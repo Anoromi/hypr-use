@@ -135,3 +135,9 @@ Existing phase directories now fail before desktop access unless --resume is exp
 ## Direct workflow guidance
 
 Server instructions now document set_date and explain that direct workflow tools bind/inspect internally. Fresh Astra profile, date, and filter tasks passed (26.29/31.19/24.14 s), no refocuses or tool failures. Agents still inspected before using exact accessible names, so this does not demonstrate removal of discovery calls or a speedup. Kept as accurate API documentation. All 36 JS/protocol tests pass. Evidence: loop-direct-guidance.
+
+## Declared labels for unnamed native inputs
+
+Writer Find/Replace exposes unnamed editable children whose immediate combo-box parents declare LABELLED_BY relationships to Find:/Replace:. AX records now use that unambiguous declared label only when their native name is empty; arbitrary ancestor/proximity inference is excluded. Structured records retain nativeName/nameSource. Both controlled fill_form replacements passed in 2.218/2.207 s, saved documents independently graded, no refocuses. Label, enumeration, checkbox, menu-routing and general-fix regressions pass (21 tests).
+
+Fresh Astra used fill_form successfully for Writer; browser profile also passed. Writer total 83.75 s versus current baseline 72.41 s: no overall speedup claim. A separate stale welcome-dialog binding caused one tool error and extra discovery calls before replacement; fix that failed case next. Browser 31.18 s. No refocuses. Evidence: loop-writer-current, loop-writer-labelled-fill, loop-declared-labels-astra. Initial diagnostic loop-writer-labels lacked child AT-SPI initialization; loop-writer-labels-ready captured a delayed Welcome dialog and is not Find/Replace evidence. Correct title-verified relationships are in loop-writer-labels-dialog.

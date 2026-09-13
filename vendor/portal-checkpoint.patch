@@ -71,7 +71,7 @@ index 0000000..b2ee111
 +    raise SystemExit("Expected an AT-SPI child mode")
 +raise SystemExit(portal.atspi_child_main(sys.argv[1]))
 diff --git a/mcp/hypr-agent-portal-mcp.py b/mcp/hypr-agent-portal-mcp.py
-index 84175d4..c59a862 100755
+index 84175d4..6a4a434 100755
 --- a/mcp/hypr-agent-portal-mcp.py
 +++ b/mcp/hypr-agent-portal-mcp.py
 @@ -452,7 +452,7 @@ def tool_definitions() -> list[dict[str, Any]]:
@@ -296,7 +296,7 @@ index 84175d4..c59a862 100755
  def corrected_large_grid_cell_bounds(
      cell_bounds: dict[str, float],
      table_bounds: dict[str, float],
-@@ -3090,6 +3193,17 @@ def corrected_large_grid_cell_bounds(
+@@ -3090,6 +3193,55 @@ def corrected_large_grid_cell_bounds(
      return cell_bounds, header_y_offset
  
  
@@ -311,10 +311,48 @@ index 84175d4..c59a862 100755
 +    return atspi_name(selected) if selected is not None else ""
 +
 +
++def atspi_declared_label(node: Any) -> str:
++    """Use only an unambiguous provider-declared label, never nearby text."""
++    relations = atspi_safe(node.get_relation_set, []) or []
++    labels: set[str] = set()
++    if len(relations) > 8:
++        return ""
++    for relation in relations:
++        if atspi_safe(relation.get_relation_type) != _ATSPI.RelationType.LABELLED_BY:
++            continue
++        count = int(atspi_safe(relation.get_n_targets, 0) or 0)
++        if count > 8:
++            return ""
++        for i in range(count):
++            target = atspi_safe(lambda: relation.get_target(i))
++            if target is not None:
++                label = atspi_name(target).strip()
++                if label:
++                    labels.add(label)
++    return next(iter(labels)) if len(labels) == 1 else ""
++
++
++def atspi_input_label(node: Any, role: str) -> tuple[str, str]:
++    if normalize(role) not in {"entry", "text", "password text", "spin button", "combo box"}:
++        return "", ""
++    label = atspi_declared_label(node)
++    if label:
++        return label, "labelled-by"
++    # Editable combo entries often have no name while the immediate combo
++    # parent owns the label relationship. Do not walk arbitrary ancestors.
++    if normalize(role) in {"entry", "text", "password text"}:
++        parent = atspi_safe(node.get_parent)
++        if parent is not None and normalize(atspi_role(parent)) == "combo box":
++            label = atspi_declared_label(parent)
++            if label:
++                return label, "parent-combo-labelled-by"
++    return "", ""
++
++
  def atspi_record_for(
      node: Any,
      index: int,
-@@ -3100,6 +3214,13 @@ def atspi_record_for(
+@@ -3100,20 +3252,34 @@ def atspi_record_for(
      hypr_window: dict[str, Any],
  ) -> dict[str, Any]:
      role = atspi_role(node)
@@ -325,10 +363,15 @@ index 84175d4..c59a862 100755
 +        if state is not None and state_set is not None and atspi_safe(lambda: state_set.contains(state), False):
 +            states.append(name.lower())
 +    selection_value = atspi_selection_value(node) if normalize(role) in {"combo box", "list box"} else ""
++    native_name = atspi_name(node)
++    name, name_source = (native_name, "native") if native_name else atspi_input_label(node, role)
      return {
          "index": index,
          "runtimeId": path[:],
-@@ -3108,12 +3229,16 @@ def atspi_record_for(
+         "automationId": atspi_accessible_id(node),
+-        "name": atspi_name(node),
++        "name": name,
++        **({"nativeName": native_name, "nameSource": name_source} if name_source and name_source != "native" else {}),
          "controlType": role,
          "localizedControlType": role,
          "className": str(atspi_safe(node.get_toolkit_name, "") or ""),
@@ -348,7 +391,7 @@ index 84175d4..c59a862 100755
          "source": "atspi",
      }
  
-@@ -3124,6 +3249,8 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3124,6 +3290,8 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
      atspi_window_bounds = atspi_extents(root)
      deadline = time.monotonic() + 4.5
      truncated_reason = ""
@@ -357,7 +400,7 @@ index 84175d4..c59a862 100755
  
      def mark_truncated(reason: str) -> None:
          nonlocal truncated_reason
-@@ -3139,7 +3266,7 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3139,7 +3307,7 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
              return True
          return False
  
@@ -366,7 +409,7 @@ index 84175d4..c59a862 100755
          if node is None or len(records) >= 500 or depth > 64:
              if len(records) >= 500:
                  mark_truncated("record-limit")
-@@ -3147,6 +3274,23 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3147,6 +3315,23 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
          if budget_exhausted():
              return
          bounds = bounds_hint if bounds_hint is not None else atspi_extents(node)
@@ -390,7 +433,7 @@ index 84175d4..c59a862 100755
          if depth > 0 and not atspi_node_is_currently_visible(node, bounds):
              return
          index = len(records)
-@@ -3159,7 +3303,14 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3159,7 +3344,14 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
          if record["value"] and record["value"] != title:
              safe_value = str(record["value"]).replace("\r", "\\r").replace("\n", "\\n")
              value_segment = " Value: " + safe_value
@@ -405,7 +448,7 @@ index 84175d4..c59a862 100755
          frame_segment = ""
          if isinstance(record["frame"], dict):
              frame = record["frame"]
-@@ -3168,16 +3319,19 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3168,16 +3360,19 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
              )
          lines.append(("\t" * (depth + 1)) + f"{index} {role} {title}{value_segment}{actions_segment}{frame_segment}".rstrip())
  
@@ -427,7 +470,7 @@ index 84175d4..c59a862 100755
          if table_bounds is None or not bool(atspi_safe(node.is_table, False)):
              return False
          table_iface = atspi_safe(node.get_table_iface)
-@@ -3189,7 +3343,8 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3189,7 +3384,8 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
          max_rows = min(total_rows, 200)
          max_cols = min(total_cols, 200)
          large_grid = total_rows > 1000 or total_cols > 100
@@ -437,7 +480,7 @@ index 84175d4..c59a862 100755
          empty_rows = 0
          for row in range(max_rows):
              if budget_exhausted():
-@@ -3219,8 +3374,23 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3219,8 +3415,23 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
                      large_grid=large_grid,
                      header_y_offset=header_y_offset,
                  )
@@ -461,7 +504,7 @@ index 84175d4..c59a862 100755
                  child_index = atspi_safe(lambda r=row, c=col: _ATSPI.Table.get_index_at(table_iface, r, c))
                  if isinstance(child_index, int) and child_index >= 0:
                      child_path = path + [child_index]
-@@ -3236,6 +3406,11 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3236,6 +3447,11 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
          return True
  
      visit(root, 0, root_path)
@@ -473,7 +516,7 @@ index 84175d4..c59a862 100755
      return records, lines, atspi_window_bounds, truncated_reason
  
  
-@@ -3335,6 +3510,8 @@ def atspi_insert_text(snapshot: dict[str, Any], text: str, *, focused_only: bool
+@@ -3335,6 +3551,8 @@ def atspi_insert_text(snapshot: dict[str, Any], text: str, *, focused_only: bool
  def atspi_node_is_editable(node: Any, *, focused_only: bool = False) -> bool:
      if node is None or not bool(atspi_safe(node.is_editable_text, False)) or not bool(atspi_safe(node.is_text, False)):
          return False
@@ -482,7 +525,7 @@ index 84175d4..c59a862 100755
      return not focused_only or atspi_state_contains(node, _ATSPI.StateType.FOCUSED)
  
  
-@@ -3372,16 +3549,32 @@ def atspi_insert_text_in_window(
+@@ -3372,16 +3590,32 @@ def atspi_insert_text_in_window(
  def atspi_set_node_value(node: Any, value: str) -> bool:
      if node is None:
          return False
@@ -521,7 +564,7 @@ index 84175d4..c59a862 100755
      return False
  
  
-@@ -3431,12 +3624,33 @@ def atspi_child_env() -> dict[str, str]:
+@@ -3431,12 +3665,33 @@ def atspi_child_env() -> dict[str, str]:
      return env
  
  
@@ -556,7 +599,7 @@ index 84175d4..c59a862 100755
              input=json.dumps(payload, ensure_ascii=False),
              text=True,
              stdout=subprocess.PIPE,
-@@ -3446,7 +3660,8 @@ def run_atspi_child(mode: str, payload: dict[str, Any], *, timeout: float = 5.0)
+@@ -3446,7 +3701,8 @@ def run_atspi_child(mode: str, payload: dict[str, Any], *, timeout: float = 5.0)
              timeout=timeout,
          )
      except subprocess.TimeoutExpired as exc:
@@ -566,7 +609,7 @@ index 84175d4..c59a862 100755
          detail = f"AT-SPI child timed out after {timeout:g}s"
          if stderr:
              detail = f"{detail}: {stderr}"
-@@ -3492,6 +3707,39 @@ def atspi_child_probe() -> dict[str, Any]:
+@@ -3492,6 +3748,39 @@ def atspi_child_probe() -> dict[str, Any]:
      return {"available": False, "mode": "isolated-child", "status": result.get("status", "error"), "error": str(result.get("error") or "AT-SPI child probe failed")}
  
  
@@ -606,7 +649,7 @@ index 84175d4..c59a862 100755
  def require_atspi_mutation_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
      """Revalidate the full Hypr/AT-SPI binding before launching a mutator."""
      window = snapshot.get("window")
-@@ -3532,11 +3780,14 @@ def require_atspi_mutation_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
+@@ -3532,11 +3821,14 @@ def require_atspi_mutation_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
          "initialTitle": normalize(live.get("initialTitle")),
      }
      if actual_fields != expected_fields:
@@ -623,7 +666,7 @@ index 84175d4..c59a862 100755
      return window
  
  
-@@ -3807,6 +4058,11 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
+@@ -3807,6 +4099,11 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
              "status": "ok",
          }
  
@@ -635,7 +678,7 @@ index 84175d4..c59a862 100755
      runtime_id = payload.get("runtimeId")
      if not isinstance(runtime_id, list):
          return {"ok": False, "status": "error", "error": "AT-SPI action requires runtimeId"}
-@@ -3814,6 +4070,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
+@@ -3814,6 +4111,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
      if node is None:
          return {"ok": False, "status": "not-found", "error": "AT-SPI runtimeId no longer resolves."}
  
@@ -645,7 +688,7 @@ index 84175d4..c59a862 100755
      if operation == "do_action":
          action = payload.get("action")
          return {"ok": atspi_do_action(node, action if isinstance(action, str) and action else None), "status": "ok"}
-@@ -3826,6 +4085,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
+@@ -3826,6 +4126,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
  
  
  def atspi_child_main(mode: str) -> int:
@@ -655,7 +698,7 @@ index 84175d4..c59a862 100755
      os.environ[ATSPI_CHILD_ENV] = "1"
      ensure_session_environment()
      try:
-@@ -4062,17 +4324,30 @@ def can_type_with_keys(text: str) -> bool:
+@@ -4062,17 +4365,30 @@ def can_type_with_keys(text: str) -> bool:
      return all(key_for_char(ch) is not None for ch in text)
  
  
@@ -693,7 +736,7 @@ index 84175d4..c59a862 100755
  
  
  def prefer_related_target(target: str, enabled: bool = False) -> tuple[str, dict[str, Any] | None]:
-@@ -4100,6 +4375,13 @@ def key_from_args(args: dict[str, Any]) -> tuple[str, str]:
+@@ -4100,6 +4416,13 @@ def key_from_args(args: dict[str, Any]) -> tuple[str, str]:
      if not isinstance(key, str) or not key:
          raise RuntimeError("key action requires key or keys")
      modifiers = args.get("modifiers") if isinstance(args.get("modifiers"), str) else ""
@@ -707,7 +750,7 @@ index 84175d4..c59a862 100755
      return key, modifiers
  
  
-@@ -4172,7 +4454,8 @@ def type_text(target: str, text: str, args: dict[str, Any]) -> dict[str, Any]:
+@@ -4172,7 +4495,8 @@ def type_text(target: str, text: str, args: dict[str, Any]) -> dict[str, Any]:
      target_for_input, related = prefer_related_target(target, False if not isinstance(prefer_related, bool) else prefer_related)
  
      if method == "keys" or (method == "auto" and not text_is_bulk_paste_candidate(text) and can_type_with_keys(text)):
@@ -717,7 +760,7 @@ index 84175d4..c59a862 100755
          info.update({"target": target, "resolvedTarget": target_for_input, "relatedTarget": related})
          return info
  
-@@ -4217,7 +4500,14 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
+@@ -4217,7 +4541,14 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
          related_error = str(exc)
      else:
          related_error = ""
@@ -733,7 +776,7 @@ index 84175d4..c59a862 100755
      png_bytes = base64.b64decode(png_base64, validate=True)
      captured_at = time.time()
      screenshot_id = f"snap_{secrets.token_urlsafe(18)}"
-@@ -4225,16 +4515,17 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
+@@ -4225,16 +4556,17 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
      screenshot.update(
          {
              "id": screenshot_id,
@@ -754,7 +797,7 @@ index 84175d4..c59a862 100755
      elements = atspi["elements"] if atspi["status"] == "ok" and atspi["elements"] else []
      tree_lines = atspi["treeLines"] if atspi["status"] == "ok" and atspi["treeLines"] else []
      if not elements:
-@@ -4816,12 +5107,45 @@ def tool_get_cursor_position(args: dict[str, Any]) -> dict[str, Any]:
+@@ -4816,12 +5148,45 @@ def tool_get_cursor_position(args: dict[str, Any]) -> dict[str, Any]:
      return mcp_text(json.dumps(result, ensure_ascii=False), structured=result)
  
  
@@ -800,7 +843,7 @@ index 84175d4..c59a862 100755
      element = None
      refresh_info = None
      if isinstance(element_index, str) and element_index:
-@@ -4836,58 +5160,75 @@ def semantic_click(args: dict[str, Any]) -> dict[str, Any]:
+@@ -4836,58 +5201,75 @@ def semantic_click(args: dict[str, Any]) -> dict[str, Any]:
  
      target = str(snapshot["target"])
      session_info = begin_related_action_session(target)
@@ -924,7 +967,7 @@ index 84175d4..c59a862 100755
  
  
  def semantic_perform_secondary_action(args: dict[str, Any]) -> dict[str, Any]:
-@@ -5064,7 +5405,12 @@ def semantic_hover(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5064,7 +5446,12 @@ def semantic_hover(args: dict[str, Any]) -> dict[str, Any]:
  def semantic_type_text(args: dict[str, Any]) -> dict[str, Any]:
      app = str(args.get("app") or "")
      text = args.get("text")
@@ -938,7 +981,7 @@ index 84175d4..c59a862 100755
          raise RuntimeError("Missing required argument: text")
      snapshot = current_snapshot(app)
      control_overlay(snapshot, action="type")
-@@ -5085,7 +5431,10 @@ def semantic_type_text(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5085,7 +5472,10 @@ def semantic_type_text(args: dict[str, Any]) -> dict[str, Any]:
              return mcp_snapshot_result(snapshot_after_action(app, snapshot, {"method": "atspi", "targeting": "editable"}))
          raise RuntimeError("explicit AT-SPI text insertion failed; no keyboard or clipboard fallback was attempted")
      type_args = dict(args)
@@ -950,7 +993,7 @@ index 84175d4..c59a862 100755
      info = type_text(str(snapshot["target"]), text, type_args)
      return mcp_snapshot_result(snapshot_after_action(app, snapshot, info))
  
-@@ -5098,7 +5447,10 @@ def semantic_paste_text(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5098,7 +5488,10 @@ def semantic_paste_text(args: dict[str, Any]) -> dict[str, Any]:
      snapshot = current_snapshot(app)
      control_overlay(snapshot, action="type")
      target = str(snapshot["target"])
@@ -962,7 +1005,7 @@ index 84175d4..c59a862 100755
      prefer_related = args.get("prefer_related")
      target_for_input, related = prefer_related_target(target, False if not isinstance(prefer_related, bool) else prefer_related)
      target_is_xwayland = target_uses_xwayland(target_for_input, related)
-@@ -5113,29 +5465,54 @@ def semantic_paste_text(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5113,29 +5506,54 @@ def semantic_paste_text(args: dict[str, Any]) -> dict[str, Any]:
  def semantic_press_key(args: dict[str, Any]) -> dict[str, Any]:
      app = str(args.get("app") or "")
      snapshot = current_snapshot(app)
@@ -1031,7 +1074,7 @@ index 84175d4..c59a862 100755
  def semantic_set_value(args: dict[str, Any]) -> dict[str, Any]:
      app = str(args.get("app") or "")
      value = args.get("value")
-@@ -5150,7 +5527,7 @@ def semantic_set_value(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5150,7 +5568,7 @@ def semantic_set_value(args: dict[str, Any]) -> dict[str, Any]:
      except Exception:
          control_overlay(snapshot, action="set_value")
      if not atspi_set_element_value_isolated(snapshot, element, value):
@@ -1040,7 +1083,7 @@ index 84175d4..c59a862 100755
      action_result = {"method": "atspi", "action": "set_value"}
      if element_point is not None:
          action_result["element"] = compact_element_info(element, element_point[0], element_point[1], "screenshot")
-@@ -6071,6 +6448,7 @@ SEMANTIC_TOOLS = {
+@@ -6071,6 +6489,7 @@ SEMANTIC_TOOLS = {
      "paste_text": semantic_paste_text,
      "press_key": semantic_press_key,
      "key": semantic_press_key,
@@ -1048,7 +1091,7 @@ index 84175d4..c59a862 100755
      "set_value": semantic_set_value,
      "wait": semantic_wait,
      "wait_for_window": semantic_wait_for_window,
-@@ -6438,6 +6816,7 @@ FULL_LEVEL_ACTIONS = {
+@@ -6438,6 +6857,7 @@ FULL_LEVEL_ACTIONS = {
      "paste_image",
      "session",
      "set_value",
