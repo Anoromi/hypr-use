@@ -45,3 +45,9 @@ Fresh Astra runs `loop-fused-astra` all passed: new Google tab 30.61 s, form fil
 `fill_form` now accepts boolean checkbox values alongside string text fields. It skips already-correct states, verifies changed states, and rejects mixed/unknown states before mutation. `wait_for` can match boolean checked state. AT-SPI indeterminate checkboxes are reported as mixed rather than unchecked.
 
 Two repeated-call browser probes passed; their second calls issued only AX reads, no input (`diagnostics/loop-checkbox-probe`). Fresh Astra before/after pairs passed with no errors/refocuses: mixed native form 34.1 → 32.6 s and browser checkboxes 33.7 → 32.1 s. Native task calls fell from three to two; browser calls stayed at two. These single-run task timings do not establish a general speedup. Both updated agents chose the combined `fill_form`. Twenty-one JS/protocol tests and the mixed-state Python regression passed.
+
+## Verify the whole form before submission
+
+A reactive Email input reset the previously verified Full name. The old helper still submitted the wrong name and returned completed (`loop-final-form-before`). The helper now rechecks all requested fields against its final verification snapshot before submission, without another scan. A mismatch emits that snapshot and stops. This catches changes visible in that snapshot; it is not an atomic guarantee against later application changes.
+
+Two negative probes now correctly rejected the invalid form without saving; an ordinary form passed (`loop-final-form-after`). A fresh Astra reactive-form variant recovered from the error, restored only the name, and saved correct data in 43.16 s. Its entire submission history contained no incorrect save. No refocuses. The variant is explicitly recorded separately from standard suite results. All 22 JS/protocol tests pass.

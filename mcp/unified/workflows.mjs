@@ -84,6 +84,15 @@ export function createWorkflows(app,read,emit,showState){
      }else await replace(f,f.value,f.method,state);
      await step(`verify ${f.name}`,async()=>{const actual=select(await refresh(),f,checkbox?'checkbox':'field');if((checkbox?actual.checked:String(actual.value??''))!==f.value)throw Error('Field value does not match requested value');});
     }
+    await step('verify final form',async()=>{
+     for(const f of args.fields){
+      const checkbox=typeof f.value==='boolean';const e=select(state,f,checkbox?'checkbox':'field');
+      if((checkbox?e.checked:String(e.value??''))!==f.value){
+       if(showState)showState(state);
+       throw Error(`Field ${JSON.stringify(f.name)} changed after a later input; inspect the form before submitting`);
+      }
+     }
+    });
     if(args.submit){const e=select(state,args.submit);await step('submit form',()=>app.click(e.index));}
    }else if(name==='replace_text'){
     await replace(args.target,args.text,args.method??'keys',undefined,args.submit??false);

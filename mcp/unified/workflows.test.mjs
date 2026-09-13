@@ -81,3 +81,9 @@ test('mixed checkbox and text-method misuse fail before any input',async()=>{
  await assert.rejects(f.workflow.fillForm({fields:[{name:'Name',value:'Ada'},{name:'Updates',value:true}]}),/mixed/);assert.equal(f.calls.length,0);
  await assert.rejects(f.workflow.fillForm({fields:[{name:'Updates',value:true,method:'keys'}]}),/text method/);assert.equal(f.calls.length,0);
 });
+
+test('a later field cannot invalidate an earlier field and still submit',async()=>{
+ const f=fixture();const set=f.app.setValue;f.app.setValue=async(i,v)=>{await set(i,v);if(i===2)f.elements[0].value='Reset';};
+ await assert.rejects(f.workflow.fillForm({fields:[{name:'Name',value:'Ada'},{name:'Email',value:'a@test'}],submit:{name:'Save'}}),/changed after a later input/);
+ assert.equal(f.calls.filter(c=>c[0]==='click').length,0);assert.equal(JSON.parse(f.out.at(-1).text).steps.at(-1).step,'verify final form');
+});

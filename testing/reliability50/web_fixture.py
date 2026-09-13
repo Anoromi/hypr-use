@@ -20,11 +20,12 @@ function render(){let c=document.getElementById('category').value,s=document.get
 </script></body></html>'''
 class Fixture:
  def __init__(self):
-  self.state={};self.visited=[];owner=self
+  self.state={};self.state_history=[];self.visited=[];owner=self
   class Handler(BaseHTTPRequestHandler):
    def log_message(self,*a):pass
    def do_POST(self):
-    if self.path=='/state':owner.state=json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+    if self.path=='/state':
+     owner.state=json.loads(self.rfile.read(int(self.headers['Content-Length'])));owner.state_history.append(owner.state.copy())
     self.send_response(204);self.end_headers()
    def do_GET(self):
     owner.visited.append(self.path)

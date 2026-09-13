@@ -8,12 +8,15 @@ from catalog import catalog
 from web_fixture import Fixture
 import odf
 phase=sys.argv[1];selected=set(sys.argv[2:]);out=here/'runs'/phase;out.mkdir(parents=True,exist_ok=True)
+variant=os.environ.get('HYPR_USE_SUITE_VARIANT','standard')
+assert variant in ['standard','reactive-form'],'Unknown suite variant'
+if variant=='reactive-form':assert selected=={'21-web-profile'},'Reactive variant requires only task 21-web-profile'
 source_files=list((root/'mcp/unified').glob('*.py'))+list((root/'mcp/unified').glob('*.mjs'))+[root/'vendor/hypr-agent-portal-0.56.2/scripts/hypr-agent-portalctl',root/'vendor/hypr-agent-portal-0.56.2/mcp/hypr-agent-portal-mcp.py',*[here/name for name in ['run_suite.py','catalog.py','web_fixture.py','odf.py','launch_owned.py']],here/'cdp.mjs',old/'run.py']
 source_files += list((root/'vendor/hypr-agent-portal-0.56.2/mcp').glob('*.py'))
 def hashes():return {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_files}
-manifest={'model':'gpt-6-astra','effort':'xhigh','source_hashes':hashes(),'catalog':catalog(),'started_at':time.time(),'policy':'Fresh profiles and agent cwd; no retries replace original outcomes; no restore preflight; all GUI actions through JS MCP. Controller prep/grading uses files or CDP. Stop on refocus.'}
+manifest={'variant':variant,'model':'gpt-6-astra','effort':'xhigh','source_hashes':hashes(),'catalog':catalog(),'started_at':time.time(),'policy':'Fresh profiles and agent cwd; no retries replace original outcomes; no restore preflight; all GUI actions through JS MCP. Controller prep/grading uses files or CDP. Stop on refocus.'}
 if (out/'manifest.json').exists():
- manifest=json.loads((out/'manifest.json').read_text());assert manifest['source_hashes']==hashes(),'Source changed; use a new phase'
+ manifest=json.loads((out/'manifest.json').read_text());assert manifest['source_hashes']==hashes() and manifest.get('variant','standard')==variant,'Source or variant changed; use a new phase'
 else:(out/'manifest.json').write_text(json.dumps(manifest,indent=2))
 classes=['hypr-use-bench','hypr-use-r50-browser','libreoffice-calc','libreoffice-writer','libreoffice-startcenter','soffice']
 assert not any(w['class'] in classes for w in ctl('clients')),'A target app already exists; refusing to touch it'
@@ -45,7 +48,9 @@ def grade(task,d,fixture=None,port=None):
   actual=json.loads((d/'fixture/state.json').read_text());checks={k:actual.get(k)==v for k,v in check.items()};return {'passed':all(checks.values()),'checks':checks,'evidence':actual}
  if group in ['calc','writer']:return odf.inspect(d/('document.ods' if group=='calc' else 'document.odt'),group,check)
  if group=='web':
-  actual=fixture.state.copy();checks={k:actual.get(k)==v for k,v in check.items()};return {'passed':all(checks.values()),'checks':checks,'evidence':actual}
+  actual=fixture.state.copy();checks={k:actual.get(k)==v for k,v in check.items()}
+  if variant=='reactive-form':checks['no_incorrect_submission']=all(all(st.get(k)==v for k,v in check.items()) for st in fixture.state_history if st.get('saved'))
+  return {'passed':all(checks.values()),'checks':checks,'evidence':actual,'state_history':fixture.state_history}
  ps=pages(port);urls=[p['url'] for p in ps];checks={};evidence={'urls':urls,'visited':fixture.visited}
  if 'url_contains' in check:checks['url']=any(check['url_contains'] in u for u in urls)
  if 'answer' in check:checks['answer']=check['answer'].lower() in final.lower()
@@ -120,6 +125,8 @@ try:
      except Exception:pass
      time.sleep(.2)
     else:raise RuntimeError('Browser setup did not commit pages')
+    if variant=='reactive-form':
+     cdp(ps[0],'Runtime.evaluate',{'expression':"document.getElementById('email').addEventListener('input',()=>{document.getElementById('name').value='Reset by email change'});true",'returnByValue':True})
     if task.get('closed_tab'):
      p=next(p for p in ps if p['url'].endswith('/third'));cdp(p,'Page.getNavigationHistory');urllib.request.urlopen(f'http://127.0.0.1:{port}/json/close/'+p['id']).read();time.sleep(.3);assert len(pages(port))==2
    time.sleep(.5)
