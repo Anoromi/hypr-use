@@ -49,8 +49,8 @@ export function createWorkflows(app,read,emit,showState){
   const steps=[];let state;
   async function step(label,fn){const start=performance.now();try{const v=await fn();steps.push({step:label,status:'completed',ms:performance.now()-start});return v;}catch(e){steps.push({step:label,status:'failed',ms:performance.now()-start,error:e.message});throw e;}}
   async function refresh(){state=await read();return state;}
-  async function replace(target,text,method){
-   const e=select(await refresh(),target,'field');
+  async function replace(target,text,method,current){
+   const e=select(current??await refresh(),target,'field');
    method ??= e.supportsValue===true||(e.editable===true&&e.supportsEditableText===true)?'setValue':'keys';
    if(method==='keys'&&(/[^\x20-\x7e\n\r\t]/.test(text)||text.length>4096))throw Error('Choose method=paste for unsupported or long text');
    if(method==='setValue'&&e.supportsValue!==true&&e.supportsEditableText!==true)throw Error('Field has no setter interface; choose method=keys');
@@ -68,10 +68,10 @@ export function createWorkflows(app,read,emit,showState){
     // Validate selectors before the first mutation, then resolve afresh per field.
     await refresh();for(const f of args.fields)select(state,f,'field');if(args.submit)select(state,args.submit);
     for(const f of args.fields){
-     await replace(f,f.value,f.method);
+     await replace(f,f.value,f.method,state);
      await step(`verify ${f.name}`,async()=>{const actual=select(await refresh(),f,'field');if(String(actual.value??'')!==f.value)throw Error('Field value does not match requested value');});
     }
-    if(args.submit){const e=select(await refresh(),args.submit);await step('submit form',()=>app.click(e.index));}
+    if(args.submit){const e=select(state,args.submit);await step('submit form',()=>app.click(e.index));}
    }else if(name==='replace_text'){
     await replace(args.target,args.text,args.method??'keys');
     if(args.submit)await step('submit',()=>app.pressKey('Return'));
@@ -81,7 +81,7 @@ export function createWorkflows(app,read,emit,showState){
     if(!target){const known=['Address and search bar','Search or enter address','Search with Google or enter address'];const found=(state.elements??[]).filter(e=>known.includes(e.name));if(found.length!==1)throw Error('Address bar is ambiguous or unknown; provide address selector');target={name:found[0].name};}
     const e=select(state,target);
     if(args.new_tab){await step('activate address bar',()=>app.click(e.index));await step('new tab',()=>app.pressKey('Ctrl+t'));}
-    await replace(target,args.url,'keys');await step('navigate',()=>app.pressKey('Return'));
+    await replace(target,args.url,'keys',args.new_tab?undefined:state);await step('navigate',()=>app.pressKey('Return'));
     result.status='submitted';
    }else{
     const begin=performance.now(),timeout=args.timeout_ms??10000;let polls=0;
@@ -96,7 +96,7 @@ export function createWorkflows(app,read,emit,showState){
      await new Promise(resolve=>setTimeout(resolve,Math.min(300,timeout-(performance.now()-begin))));
     }
    }
-   if(name==='wait_for'&&showState)showState(state);else await app.getAXState();return {...result,steps};
+   if((name==='wait_for'||name==='fill_form'&&!args.submit)&&showState)showState(state);else await app.getAXState();return {...result,steps};
   }catch(e){emit({type:'text',text:JSON.stringify({status:'failed',steps,message:e.message,notice:'Completed steps remain applied; inspect state before retrying.'})});throw e;}
  }
  return Object.fromEntries(Object.entries(workflowMethods).map(([name,method])=>[method,args=>run(name,args)]));

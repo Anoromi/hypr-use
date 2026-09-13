@@ -23,3 +23,11 @@ The failed probe is retained in `diagnostics/loop-workflow-cost-before`. Two fre
 Several following probes timed out at six seconds, including initial AX reads. An opt-in child stack dump showed the scanner blocked in `atspi_name` inside `atspi_iter_apps`, before target PID matching. Removing eager app-name requests from enumeration made both failed form probes pass again. PID matching and mutation identity checks remain unchanged. Empty names are explicitly excluded from the later name fallback.
 
 Debug support uses `HYPR_USE_AX_DEBUG_STACK=1`; binary stderr from timed-out children is now retained so stack traces are not discarded. Evidence: `diagnostics/loop-ax-timeout-stack`, `diagnostics/loop-ax-enumeration-fix`. Two fresh Astra tasks passed (`loop-enumeration-astra`): navigation 22.6 s and form fill 37.6 s, with no timeouts or refocuses. Four enumeration/diagnostic tests and existing AX semantics checks passed. The scan-reuse candidate was set aside during this investigation.
+
+## Reuse observations between actions
+
+Form helpers reuse the preflight snapshot for the first field and each verified snapshot for the next field or submit lookup. Native/indexed actions still perform their own fresh identity rematch. Navigation reuses its initial lookup when no tab-opening action intervenes. A form without submission emits its already verified final snapshot.
+
+On the stable enumeration build, two matched fresh key-input form probes changed from 8.347/8.681 s to 6.557/6.865 s: median 8.514 → 6.711 s, 21.2% lower helper time. Both methods, the auto-route form, and navigation/wait probes passed (`diagnostics/loop-scan-reuse`). Two fresh Astra tasks passed: native replacement 35.16 s and form fill 31.25 s, no errors/refocuses (`loop-scan-reuse-astra`). Eighteen unit/protocol tests pass. The earlier timeout attempts remain recorded separately and are not substituted into the stable timing comparison.
+
+Probe cleanup now verifies process start time before terminating its owned app, and probe summaries explicitly mark incomplete/aborted runs.

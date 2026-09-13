@@ -9,10 +9,14 @@ cases=sys.argv[2:] or ['index-batch','point-batch','index-split','index-wait','s
 app='hypr-use-r50-browser';assert not any(w['class']==app for w in ctl('clients'))
 m=Monitor(out/'focus.jsonl',[app]);owned=None;p=None;fixture=None;results=[]
 def stop():
- for pid in [owned['pid'] if owned else None,p.pid if p else None]:
-  if pid:
-   try:os.killpg(pid,signal.SIGTERM)
-   except ProcessLookupError:pass
+ if owned:
+  try:
+   fields=Path(f"/proc/{owned['pid']}/stat").read_text().split(') ',1)[1].split()
+   if fields[19]==owned['start']:os.killpg(owned['pid'],signal.SIGTERM)
+  except (FileNotFoundError,ProcessLookupError):pass
+ if p and p.poll() is None:
+  try:os.killpg(p.pid,signal.SIGTERM)
+  except ProcessLookupError:pass
 m.callback=stop
 try:
  for case in cases:
@@ -95,4 +99,4 @@ finally:
  stop()
  if fixture:fixture.close()
  subprocess.run(['hyprctl','eval','hl.window_rule({name="hypr-use-r50-probe",match={class="^hypr-use-r50-browser$"}}):set_enabled(false)'],capture_output=True)
- m.close();(out/'results.json').write_text(json.dumps({'cases':results,'refocus':m.violations},indent=2))
+ m.close();(out/'results.json').write_text(json.dumps({'cases':results,'refocus':m.violations,'completed_all':len(results)==len(cases),'error':str(sys.exc_info()[1])[:500] if sys.exc_info()[1] else None},indent=2))

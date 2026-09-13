@@ -61,3 +61,9 @@ test('Chromium entry without editable flags uses native keys, not a setter',asyn
  await f.workflow.fillForm({fields:[{name:'Name',value:'Ada'}]});assert.deepEqual(f.calls.slice(0,3),[['click',1],['key','Ctrl+a'],['text','Ada']]);
  f.calls.length=0;await assert.rejects(f.workflow.fillForm({fields:[{name:'Name',value:'Ada',method:'setValue'}]}),/no setter/);assert.equal(f.calls.length,0);
 });
+
+test('form reuses each verification snapshot until the next action',async()=>{
+ const f=fixture();let reads=0;const w=createWorkflows(f.app,async()=>{reads++;return {elements:f.elements};},()=>{});
+ await w.fillForm({fields:[{name:'Name',value:'Ada'},{name:'Email',value:'a@test'}],submit:{name:'Save'}});
+ assert.equal(reads,3);assert.deepEqual(f.calls,[['set',1,'Ada'],['set',2,'a@test'],['click',3],['observe']]);
+});

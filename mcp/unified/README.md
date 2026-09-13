@@ -105,3 +105,5 @@ Agent adoption: all four tools were used directly by fresh Astra CLI instances; 
 Field selectors ignore same-name labels and match editable/value controls or text-entry roles, because Chromium can omit editability interface flags. Multiple matching fields remain an error; supply a role to disambiguate. Selection readback now allows 150 ms for asynchronous AT-SPI updates without repeating the mutation.
 
 Target PID matching no longer requests every application name first. This avoids a blocked name query preventing access to a healthy target. `HYPR_USE_AX_DEBUG_STACK=1` enables a four-second stack dump in isolated AT-SPI children for private diagnostics; normal operation leaves it disabled.
+
+Within a workflow, the latest preflight or verification snapshot is reused until another mutation. Each indexed action still performs the backend's fresh identity rematch. This avoids duplicate reads without weakening target checks.
