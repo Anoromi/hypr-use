@@ -91,3 +91,11 @@ Three production-handler regression tests cover the old unwanted Escape, the cor
 A requested `31-table` task did not exist; the harness silently skipped it while running valid `03-country`. The harness now rejects unknown IDs before creating a phase or launching apps. The invalid-ID smoke test exits with an explicit error. The actual Calc catalog ID is `31-calc-table`; no Calc result is claimed for loop-ax-bytecode-astra.
 
 The native run in that phase passed after a silent pointer-selection failure and keyboard recovery. Its reviewed failure-associated gaps are recorded separately (indices 2,3,4), even though no tool returned isError.
+
+## Isolated AX bytecode loading
+
+AT-SPI children load through checked-hash bytecode, avoiding repeated parsing while retaining a new process for every scan/action. The parent prepares the checked cache once. Unwritable caches and explicit HYPR_USE_AX_BYTECODE=0 use the original script. Tests verify same-size/same-timestamp edits invalidate the cache, process IDs differ between calls, and fallback remains available.
+
+Initial paired probes averaged 477.39 → 414.57 ms per read. Alternating legacy/cached runs then averaged 489.46 → 392.91 ms (19.7% lower) across twelve repeated reads per route. All 56 observed trees, including initial binds, were healthy and had over 100 elements; no refocuses. Probe phases now hash runtime sources and record route flags.
+
+Fresh Astra native Country task passed after recovering from an existing pointer-menu failure (43.17 s); controlled legacy and cached pointer routes both reproduced it, while semantic and keyboard routes passed. Fresh Calc table entry passed independently (61.11 s, zero tool errors/refocuses). Evidence: loop-ax-startup-before/after/alternating, loop-native-choice-cause, loop-ax-bytecode-astra, loop-ax-bytecode-calc. Three new loader tests, four AX enumeration tests, and all 31 JS/protocol tests pass. No native plugin changes are included.

@@ -1,11 +1,15 @@
 """Fresh owned browsers distinguish geometry from input-order failures. No agent scoring."""
-import json,os,shlex,signal,socket,subprocess,sys,time,urllib.request
+import hashlib,json,os,shlex,signal,socket,subprocess,sys,time,urllib.request
 from pathlib import Path
 here=Path(__file__).resolve().parent;root=here.parents[1];sys.path.insert(0,str(here.parent/'unified-benchmark'))
 from monitor import Monitor,ctl
 from web_fixture import Fixture
 out=here/'diagnostics'/sys.argv[1];out.mkdir(parents=True,exist_ok=False)
 cases=sys.argv[2:] or ['index-batch','point-batch','index-split','index-wait','shortcut-batch','shortcut-split']
+runtime_files=[*root.joinpath('mcp/unified').glob('*.py'),*root.joinpath('mcp/unified').glob('*.mjs'),*root.joinpath('vendor/hypr-agent-portal-0.56.2/mcp').glob('*.py'),root/'vendor/hypr-agent-portal-0.56.2/scripts/hypr-agent-portalctl',*[here/n for n in ['probe_browser_input.py','web_fixture.py','cdp.mjs','launch_owned.py']],here.parent/'unified-benchmark/monitor.py',root/'testing/plugin-reliability-sequence-result/lib/libhypr-agent-portal.so']
+def runtime_hashes():return {str(f.relative_to(root)):hashlib.sha256(f.read_bytes()).hexdigest() for f in runtime_files}
+source_hashes=runtime_hashes()
+(out/'manifest.json').write_text(json.dumps({'kind':'controlled-probe','cases':cases,'source_hashes':source_hashes,'started_at':time.time()},indent=2))
 app='hypr-use-r50-browser';assert not any(w['class']==app for w in ctl('clients'))
 m=Monitor(out/'focus.jsonl',[app]);owned=None;p=None;fixture=None;results=[]
 def stop():
@@ -20,10 +24,11 @@ def stop():
 m.callback=stop
 try:
  for case in cases:
+  assert runtime_hashes()==source_hashes,'Runtime changed during probe phase'
   assert not m.trigger.is_set();m.stage=case;d=out/case;d.mkdir();fixture=Fixture()
   with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
   start=f'http://127.0.0.1:{fixture.port}/start';destination=f'http://127.0.0.1:{fixture.port}/second'
-  if case.startswith(('date','select','form','workflow-replace')):start=f'http://127.0.0.1:{fixture.port}/web'
+  if case.startswith(('date','select','form','workflow-replace','ax-repeat')):start=f'http://127.0.0.1:{fixture.port}/web'
   rule='hl.window_rule({name="hypr-use-r50-probe",match={class="^hypr-use-r50-browser$"},no_initial_focus=true,suppress_event="activate activatefocus",workspace="902 silent"}):set_enabled(true)'
   subprocess.run(['hyprctl','eval',rule],check=True,capture_output=True)
   cmd=['chromium','--user-data-dir='+str(d/'profile'),'--class='+app,'--ozone-platform=wayland','--force-renderer-accessibility','--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1','--remote-debugging-port='+str(port),start]
@@ -39,6 +44,7 @@ try:
   env={k:v for k,v in os.environ.items() if not k.startswith(('HYPR_USE_','HYPR_AGENT_PORTAL_'))}
   env.update(HYPR_AGENT_PORTAL_PERMISSION_MODE='full',HYPR_AGENT_PORTAL_APPROVAL_POLICY='never',HYPR_AGENT_PORTAL_CONFINE='class:'+app,HYPR_USE_WIRE_LOG=str(d/'wire.jsonl'),HYPR_USE_PORTAL_LOG=str(d/'portal.jsonl'))
   if 'debug' in case:env['HYPR_USE_AX_DEBUG_STACK']='1'
+  if case.startswith('ax-repeat') and 'legacy' in case:env['HYPR_USE_AX_BYTECODE']='0'
   p=subprocess.Popen(['node',str(root/'mcp/unified/server.mjs')],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=(d/'stderr.txt').open('w'),text=True,env=env,start_new_session=True)
   steps=[]
   def js(code,allow_error=False,tool=None):
@@ -57,7 +63,9 @@ try:
   if case.startswith('left'):click=f"await app.click([{frame['x']+150}, {point[1]}]);"
   if case.startswith('shortcut'):click="await app.pressKey('Ctrl+l');"
   keys=["await app.pressKey('Ctrl+a');",'await app.typeText('+json.dumps(destination)+');',"await app.pressKey('Return');"]
-  if case.startswith('form-cascade'):
+  if case.startswith('ax-repeat'):
+   js('for(var i=0;i<6;i++) await app.getAXState({emit:false});')
+  elif case.startswith('form-cascade'):
    page=next(x for x in json.load(urllib.request.urlopen(f'http://127.0.0.1:{port}/json/list',timeout=3)) if x['type']=='page')
    # Controller-only fixture setup: make a later field invalidate an earlier one.
    expression="document.getElementById('email').addEventListener('input',()=>{document.getElementById('name').value='Reset by email change';}); true"
@@ -110,14 +118,17 @@ try:
   time.sleep(.4)
   urls=[v['url'] for v in json.load(urllib.request.urlopen(f'http://127.0.0.1:{port}/json/list',timeout=3)) if v['type']=='page']
   passed=fixture.state.get('date')=='2026-10-21' and fixture.state.get('saved') is True if case.startswith('date') else destination in urls
+  if case.startswith('ax-repeat'):
+   scans=[json.loads(l)['response']['result'].get('structuredContent',{}) for l in (d/'portal.jsonl').read_text().splitlines()]
+   passed=len(scans)==7 and all(s.get('accessibility',{}).get('status')=='ok' and len(s.get('elements',[]))>100 for s in scans)
   if case.startswith('select'):passed=fixture.state.get('note')=='alpha DELTA gamma' and fixture.state.get('saved') is True
   if case.startswith('form'):passed=fixture.state.get('name')=='Grace Hopper' and fixture.state.get('email')=='grace@example.test' and fixture.state.get('saved') is True
   if case.startswith('workflow-replace'):passed=fixture.state.get('note')==('' if case.endswith('clear') else 'alpha DELTA gamma') and fixture.state.get('saved') is True
   if case.startswith('form-checkbox'):passed=fixture.state.get('updates') is True and fixture.state.get('sms') is False and fixture.state.get('saved') is True
   if case.startswith('form-options'):passed=fixture.state.get('category')=='Accessories' and fixture.state.get('sort')=='ascending'
   if case.startswith('form-cascade'):passed=cascade['result'].get('isError') is True and 'changed after a later input' in json.dumps(cascade) and fixture.state.get('saved') is not True
-  row={'case':case,'passed':passed,'urls':urls,'steps':steps,'refocus':m.trigger.is_set()}
-  if case.startswith(('date','select','form','workflow-replace')):row['state']=fixture.state
+  row={'ax_bytecode':env.get('HYPR_USE_AX_BYTECODE','1'),'case':case,'passed':passed,'urls':urls,'steps':steps,'refocus':m.trigger.is_set()}
+  if case.startswith(('date','select','form','workflow-replace','ax-repeat')):row['state']=fixture.state
   results.append(row);print(json.dumps(row),flush=True)
   p.stdin.close();p.wait(timeout=10);p=None;stop();owned=None;fixture.close();fixture=None
   for _ in range(100):
@@ -127,4 +138,4 @@ finally:
  stop()
  if fixture:fixture.close()
  subprocess.run(['hyprctl','eval','hl.window_rule({name="hypr-use-r50-probe",match={class="^hypr-use-r50-browser$"}}):set_enabled(false)'],capture_output=True)
- m.close();(out/'results.json').write_text(json.dumps({'cases':results,'refocus':m.violations,'completed_all':len(results)==len(cases),'error':str(sys.exc_info()[1])[:500] if sys.exc_info()[1] else None},indent=2))
+ m.close();(out/'results.json').write_text(json.dumps({'cases':results,'refocus':m.violations,'source_unchanged':runtime_hashes()==source_hashes,'completed_all':len(results)==len(cases),'error':str(sys.exc_info()[1])[:500] if sys.exc_info()[1] else None},indent=2))

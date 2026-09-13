@@ -52,8 +52,26 @@ index d32e312..8b36eee 100644
  shortcuts, and clearing the panic latch return `confirmation_required`. Call
  `request_confirmation` with the exact tool name and exact arguments. It returns
  a pending challenge ID, not a self-authorizing token. A person must run the
+diff --git a/mcp/atspi_child_runner.py b/mcp/atspi_child_runner.py
+new file mode 100644
+index 0000000..b2ee111
+--- /dev/null
++++ b/mcp/atspi_child_runner.py
+@@ -0,0 +1,12 @@
++"""Load the portal through its validated bytecode cache; retain one-shot isolation."""
++import importlib.util
++from pathlib import Path
++import sys
++
++path = Path(__file__).with_name("hypr-agent-portal-mcp.py")
++spec = importlib.util.spec_from_file_location("hypr_portal_atspi_child", path)
++portal = importlib.util.module_from_spec(spec)
++spec.loader.exec_module(portal)
++if len(sys.argv) != 2 or sys.argv[1] not in portal.ATSPI_CHILD_MODES:
++    raise SystemExit("Expected an AT-SPI child mode")
++raise SystemExit(portal.atspi_child_main(sys.argv[1]))
 diff --git a/mcp/hypr-agent-portal-mcp.py b/mcp/hypr-agent-portal-mcp.py
-index 84175d4..80cf514 100755
+index 84175d4..c59a862 100755
 --- a/mcp/hypr-agent-portal-mcp.py
 +++ b/mcp/hypr-agent-portal-mcp.py
 @@ -452,7 +452,7 @@ def tool_definitions() -> list[dict[str, Any]]:
@@ -503,7 +521,42 @@ index 84175d4..80cf514 100755
      return False
  
  
-@@ -3446,7 +3639,8 @@ def run_atspi_child(mode: str, payload: dict[str, Any], *, timeout: float = 5.0)
+@@ -3431,12 +3624,33 @@ def atspi_child_env() -> dict[str, str]:
+     return env
+ 
+ 
++ATSPI_BYTECODE_READY: bool | None = None
++
++
++def atspi_child_command(mode: str) -> list[str]:
++    global ATSPI_BYTECODE_READY
++    source = pathlib.Path(__file__).resolve()
++    runner = source.with_name("atspi_child_runner.py")
++    if os.environ.get("HYPR_USE_AX_BYTECODE", "1") == "0" or not runner.is_file():
++        return [sys.executable, str(source), mode]
++    if ATSPI_BYTECODE_READY is None:
++        import py_compile
++        try:
++            # Hash validation prevents same-size edits within one timestamp tick
++            # from reusing old code. Compile once in the parent, never per scan.
++            py_compile.compile(str(source), doraise=True, invalidation_mode=py_compile.PycInvalidationMode.CHECKED_HASH)
++            ATSPI_BYTECODE_READY = True
++        except (OSError, py_compile.PyCompileError):
++            ATSPI_BYTECODE_READY = False
++    return [sys.executable, str(runner if ATSPI_BYTECODE_READY else source), mode]
++
++
+ def run_atspi_child(mode: str, payload: dict[str, Any], *, timeout: float = 5.0) -> dict[str, Any]:
+     if mode not in ATSPI_CHILD_MODES:
+         return {"status": "error", "error": f"unknown AT-SPI child mode: {mode}", "ok": False}
+     try:
+         proc = subprocess.run(
+-            [sys.executable, str(pathlib.Path(__file__).resolve()), mode],
++            atspi_child_command(mode),
+             input=json.dumps(payload, ensure_ascii=False),
+             text=True,
+             stdout=subprocess.PIPE,
+@@ -3446,7 +3660,8 @@ def run_atspi_child(mode: str, payload: dict[str, Any], *, timeout: float = 5.0)
              timeout=timeout,
          )
      except subprocess.TimeoutExpired as exc:
@@ -513,7 +566,7 @@ index 84175d4..80cf514 100755
          detail = f"AT-SPI child timed out after {timeout:g}s"
          if stderr:
              detail = f"{detail}: {stderr}"
-@@ -3492,6 +3686,39 @@ def atspi_child_probe() -> dict[str, Any]:
+@@ -3492,6 +3707,39 @@ def atspi_child_probe() -> dict[str, Any]:
      return {"available": False, "mode": "isolated-child", "status": result.get("status", "error"), "error": str(result.get("error") or "AT-SPI child probe failed")}
  
  
@@ -553,7 +606,7 @@ index 84175d4..80cf514 100755
  def require_atspi_mutation_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
      """Revalidate the full Hypr/AT-SPI binding before launching a mutator."""
      window = snapshot.get("window")
-@@ -3532,11 +3759,14 @@ def require_atspi_mutation_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
+@@ -3532,11 +3780,14 @@ def require_atspi_mutation_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
          "initialTitle": normalize(live.get("initialTitle")),
      }
      if actual_fields != expected_fields:
@@ -570,7 +623,7 @@ index 84175d4..80cf514 100755
      return window
  
  
-@@ -3807,6 +4037,11 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
+@@ -3807,6 +4058,11 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
              "status": "ok",
          }
  
@@ -582,7 +635,7 @@ index 84175d4..80cf514 100755
      runtime_id = payload.get("runtimeId")
      if not isinstance(runtime_id, list):
          return {"ok": False, "status": "error", "error": "AT-SPI action requires runtimeId"}
-@@ -3814,6 +4049,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
+@@ -3814,6 +4070,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
      if node is None:
          return {"ok": False, "status": "not-found", "error": "AT-SPI runtimeId no longer resolves."}
  
@@ -592,7 +645,7 @@ index 84175d4..80cf514 100755
      if operation == "do_action":
          action = payload.get("action")
          return {"ok": atspi_do_action(node, action if isinstance(action, str) and action else None), "status": "ok"}
-@@ -3826,6 +4064,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
+@@ -3826,6 +4085,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
  
  
  def atspi_child_main(mode: str) -> int:
@@ -602,7 +655,7 @@ index 84175d4..80cf514 100755
      os.environ[ATSPI_CHILD_ENV] = "1"
      ensure_session_environment()
      try:
-@@ -4062,17 +4303,30 @@ def can_type_with_keys(text: str) -> bool:
+@@ -4062,17 +4324,30 @@ def can_type_with_keys(text: str) -> bool:
      return all(key_for_char(ch) is not None for ch in text)
  
  
@@ -640,7 +693,7 @@ index 84175d4..80cf514 100755
  
  
  def prefer_related_target(target: str, enabled: bool = False) -> tuple[str, dict[str, Any] | None]:
-@@ -4100,6 +4354,13 @@ def key_from_args(args: dict[str, Any]) -> tuple[str, str]:
+@@ -4100,6 +4375,13 @@ def key_from_args(args: dict[str, Any]) -> tuple[str, str]:
      if not isinstance(key, str) or not key:
          raise RuntimeError("key action requires key or keys")
      modifiers = args.get("modifiers") if isinstance(args.get("modifiers"), str) else ""
@@ -654,7 +707,7 @@ index 84175d4..80cf514 100755
      return key, modifiers
  
  
-@@ -4172,7 +4433,8 @@ def type_text(target: str, text: str, args: dict[str, Any]) -> dict[str, Any]:
+@@ -4172,7 +4454,8 @@ def type_text(target: str, text: str, args: dict[str, Any]) -> dict[str, Any]:
      target_for_input, related = prefer_related_target(target, False if not isinstance(prefer_related, bool) else prefer_related)
  
      if method == "keys" or (method == "auto" and not text_is_bulk_paste_candidate(text) and can_type_with_keys(text)):
@@ -664,7 +717,7 @@ index 84175d4..80cf514 100755
          info.update({"target": target, "resolvedTarget": target_for_input, "relatedTarget": related})
          return info
  
-@@ -4217,7 +4479,14 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
+@@ -4217,7 +4500,14 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
          related_error = str(exc)
      else:
          related_error = ""
@@ -680,7 +733,7 @@ index 84175d4..80cf514 100755
      png_bytes = base64.b64decode(png_base64, validate=True)
      captured_at = time.time()
      screenshot_id = f"snap_{secrets.token_urlsafe(18)}"
-@@ -4225,16 +4494,17 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
+@@ -4225,16 +4515,17 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
      screenshot.update(
          {
              "id": screenshot_id,
@@ -701,7 +754,7 @@ index 84175d4..80cf514 100755
      elements = atspi["elements"] if atspi["status"] == "ok" and atspi["elements"] else []
      tree_lines = atspi["treeLines"] if atspi["status"] == "ok" and atspi["treeLines"] else []
      if not elements:
-@@ -4816,12 +5086,45 @@ def tool_get_cursor_position(args: dict[str, Any]) -> dict[str, Any]:
+@@ -4816,12 +5107,45 @@ def tool_get_cursor_position(args: dict[str, Any]) -> dict[str, Any]:
      return mcp_text(json.dumps(result, ensure_ascii=False), structured=result)
  
  
@@ -747,7 +800,7 @@ index 84175d4..80cf514 100755
      element = None
      refresh_info = None
      if isinstance(element_index, str) and element_index:
-@@ -4836,58 +5139,75 @@ def semantic_click(args: dict[str, Any]) -> dict[str, Any]:
+@@ -4836,58 +5160,75 @@ def semantic_click(args: dict[str, Any]) -> dict[str, Any]:
  
      target = str(snapshot["target"])
      session_info = begin_related_action_session(target)
@@ -871,7 +924,7 @@ index 84175d4..80cf514 100755
  
  
  def semantic_perform_secondary_action(args: dict[str, Any]) -> dict[str, Any]:
-@@ -5064,7 +5384,12 @@ def semantic_hover(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5064,7 +5405,12 @@ def semantic_hover(args: dict[str, Any]) -> dict[str, Any]:
  def semantic_type_text(args: dict[str, Any]) -> dict[str, Any]:
      app = str(args.get("app") or "")
      text = args.get("text")
@@ -885,7 +938,7 @@ index 84175d4..80cf514 100755
          raise RuntimeError("Missing required argument: text")
      snapshot = current_snapshot(app)
      control_overlay(snapshot, action="type")
-@@ -5085,7 +5410,10 @@ def semantic_type_text(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5085,7 +5431,10 @@ def semantic_type_text(args: dict[str, Any]) -> dict[str, Any]:
              return mcp_snapshot_result(snapshot_after_action(app, snapshot, {"method": "atspi", "targeting": "editable"}))
          raise RuntimeError("explicit AT-SPI text insertion failed; no keyboard or clipboard fallback was attempted")
      type_args = dict(args)
@@ -897,7 +950,7 @@ index 84175d4..80cf514 100755
      info = type_text(str(snapshot["target"]), text, type_args)
      return mcp_snapshot_result(snapshot_after_action(app, snapshot, info))
  
-@@ -5098,7 +5426,10 @@ def semantic_paste_text(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5098,7 +5447,10 @@ def semantic_paste_text(args: dict[str, Any]) -> dict[str, Any]:
      snapshot = current_snapshot(app)
      control_overlay(snapshot, action="type")
      target = str(snapshot["target"])
@@ -909,7 +962,7 @@ index 84175d4..80cf514 100755
      prefer_related = args.get("prefer_related")
      target_for_input, related = prefer_related_target(target, False if not isinstance(prefer_related, bool) else prefer_related)
      target_is_xwayland = target_uses_xwayland(target_for_input, related)
-@@ -5113,29 +5444,54 @@ def semantic_paste_text(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5113,29 +5465,54 @@ def semantic_paste_text(args: dict[str, Any]) -> dict[str, Any]:
  def semantic_press_key(args: dict[str, Any]) -> dict[str, Any]:
      app = str(args.get("app") or "")
      snapshot = current_snapshot(app)
@@ -978,7 +1031,7 @@ index 84175d4..80cf514 100755
  def semantic_set_value(args: dict[str, Any]) -> dict[str, Any]:
      app = str(args.get("app") or "")
      value = args.get("value")
-@@ -5150,7 +5506,7 @@ def semantic_set_value(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5150,7 +5527,7 @@ def semantic_set_value(args: dict[str, Any]) -> dict[str, Any]:
      except Exception:
          control_overlay(snapshot, action="set_value")
      if not atspi_set_element_value_isolated(snapshot, element, value):
@@ -987,7 +1040,7 @@ index 84175d4..80cf514 100755
      action_result = {"method": "atspi", "action": "set_value"}
      if element_point is not None:
          action_result["element"] = compact_element_info(element, element_point[0], element_point[1], "screenshot")
-@@ -6071,6 +6427,7 @@ SEMANTIC_TOOLS = {
+@@ -6071,6 +6448,7 @@ SEMANTIC_TOOLS = {
      "paste_text": semantic_paste_text,
      "press_key": semantic_press_key,
      "key": semantic_press_key,
@@ -995,7 +1048,7 @@ index 84175d4..80cf514 100755
      "set_value": semantic_set_value,
      "wait": semantic_wait,
      "wait_for_window": semantic_wait_for_window,
-@@ -6438,6 +6795,7 @@ FULL_LEVEL_ACTIONS = {
+@@ -6438,6 +6816,7 @@ FULL_LEVEL_ACTIONS = {
      "paste_image",
      "session",
      "set_value",
