@@ -53,8 +53,8 @@ try:
   if case.startswith('shortcut'):click="await app.pressKey('Ctrl+l');"
   keys=["await app.pressKey('Ctrl+a');",'await app.typeText('+json.dumps(destination)+');',"await app.pressKey('Return');"]
   if case.startswith('form'):
-   method='keys' if 'keys' in case else 'setValue'
-   js('await app.fillForm('+json.dumps({'fields':[{'name':'Full name','value':'Grace Hopper','method':method},{'name':'Email','value':'grace@example.test','method':method}],'submit':{'name':'Save profile'}})+');')
+   method='keys' if 'keys' in case else None
+   js('await app.fillForm('+json.dumps({'fields':[{'name':'Full name','value':'Grace Hopper',**({'method':method} if method else {})},{'name':'Email','value':'grace@example.test',**({'method':method} if method else {})}],'submit':{'name':'Save profile'}})+');')
   elif case.startswith('workflow-replace'):
    js("await app.replaceText({target:{name:'Note'},text:'alpha DELTA gamma'});")
    save=next(e for e in observation['elements'] if e['name']=='Save profile');js(f"await app.click({save['index']}); await app.getAXState();")

@@ -90,7 +90,7 @@ Four additional MCP tools are available alongside `js`: `fill_form`, `replace_te
 {"app":"hypr-use-r50-browser","fields":[{"name":"Full name","value":"Grace Hopper"},{"name":"Email","value":"grace@example.test"}],"submit":{"name":"Save profile"}}
 ```
 
-Pass that object to `fill_form`. Selectors use an exact accessible name and optional role; ambiguous names fail. Fields are editable text/value controls, not checkboxes or selects. Values are strings. Default field method is `setValue`, verified by AX readback; explicit `keys` and `paste` methods are available.
+Pass that object to `fill_form`. Selectors use an exact accessible name and optional role; ambiguous names fail. Fields are editable text/value controls, not checkboxes or selects. Values are strings. Default field input uses a supported setter, otherwise native keys, verified by AX readback; explicit `keys` and `paste` methods are available.
 
 `replace_text` takes `target`, `text`, optional `method` and boolean `submit`. It replaces the entire field, not every matching word in a document. Native keys are the default. `navigate` takes an http(s) `url`, optional `new_tab` and an `address` selector when its default address-bar names do not match the browser. Navigation returns submitted status; use `wait_for` for a page condition.
 
@@ -102,4 +102,4 @@ Tests: `node --test mcp/unified/test.mjs mcp/unified/workflows.test.mjs`. Fresh 
 
 Agent adoption: all four tools were used directly by fresh Astra CLI instances; seven focused runs passed with no refocuses. One old `selectText` call failed and the agent recovered using `replace_text`. See `testing/reliability50/workflow-tools.md`; no paired speedup is claimed.
 
-Field selectors ignore same-name labels and match only editable/value controls. Multiple matching fields remain an error; supply a role to disambiguate. Selection readback now allows 150 ms for asynchronous AT-SPI updates without repeating the mutation.
+Field selectors ignore same-name labels and match editable/value controls or text-entry roles, because Chromium can omit editability interface flags. Multiple matching fields remain an error; supply a role to disambiguate. Selection readback now allows 150 ms for asynchronous AT-SPI updates without repeating the mutation.
