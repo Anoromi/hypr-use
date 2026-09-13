@@ -1005,11 +1005,26 @@ index 265b090..d06ec3c 100644
          confinement=confinement,
 diff --git a/mcp/text_selection.py b/mcp/text_selection.py
 new file mode 100644
-index 0000000..b40f7c8
+index 0000000..8de818d
 --- /dev/null
 +++ b/mcp/text_selection.py
-@@ -0,0 +1,49 @@
+@@ -0,0 +1,66 @@
 +"""AT-SPI text selection without pointer motion or focus requests."""
++
++import time
++
++
++def wait_readback(read, expected, timeout=0.15):
++    """Allow asynchronous provider updates; never repeat the mutation."""
++    deadline = time.monotonic() + timeout
++    while True:
++        observed = read()
++        if observed == expected:
++            return
++        if time.monotonic() >= deadline:
++            raise ValueError(f'Application did not retain requested state: expected {expected}, observed {observed}')
++        time.sleep(min(0.01, max(0, deadline - time.monotonic())))
++
 +
 +def selection_range(content, text, prefix='', suffix=''):
 +    if not isinstance(text, str) or not text:
@@ -1045,16 +1060,18 @@ index 0000000..b40f7c8
 +            accepted = atspi.Text.add_selection(iface, start, end)
 +        if not accepted:
 +            raise ValueError('Application refused text selection')
-+        observed = atspi.Text.get_selection(iface, 0)
-+        if (observed.start_offset, observed.end_offset) != (start, end):
-+            raise ValueError('Application did not retain the requested selection')
++        def read_selection():
++            observed = atspi.Text.get_selection(iface, 0)
++            return observed.start_offset, observed.end_offset
++        wait_readback(read_selection, (start, end))
 +    elif mode in ('cursor_before', 'cursor_after'):
 +        for index in reversed(range(atspi.Text.get_n_selections(iface))):
 +            if not atspi.Text.remove_selection(iface, index):
 +                raise ValueError('Application refused to clear selection')
 +        offset = start if mode == 'cursor_before' else end
-+        if not atspi.Text.set_caret_offset(iface, offset) or atspi.Text.get_caret_offset(iface) != offset:
-+            raise ValueError('Application did not retain the requested caret position')
++        if not atspi.Text.set_caret_offset(iface, offset):
++            raise ValueError('Application refused the requested caret position')
++        wait_readback(lambda: atspi.Text.get_caret_offset(iface), offset)
 +    else:
 +        raise ValueError('Invalid selection mode')
 +    return {'ok': True, 'method': 'atspi', 'selection': mode, 'start': start, 'end': end}

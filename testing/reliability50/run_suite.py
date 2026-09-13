@@ -9,6 +9,7 @@ from web_fixture import Fixture
 import odf
 phase=sys.argv[1];selected=set(sys.argv[2:]);out=here/'runs'/phase;out.mkdir(parents=True,exist_ok=True)
 source_files=list((root/'mcp/unified').glob('*.py'))+list((root/'mcp/unified').glob('*.mjs'))+[root/'vendor/hypr-agent-portal-0.56.2/scripts/hypr-agent-portalctl',root/'vendor/hypr-agent-portal-0.56.2/mcp/hypr-agent-portal-mcp.py',*[here/name for name in ['run_suite.py','catalog.py','web_fixture.py','odf.py','launch_owned.py']],here/'cdp.mjs',old/'run.py']
+source_files += list((root/'vendor/hypr-agent-portal-0.56.2/mcp').glob('*.py'))
 def hashes():return {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_files}
 manifest={'model':'gpt-6-astra','effort':'xhigh','source_hashes':hashes(),'catalog':catalog(),'started_at':time.time(),'policy':'Fresh profiles and agent cwd; no retries replace original outcomes; no restore preflight; all GUI actions through JS MCP. Controller prep/grading uses files or CDP. Stop on refocus.'}
 if (out/'manifest.json').exists():

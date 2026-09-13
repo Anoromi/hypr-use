@@ -19,7 +19,7 @@ try:
   assert not m.trigger.is_set();m.stage=case;d=out/case;d.mkdir();fixture=Fixture()
   with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
   start=f'http://127.0.0.1:{fixture.port}/start';destination=f'http://127.0.0.1:{fixture.port}/second'
-  if case.startswith('date'):start=f'http://127.0.0.1:{fixture.port}/web'
+  if case.startswith(('date','select','form','workflow-replace')):start=f'http://127.0.0.1:{fixture.port}/web'
   rule='hl.window_rule({name="hypr-use-r50-probe",match={class="^hypr-use-r50-browser$"},no_initial_focus=true,suppress_event="activate activatefocus",workspace="902 silent"}):set_enabled(true)'
   subprocess.run(['hyprctl','eval',rule],check=True,capture_output=True)
   cmd=['chromium','--user-data-dir='+str(d/'profile'),'--class='+app,'--ozone-platform=wayland','--force-renderer-accessibility','--no-first-run','--no-default-browser-check','--remote-debugging-address=127.0.0.1','--remote-debugging-port='+str(port),start]
@@ -36,11 +36,11 @@ try:
   env.update(HYPR_AGENT_PORTAL_PERMISSION_MODE='full',HYPR_AGENT_PORTAL_APPROVAL_POLICY='never',HYPR_AGENT_PORTAL_CONFINE='class:'+app,HYPR_USE_WIRE_LOG=str(d/'wire.jsonl'),HYPR_USE_PORTAL_LOG=str(d/'portal.jsonl'))
   p=subprocess.Popen(['node',str(root/'mcp/unified/server.mjs')],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=(d/'stderr.txt').open('w'),text=True,env=env,start_new_session=True)
   steps=[]
-  def js(code):
+  def js(code,allow_error=False):
    assert not m.trigger.is_set();begin=time.monotonic()
    p.stdin.write(json.dumps({'jsonrpc':'2.0','id':len(steps)+1,'method':'tools/call','params':{'name':'js','arguments':{'code':code,'timeout_ms':30000}}})+'\n');p.stdin.flush()
    r=json.loads(p.stdout.readline());steps.append({'code':code,'seconds':time.monotonic()-begin,'error':r['result'].get('isError')})
-   (d/f'response-{len(steps)}.json').write_text(json.dumps(r));assert not r['result'].get('isError'),str(r)[:300]
+   (d/f'response-{len(steps)}.json').write_text(json.dumps(r));assert allow_error or not r['result'].get('isError'),str(r)[:300]
    return r
   js("var app=await cua.getApp('"+app+"');")
   observation=json.loads((d/'portal.jsonl').read_text().splitlines()[-1])['response']['result']['structuredContent']
@@ -52,7 +52,20 @@ try:
   if case.startswith('left'):click=f"await app.click([{frame['x']+150}, {point[1]}]);"
   if case.startswith('shortcut'):click="await app.pressKey('Ctrl+l');"
   keys=["await app.pressKey('Ctrl+a');",'await app.typeText('+json.dumps(destination)+');',"await app.pressKey('Return');"]
-  if case.startswith('date'):
+  if case.startswith('form'):
+   method='keys' if 'keys' in case else 'setValue'
+   js('await app.fillForm('+json.dumps({'fields':[{'name':'Full name','value':'Grace Hopper','method':method},{'name':'Email','value':'grace@example.test','method':method}],'submit':{'name':'Save profile'}})+');')
+  elif case.startswith('workflow-replace'):
+   js("await app.replaceText({target:{name:'Note'},text:'alpha DELTA gamma'});")
+   save=next(e for e in observation['elements'] if e['name']=='Save profile');js(f"await app.click({save['index']}); await app.getAXState();")
+  elif case.startswith('workflow-nav'):
+   js('await app.navigate('+json.dumps({'url':destination})+'); await app.waitFor({text:"heading Second"});')
+  elif case.startswith('select'):
+   note=next(e for e in observation['elements'] if e['name']=='Note');save=next(e for e in observation['elements'] if e['name']=='Save profile')
+   js(f"await app.click({note['index']}); await app.typeText('alpha beta gamma'); await app.getAXState();")
+   selection=js(f"await app.selectText({note['index']}, 'beta');",allow_error=True)
+   if not selection['result'].get('isError'):js(f"await app.typeText('DELTA'); await app.click({save['index']}); await app.getAXState();")
+  elif case.startswith('date'):
    elements=observation['elements'];parts=[next(e for e in elements if e['name']==name)['index'] for name in ['Month Appointment','Day Appointment','Year Appointment']]
    save=next(e for e in elements if e['name']=='Save profile')['index'];code=''
    for index,value in zip(parts,['10','21','2026']):code+=f'await app.click({index});'+(f"await app.pressKey('{ ' '.join(value) }');" if 'sequence' in case else f"await app.typeText('{value}');")
@@ -67,8 +80,11 @@ try:
   time.sleep(.4)
   urls=[v['url'] for v in json.load(urllib.request.urlopen(f'http://127.0.0.1:{port}/json/list',timeout=3)) if v['type']=='page']
   passed=fixture.state.get('date')=='2026-10-21' and fixture.state.get('saved') is True if case.startswith('date') else destination in urls
+  if case.startswith('select'):passed=fixture.state.get('note')=='alpha DELTA gamma' and fixture.state.get('saved') is True
+  if case.startswith('form'):passed=fixture.state.get('name')=='Grace Hopper' and fixture.state.get('email')=='grace@example.test' and fixture.state.get('saved') is True
+  if case.startswith('workflow-replace'):passed=fixture.state.get('note')=='alpha DELTA gamma' and fixture.state.get('saved') is True
   row={'case':case,'passed':passed,'urls':urls,'steps':steps,'refocus':m.trigger.is_set()}
-  if case.startswith('date'):row['state']=fixture.state
+  if case.startswith(('date','select','form','workflow-replace')):row['state']=fixture.state
   results.append(row);print(json.dumps(row),flush=True)
   p.stdin.close();p.wait(timeout=10);p=None;stop();owned=None;fixture.close();fixture=None
   for _ in range(100):
