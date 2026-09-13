@@ -1,4 +1,3 @@
-import {validateWorkflow,workflowMethods} from './workflows.mjs';
 import vm from 'node:vm';
 import {spawn} from 'node:child_process';
 import readline from 'node:readline';
@@ -17,7 +16,7 @@ async function dispatch(name,args){const start=performance.now();try{
 }catch(e){throw Error(`${name}: ${e.message}`);}}
 function call(name,args){const p=dispatch(name,args);inFlight.add(p);p.then(()=>inFlight.delete(p),()=>inFlight.delete(p));return p;}
 const output=block=>{content.push(block);process.send({event:'output',block});};
-const {cua,cleanup}=createFacade(call,output,{aliases:JSON.parse(process.env.HYPR_USE_APP_ALIASES??'{}'),commandModifier:process.env.HYPR_USE_COMMAND_MODIFIER??'ctrl'});
+const {cua,cleanup,executeWorkflow}=createFacade(call,output,{aliases:JSON.parse(process.env.HYPR_USE_APP_ALIASES??'{}'),commandModifier:process.env.HYPR_USE_COMMAND_MODIFIER??'ctrl'});
 const context=vm.createContext({cua,nodeRepl:Object.freeze({write:v=>output({type:'text',text:typeof v==='string'?v:JSON.stringify(v)}),emitImage:async v=>{if(v instanceof Uint8Array||ArrayBuffer.isView(v))output({type:'image',mimeType:'image/png',data:Buffer.from(v).toString('base64')});else if(v?.bytes)output({type:'image',mimeType:v.mimeType??'image/png',data:Buffer.from(v.bytes).toString('base64')});else throw Error('emitImage expects image bytes');}})}, {codeGeneration:{strings:false,wasm:false}});
 function names(pattern){if(pattern.type==='Identifier')return [pattern.name];if(pattern.type==='ObjectPattern')return pattern.properties.flatMap(p=>names(p.value??p.argument));if(pattern.type==='ArrayPattern')return pattern.elements.filter(Boolean).flatMap(names);if(pattern.type==='RestElement')return names(pattern.argument);if(pattern.type==='AssignmentPattern')return names(pattern.left);return [];}
 function rewrite(code){const ast=parse(code,{ecmaVersion:'latest',allowAwaitOutsideFunction:true});let out='',last=0;for(const n of ast.body){let replacement;
@@ -28,7 +27,7 @@ function rewrite(code){const ast=parse(code,{ecmaVersion:'latest',allowAwaitOuts
  return out+code.slice(last);
 }
 process.on('message',async msg=>{content=[];timings=[];try{if(msg.kind==='cleanup'){await cleanup();process.send({ok:true,content:[],timings});return;}
- if(msg.kind==='workflow'){validateWorkflow(msg.name,msg.args);const {app:target,...args}=msg.args;const app=await cua.getApp(target);const value=await app[workflowMethods[msg.name]](args);output({type:'text',text:JSON.stringify(value)});process.send({ok:true,content,timings});return;}
+ if(msg.kind==='workflow'){const value=await executeWorkflow(msg.name,msg.args);output({type:'text',text:JSON.stringify(value)});process.send({ok:true,content,timings});return;}
  const transformed=rewrite(msg.code);await new vm.Script(`(async()=>{${transformed}\n})()`).runInContext(context,{timeout:Math.min(msg.timeout,1000)});
  while(inFlight.size)await Promise.all([...inFlight]);
  process.send({ok:true,content,timings});

@@ -63,3 +63,9 @@ Two repeated-fill probes changed from 3.593/3.633 s to 0.360/0.350 s (median 3.6
 AX text now prints frame coordinates as `[x,y,width,height]` with one legend, retaining all nodes, indices, actions, states and geometry. `compactGeometry:false` retains the verbose labels. Raw structured snapshots are unchanged. The sampled native tree shrank 1341 → 1058 characters (21.1%); browser tree 18228 → 14801 (18.8%). These are character counts, not measured token or inference savings.
 
 Fresh Astra dropdown-selection and product-comparison tasks both passed (35.35 s, 23.94 s), with no tool errors or refocuses (`loop-compact-ax-astra`). All 25 JS/protocol tests pass. End-to-end speed improvement is not established by these adoption runs.
+
+## Direct workflow binding
+
+Direct MCP workflow calls now reuse their just-read binding snapshot for preflight (within the existing 100 ms freshness bound) and emit the final observation without first repeating the entire initial tree. Public JS getApp behavior is unchanged. Indexed actions still perform identity rematching.
+
+Two controlled direct-form probes passed. AX reads fell from six to five including initial test binding; returned text fell from 17502/17487 to 2594/2599 characters. Whole helper medians were 6.159 → 5.978 s; sample noise is too large for a reliable latency claim. Fresh Astra navigation and form tasks passed at 30.69/26.43 s with no errors/refocuses (`loop-direct-binding-astra`). All 26 JS/protocol tests pass.

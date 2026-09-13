@@ -1,4 +1,4 @@
-import {createWorkflows} from './workflows.mjs';
+import {createWorkflows,validateWorkflow,workflowMethods} from './workflows.mjs';
 export function createFacade(call, output, options={}) {
   const aliases=options.aliases??{};
   const diffs=new Map();
@@ -46,12 +46,12 @@ export function createFacade(call, output, options={}) {
     const rows=windows.map(w=>({id:w.target,displayName:w.class,isRunning:true,title:w.title}));
     if(opt.emit!==false)output({type:'text',text:JSON.stringify(rows)});return rows;
   }
-  async function getApp(input) {
+  async function bindApp(input,workflow=false) {
     let name=aliases[string(input,'app')]??input;
     const r=await call('get_ax_state',{app:name});
     name=r.structuredContent?.target??name;bound.add(name);
-    ax(r,name,{disableDiffing:true});
-    let recent=null;
+    if(!workflow)ax(r,name,{disableDiffing:true});
+    let recent=workflow?{result:r,time:Date.now()}:null;
     const act=async(tool,args)=>{
       recent=null;const r=await call(tool,{app:name,...args});
       const state=r.structuredContent;
@@ -93,7 +93,7 @@ export function createFacade(call, output, options={}) {
     Object.assign(app,createWorkflows(app,async()=> (await observe()).structuredContent,output,state=>ax({structuredContent:state,content:[]},name,{disableDiffing:true})));
     return Object.freeze(app);
   }
-  const cua={getApp,listApps:apps,getState:async(opt={})=>{const state={apps:await apps({emit:false}),browsers:[]};if(opt.emit!==false)output({type:'text',text:JSON.stringify(state)});return state;}};
+  const cua={getApp:input=>bindApp(input),listApps:apps,getState:async(opt={})=>{const state={apps:await apps({emit:false}),browsers:[]};if(opt.emit!==false)output({type:'text',text:JSON.stringify(state)});return state;}};
   cua.initialize=cua.getState;
-  return {cua,async cleanup(){for(const target of bound){await call('computer',{action:'session',session_action:'end',target}).catch(()=>{});}bound.clear();}};
+  return {cua,async executeWorkflow(name,args){validateWorkflow(name,args);const {app:target,...options}=args;const app=await bindApp(target,true);return app[workflowMethods[name]](options);},async cleanup(){for(const target of bound){await call('computer',{action:'session',session_action:'end',target}).catch(()=>{});}bound.clear();}};
 }

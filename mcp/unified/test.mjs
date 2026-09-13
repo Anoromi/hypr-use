@@ -47,3 +47,15 @@ test('compact geometry preserves every coordinate and offers full labels',async(
  const full=await app.getAXState({compactGeometry:false,disableDiffing:true,emit:false});assert.ok(full.includes(line));
  assert.equal(state.treeLines[0],line);
 });
+
+test('direct workflow reuses binding read and emits only the final observation',async()=>{
+ const calls=[],out=[];let value='old';
+ const {executeWorkflow}=createFacade(async(name,args)=>{
+  calls.push(name);if(name==='set_value'){value=args.value;return {structuredContent:{observationDeferred:true}};}
+  return {content:[],structuredContent:{target:'owned',accessibility:{status:'ok'},elements:[{index:1,name:'Name',value,editable:true,supportsEditableText:true}],treeLines:[`1 text Name Value: ${value}`]}};
+ },b=>out.push(b));
+ await executeWorkflow('fill_form',{app:'Editor',fields:[{name:'Name',value:'new'}]});
+ assert.deepEqual(calls,['get_ax_state','set_value','get_ax_state']);
+ assert.equal(out.length,1);assert.match(out[0].text,/Value: new/);assert.doesNotMatch(out[0].text,/Value: old/);
+ calls.length=0;await assert.rejects(executeWorkflow('fill_form',{app:'Editor',fields:[]}),/array length/);assert.equal(calls.length,0);
+});

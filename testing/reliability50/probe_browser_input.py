@@ -41,9 +41,9 @@ try:
   if 'debug' in case:env['HYPR_USE_AX_DEBUG_STACK']='1'
   p=subprocess.Popen(['node',str(root/'mcp/unified/server.mjs')],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=(d/'stderr.txt').open('w'),text=True,env=env,start_new_session=True)
   steps=[]
-  def js(code,allow_error=False):
+  def js(code,allow_error=False,tool=None):
    assert not m.trigger.is_set();begin=time.monotonic()
-   p.stdin.write(json.dumps({'jsonrpc':'2.0','id':len(steps)+1,'method':'tools/call','params':{'name':'js','arguments':{'code':code,'timeout_ms':30000}}})+'\n');p.stdin.flush()
+   p.stdin.write(json.dumps({'jsonrpc':'2.0','id':len(steps)+1,'method':'tools/call','params':{'name':tool or 'js','arguments':code if tool else {'code':code,'timeout_ms':30000}}})+'\n');p.stdin.flush()
    r=json.loads(p.stdout.readline());steps.append({'code':code,'seconds':time.monotonic()-begin,'error':r['result'].get('isError')})
    (d/f'response-{len(steps)}.json').write_text(json.dumps(r));assert allow_error or not r['result'].get('isError'),str(r)[:300]
    return r
@@ -68,6 +68,8 @@ try:
    fields=[{'name':'Email updates','value':True},{'name':'SMS updates','value':False}]
    js('await app.fillForm('+json.dumps({'fields':fields,'submit':{'name':'Save profile'}})+');')
    js('await app.fillForm('+json.dumps({'fields':fields})+'); await app.waitFor({target:{name:"Email updates"},value:true});')
+  elif case.startswith('form-direct'):
+   js({'app':app,'fields':[{'name':'Full name','value':'Grace Hopper'},{'name':'Email','value':'grace@example.test'}],'submit':{'name':'Save profile'}},tool='fill_form')
   elif case.startswith('form-repeat'):
    fields=[{'name':'Full name','value':'Grace Hopper'},{'name':'Email','value':'grace@example.test'}]
    js('await app.fillForm('+json.dumps({'fields':fields,'submit':{'name':'Save profile'}})+');')
