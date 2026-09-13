@@ -1,14 +1,17 @@
 """Compare native popup input routes on fresh owned GTK fixtures."""
-import hashlib,json,os,shlex,signal,subprocess,sys,time
+import base64,hashlib,json,os,shlex,signal,subprocess,sys,time
 from pathlib import Path
 here=Path(__file__).resolve().parent;root=here.parents[1];old=here.parent/'unified-benchmark'
 sys.path.insert(0,str(old))
 from monitor import Monitor,ctl
+from native_runtime import native_runtime
 app='hypr-use-bench';out=here/'diagnostics'/sys.argv[1];out.mkdir(parents=True,exist_ok=False)
 cases=sys.argv[2:] or ['pointer-legacy','pointer-cached','semantic-cached']
 files=[*root.joinpath('mcp/unified').glob('*.py'),*root.joinpath('mcp/unified').glob('*.mjs'),*root.joinpath('vendor/hypr-agent-portal-0.56.2/mcp').glob('*.py'),Path(__file__),old/'fixture.py',old/'monitor.py',here/'launch_owned.py']
-def hashes():return {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
-source_hashes=hashes();(out/'manifest.json').write_text(json.dumps({'cases':cases,'source_hashes':source_hashes},indent=2))
+def hashes():return {(str(p.relative_to(root)) if p.is_relative_to(root) else str(p)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+native=native_runtime(root)
+files += [here/'native_runtime.py',root/'testing/live-session/active-plugin.json',Path(native['path'])]
+source_hashes=hashes();(out/'manifest.json').write_text(json.dumps({'native_runtime':native,'cases':cases,'source_hashes':source_hashes},indent=2))
 assert not any(w['class']==app for w in ctl('clients'))
 m=Monitor(out/'focus.jsonl',[app]);owned=None;server=None;rows=[]
 def stop():
@@ -48,7 +51,15 @@ try:
   js("var app=await cua.getApp('hypr-use-bench');")
   country=next(e for e in state()['elements'] if e['name']=='Country' and e['controlType']=='combo box')
   js(f"await app.click({country['index']}); await app.getAXState();")
+  if '-image-' in case:
+   captured=js('await app.getAXStateAndScreenshot();')
+   for block in captured['result']['content']:
+    if block.get('type')=='image':(d/'popup.png').write_bytes(base64.b64decode(block['data']))
   germany=next(e for e in state()['elements'] if e['name']=='Germany' and e['controlType']=='menu item')
+  if 'inspect' in case:
+   frame=germany['frame'];payload=f"{state()['target']},{frame['x']+frame['width']/2},{frame['y']+frame['height']/2},inspect"
+   inspected=subprocess.run(['hyprctl','eval','local result=hl.dispatch(hl.plugin.hypr_agent_portal.pointer_relative('+json.dumps(payload)+')); error(result.error or "missing inspection")'],capture_output=True,text=True)
+   (d/'surface-inspect.txt').write_text(inspected.stdout+inspected.stderr)
   if case.startswith('semantic'):code=f"await app.performSecondaryAction({germany['index']},'click');"
   elif case.startswith('keyboard'):code="await app.pressKey('End Return');"
   else:code=f"await app.click({germany['index']});"

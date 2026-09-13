@@ -3,13 +3,16 @@ import hashlib,json,os,shlex,signal,socket,subprocess,sys,time,urllib.request
 from pathlib import Path
 here=Path(__file__).resolve().parent;root=here.parents[1];sys.path.insert(0,str(here.parent/'unified-benchmark'))
 from monitor import Monitor,ctl
+from native_runtime import native_runtime
 from web_fixture import Fixture
 out=here/'diagnostics'/sys.argv[1];out.mkdir(parents=True,exist_ok=False)
 cases=sys.argv[2:] or ['index-batch','point-batch','index-split','index-wait','shortcut-batch','shortcut-split']
 runtime_files=[*root.joinpath('mcp/unified').glob('*.py'),*root.joinpath('mcp/unified').glob('*.mjs'),*root.joinpath('vendor/hypr-agent-portal-0.56.2/mcp').glob('*.py'),root/'vendor/hypr-agent-portal-0.56.2/scripts/hypr-agent-portalctl',*[here/n for n in ['probe_browser_input.py','web_fixture.py','cdp.mjs','launch_owned.py']],here.parent/'unified-benchmark/monitor.py',root/'testing/plugin-reliability-sequence-result/lib/libhypr-agent-portal.so']
-def runtime_hashes():return {str(f.relative_to(root)):hashlib.sha256(f.read_bytes()).hexdigest() for f in runtime_files}
+def runtime_hashes():return {(str(f.relative_to(root)) if f.is_relative_to(root) else str(f)):hashlib.sha256(f.read_bytes()).hexdigest() for f in runtime_files}
+native=native_runtime(root)
+runtime_files += [here/'native_runtime.py',root/'testing/live-session/active-plugin.json',Path(native['path'])]
 source_hashes=runtime_hashes()
-(out/'manifest.json').write_text(json.dumps({'kind':'controlled-probe','cases':cases,'source_hashes':source_hashes,'started_at':time.time()},indent=2))
+(out/'manifest.json').write_text(json.dumps({'native_runtime':native,'kind':'controlled-probe','cases':cases,'source_hashes':source_hashes,'started_at':time.time()},indent=2))
 app='hypr-use-r50-browser';assert not any(w['class']==app for w in ctl('clients'))
 m=Monitor(out/'focus.jsonl',[app]);owned=None;p=None;fixture=None;results=[]
 def stop():

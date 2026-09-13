@@ -6,6 +6,7 @@ sys.path.insert(0,str(old))
 from monitor import Monitor,ctl
 from catalog import catalog
 from web_fixture import Fixture
+from native_runtime import native_runtime
 import odf
 phase=sys.argv[1];selected=set(sys.argv[2:])
 unknown=selected-{t['id'] for t in catalog()}
@@ -14,10 +15,11 @@ out=here/'runs'/phase;out.mkdir(parents=True,exist_ok=True)
 variant=os.environ.get('HYPR_USE_SUITE_VARIANT','standard')
 assert variant in ['standard','reactive-form','prefilled-form'],'Unknown suite variant'
 if variant!='standard':assert selected=={'21-web-profile'},'Form variants require only task 21-web-profile'
+native=native_runtime(root)
 source_files=list((root/'mcp/unified').glob('*.py'))+list((root/'mcp/unified').glob('*.mjs'))+[root/'vendor/hypr-agent-portal-0.56.2/scripts/hypr-agent-portalctl',root/'vendor/hypr-agent-portal-0.56.2/mcp/hypr-agent-portal-mcp.py',*[here/name for name in ['run_suite.py','catalog.py','web_fixture.py','odf.py','launch_owned.py']],here/'cdp.mjs',old/'run.py']
-source_files += list((root/'vendor/hypr-agent-portal-0.56.2/mcp').glob('*.py'))
-def hashes():return {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_files}
-manifest={'variant':variant,'model':'gpt-6-astra','effort':'xhigh','source_hashes':hashes(),'catalog':catalog(),'started_at':time.time(),'policy':'Fresh profiles and agent cwd; no retries replace original outcomes; no restore preflight; all GUI actions through JS MCP. Controller prep/grading uses files or CDP. Stop on refocus.'}
+source_files += list((root/'vendor/hypr-agent-portal-0.56.2/mcp').glob('*.py'))+[here/'native_runtime.py',root/'testing/live-session/active-plugin.json',Path(native['path'])]
+def hashes():return {(str(p.relative_to(root)) if p.is_relative_to(root) else str(p)):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_files}
+manifest={'native_runtime':native,'variant':variant,'model':'gpt-6-astra','effort':'xhigh','source_hashes':hashes(),'catalog':catalog(),'started_at':time.time(),'policy':'Fresh profiles and agent cwd; no retries replace original outcomes; no restore preflight; all GUI actions through JS MCP. Controller prep/grading uses files or CDP. Stop on refocus.'}
 if (out/'manifest.json').exists():
  manifest=json.loads((out/'manifest.json').read_text());assert manifest['source_hashes']==hashes() and manifest.get('variant','standard')==variant,'Source or variant changed; use a new phase'
 else:(out/'manifest.json').write_text(json.dumps(manifest,indent=2))

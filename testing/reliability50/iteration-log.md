@@ -107,3 +107,9 @@ Two controlled native menu pointer clicks returned success without selecting Ger
 Both failed probes now pass through ordinary app.click(index), with no refocuses (`loop-native-menu-semantic`). Fresh Astra native Country selection passed with three calls/35.98 s versus the preceding five calls/43.17 s with recovery. Browser dropdown selection also passed (24.34 s). No new tool failures/refocuses. Three routing regression tests pass. Single-run timings are not a general speedup estimate.
 
 A separate native popup hit-test candidate reproduced/fixed the problem in a disposable compositor but did not fix live GTK selection, despite inspection confirming the popup surface was targeted. The original live plugin was restored. That incomplete native candidate is not included in this runtime fix. Raw isolated/live diagnostics and the candidate patch remain available for further investigation.
+
+## Native build provenance and isolated popup harness
+
+New desktop phases validate the explicit active-plugin load record against current plugin metadata and the binary SHA-256, then include the native binary and load declaration in source hashes. Plugin switches record old/new builds and restore the old build on a load failure. Metadata/hash checks are not direct process-map attestation; compositor mappings remain unreadable. The mismatch regression passes.
+
+The disposable compositor harness uses a short private runtime path, its own session and accessibility D-Bus daemons, a manually started accessibility registry, a virtual input seat, and a foreground sentinel. This avoids both Unix socket path limits and dbus-broker attempting systemd activation inside the private session. Its successful old/new comparison recorded 72 focus samples and no sentinel refocus. Earlier setup failures are retained.
