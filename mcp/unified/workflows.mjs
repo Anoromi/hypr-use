@@ -1,21 +1,24 @@
 // Common operations share the ordinary guarded facade; no raw input bypass.
 const selector={type:'object',properties:{name:{type:'string',minLength:1},role:{type:'string'}},required:['name'],additionalProperties:false};
 const field={type:'object',properties:{...selector.properties,value:{type:['string','boolean']},method:{enum:['setValue','keys','paste']}},required:['name','value'],additionalProperties:false};
+const choice={type:'object',properties:{...selector.properties,option:{type:'string',minLength:1}},required:['name','option'],additionalProperties:false};
 const schemas={
+ select_options:{choices:{type:'array',minItems:1,maxItems:20,items:choice},submit:selector},
  fill_form:{fields:{type:'array',minItems:1,maxItems:20,items:field},submit:selector},
  replace_text:{target:selector,text:{type:'string'},method:{enum:['setValue','keys','paste']},submit:{type:'boolean'}},
  navigate:{url:{type:'string'},new_tab:{type:'boolean'},address:selector},
  wait_for:{target:selector,value:{type:['string','boolean']},text:{type:'string',minLength:1},dialog_title:{type:'string',minLength:1},timeout_ms:{type:'integer',minimum:1,maximum:30000}}
 };
-const required={fill_form:['fields'],replace_text:['target','text'],navigate:['url'],wait_for:[]};
+const required={select_options:['choices'],fill_form:['fields'],replace_text:['target','text'],navigate:['url'],wait_for:[]};
 const descriptions={
+ select_options:'Select options in named single-choice combo boxes, in order, and optionally click submit. choices contains {name,role?,option}, using exact accessible names. Options must already be exposed beneath each control in AX and offer a select action; does not open hidden menus. Skips selected options, verifies each selection and the final set, stops on failure without retry or rollback. Final AX included.',
  fill_form:'Fill named text fields and checkboxes in order and optionally click a named submit button. Exact accessible names; labels are excluded from field matches, and multiple editable matches fail. String values use a supported setter or native keys; already matching visible text is skipped unless an explicit method requests re-entry. Boolean values set checkbox state, clicking only when it differs. Verifies changes; mixed checkbox states fail before input. Stops on first failure and reports completed steps; no rollback or retries. Final AX included.',
  replace_text:'Replace the entire contents of one named field, optionally press Enter. Default native keys: click, Ctrl+A, type; method=setValue or paste is explicit. This is not document-wide find/replace. Final AX included.',
  navigate:'Navigate a running browser via native background address-bar input, optionally opening a new tab. Uses http(s) URLs and an unambiguous known address-bar name, or an explicit address selector. Returns AX after submission; does not claim the page finished loading. Use wait_for for expected page content.',
  wait_for:'Observe until an exact named element (optionally exact text value or boolean checked state), AX text substring, or related dialog title appears. Choose exactly one condition. Bounded polling, final AX only; timeout is an error. Dialog result supplies its target for explicit binding. Does not focus windows.'
 };
 export const workflowTools=Object.keys(schemas).map(name=>({name,description:descriptions[name],inputSchema:{type:'object',properties:{app:{type:'string',minLength:1},...schemas[name]},required:['app',...required[name]],additionalProperties:false}}));
-export const workflowMethods={fill_form:'fillForm',replace_text:'replaceText',navigate:'navigate',wait_for:'waitFor'};
+export const workflowMethods={select_options:'selectOptions',fill_form:'fillForm',replace_text:'replaceText',navigate:'navigate',wait_for:'waitFor'};
 function check(schema,value,path){
  if(Array.isArray(schema.type)){if(!schema.type.includes(typeof value))throw Error(`${path} must be a string or boolean`);return;}
  if(schema.enum&&!schema.enum.includes(value))throw Error(`${path}: invalid option`);
@@ -41,9 +44,18 @@ export function validateWorkflow(name,args){
  for(const [text,method] of texts)if(method==='keys'&&(/[^\x20-\x7e\n\r\t]/.test(text)||text.length>4096))throw Error('keys accepts at most 4096 supported characters; choose paste for Unicode');
 }
 function select(state,target,purpose){
- const found=(state.elements??[]).filter(e=>e.name===target.name&&(!target.role||[e.controlType,e.localizedControlType].includes(target.role))&&(purpose!=='field'||e.editable===true||e.supportsValue===true||['entry','password text','spin button'].includes(e.controlType))&&(purpose!=='checkbox'||['check box','check menu item','toggle button'].includes(e.controlType)));
+ const found=(state.elements??[]).filter(e=>e.name===target.name&&(!target.role||[e.controlType,e.localizedControlType].includes(target.role))&&(purpose!=='field'||e.editable===true||e.supportsValue===true||['entry','password text','spin button'].includes(e.controlType))&&(purpose!=='choice'||e.controlType==='combo box')&&(purpose!=='checkbox'||['check box','check menu item','toggle button'].includes(e.controlType)));
  if(found.length!==1)throw Error(`Expected one element named ${JSON.stringify(target.name)}, found ${found.length}; inspect AX and supply a role if needed`);
  return found[0];
+}
+function choiceOption(state,choice){
+ const control=select(state,choice,'choice'),path=control.runtimeId;
+ if(!Array.isArray(path)||!path.length)throw Error('Combo box has no AX ancestry; inspect its options');
+ const matches=(state.elements??[]).filter(e=>e.name===choice.option&&Array.isArray(e.runtimeId)&&e.runtimeId.length>path.length&&path.every((v,i)=>e.runtimeId[i]===v)&&['menu item','list item','radio button'].includes(e.controlType));
+ if(matches.length!==1)throw Error(`Expected one exposed option ${JSON.stringify(choice.option)} under ${JSON.stringify(choice.name)}, found ${matches.length}; open the control and inspect AX if necessary`);
+ const option=matches[0],selected=(option.states??[]).includes('selected');
+ if(!selected&&!(option.actions??[]).includes('select'))throw Error('Option has no select action; inspect available actions');
+ return {control,option,selected};
 }
 export function createWorkflows(app,read,emit,showState){
  async function run(name,args){
@@ -71,7 +83,19 @@ export function createWorkflows(app,read,emit,showState){
   }
   try{
    let result={status:'completed'};
-   if(name==='fill_form'){
+   if(name==='select_options'){
+    await refresh();const controls=new Set();
+    for(const c of args.choices){const {control}=choiceOption(state,c);if(controls.has(control.index))throw Error('Each combo box must appear only once');controls.add(control.index);}
+    if(args.submit)select(state,args.submit);
+    for(const c of args.choices){
+     const {option,selected}=choiceOption(state,c);
+     if(selected){steps.push({step:`keep ${c.name}`,status:'unchanged',ms:0});continue;}
+     await step(`select ${c.option} in ${c.name}`,()=>app.performSecondaryAction(option.index,'select'));
+     await step(`verify ${c.name}`,async()=>{if(!choiceOption(await refresh(),c).selected)throw Error('Option selection does not match the request');});
+    }
+    await step('verify final choices',async()=>{for(const c of args.choices)if(!choiceOption(state,c).selected)throw Error(`Selection in ${JSON.stringify(c.name)} changed after a later input`);});
+    if(args.submit){const e=select(state,args.submit);await step('submit choices',()=>app.click(e.index));}
+   }else if(name==='fill_form'){
     // Validate selectors before the first mutation, then resolve afresh per field.
     await refresh();for(const f of args.fields){const e=select(state,f,typeof f.value==='boolean'?'checkbox':'field');if(typeof f.value==='boolean'&&typeof e.checked!=='boolean')throw Error('Checkbox state is mixed or unavailable; inspect it before changing it');}if(args.submit)select(state,args.submit);
     for(const f of args.fields){
@@ -121,7 +145,7 @@ export function createWorkflows(app,read,emit,showState){
      await new Promise(resolve=>setTimeout(resolve,Math.min(300,timeout-(performance.now()-begin))));
     }
    }
-   if((name==='wait_for'||name==='fill_form'&&!args.submit)&&showState)showState(state);else await app.getAXState();return {...result,steps};
+   if((name==='wait_for'||['fill_form','select_options'].includes(name)&&!args.submit)&&showState)showState(state);else await app.getAXState();return {...result,steps};
   }catch(e){emit({type:'text',text:JSON.stringify({status:'failed',steps,message:e.message,notice:'Completed steps remain applied; inspect state before retrying.'})});throw e;}
  }
  return Object.fromEntries(Object.entries(workflowMethods).map(([name,method])=>[method,args=>run(name,args)]));

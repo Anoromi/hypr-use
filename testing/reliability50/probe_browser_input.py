@@ -68,6 +68,10 @@ try:
    fields=[{'name':'Email updates','value':True},{'name':'SMS updates','value':False}]
    js('await app.fillForm('+json.dumps({'fields':fields,'submit':{'name':'Save profile'}})+');')
    js('await app.fillForm('+json.dumps({'fields':fields})+'); await app.waitFor({target:{name:"Email updates"},value:true});')
+  elif case.startswith('form-options'):
+   choices=[{'name':'Category','option':'Accessories'},{'name':'Sort by price','option':'Lowest first'}]
+   js({'app':app,'choices':choices},tool='select_options')
+   js('await app.selectOptions('+json.dumps({'choices':choices})+');')
   elif case.startswith('form-direct'):
    js({'app':app,'fields':[{'name':'Full name','value':'Grace Hopper'},{'name':'Email','value':'grace@example.test'}],'submit':{'name':'Save profile'}},tool='fill_form')
   elif case.startswith('form-repeat'):
@@ -110,6 +114,7 @@ try:
   if case.startswith('form'):passed=fixture.state.get('name')=='Grace Hopper' and fixture.state.get('email')=='grace@example.test' and fixture.state.get('saved') is True
   if case.startswith('workflow-replace'):passed=fixture.state.get('note')==('' if case.endswith('clear') else 'alpha DELTA gamma') and fixture.state.get('saved') is True
   if case.startswith('form-checkbox'):passed=fixture.state.get('updates') is True and fixture.state.get('sms') is False and fixture.state.get('saved') is True
+  if case.startswith('form-options'):passed=fixture.state.get('category')=='Accessories' and fixture.state.get('sort')=='ascending'
   if case.startswith('form-cascade'):passed=cascade['result'].get('isError') is True and 'changed after a later input' in json.dumps(cascade) and fixture.state.get('saved') is not True
   row={'case':case,'passed':passed,'urls':urls,'steps':steps,'refocus':m.trigger.is_set()}
   if case.startswith(('date','select','form','workflow-replace')):row['state']=fixture.state

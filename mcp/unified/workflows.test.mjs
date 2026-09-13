@@ -7,8 +7,8 @@ function fixture(){
  const read=async()=>({elements,treeLines:['Ready']});
  return {calls,out,app,elements,workflow:createWorkflows(app,read,v=>out.push(v))};
 }
-test('four explicit tools and strict preflight',()=>{
- assert.equal(workflowTools.length,4);
+test('five explicit tools and strict preflight',()=>{
+ assert.equal(workflowTools.length,5);
  for(const a of [{app:'a',target:{name:'Name'},text:'東京'},{app:'a',target:{name:'Name'},text:'x',typo:true}])assert.throws(()=>validateWorkflow('replace_text',a));
  assert.throws(()=>validateWorkflow('navigate',{app:'a',url:'file:///tmp/x'}));
  assert.throws(()=>validateWorkflow('wait_for',{app:'a',text:'a',target:{name:'b'}}));
@@ -100,3 +100,30 @@ test('a later field cannot invalidate an earlier field and still submit',async()
  f.calls.length=0;f.elements[0].controlType='password text';
  await f.workflow.fillForm({fields:[{name:'Name',value:''}]});assert.equal(f.calls[0][0],'set');
  });
+
+function choicesFixture(){
+ const f=fixture();f.elements.push(
+ {index:4,name:'Country',controlType:'combo box',runtimeId:[1]},
+ {index:5,name:'Japan',controlType:'menu item',runtimeId:[1,0],actions:['select'],states:[]},
+ {index:6,name:'Other',controlType:'combo box',runtimeId:[2]},
+ {index:7,name:'Japan',controlType:'menu item',runtimeId:[2,0],actions:['select'],states:[]});
+ f.app.performSecondaryAction=async(i,a)=>{f.calls.push(['action',i,a]);f.elements.find(e=>e.index===i).states=['selected'];};return f;
+}
+test('choice batching scopes identical option names to their parent and skips selected states',async()=>{
+ const f=choicesFixture();const args={choices:[{name:'Country',option:'Japan'},{name:'Other',option:'Japan'}]};
+ await f.workflow.selectOptions(args);assert.deepEqual(f.calls.slice(0,2),[['action',5,'select'],['action',7,'select']]);
+ f.calls.length=0;await f.workflow.selectOptions(args);assert.deepEqual(f.calls,[['observe']]);
+});
+test('invalid later choices and duplicate controls fail before mutation',async()=>{
+ const f=choicesFixture();await assert.rejects(f.workflow.selectOptions({choices:[{name:'Country',option:'Japan'},{name:'Other',option:'Missing'}]}),/exposed option/);assert.equal(f.calls.length,0);
+ await assert.rejects(f.workflow.selectOptions({choices:[{name:'Country',option:'Japan'},{name:'Country',option:'Japan'}]}),/only once/);assert.equal(f.calls.length,0);
+});
+test('choice readback failure stops submission',async()=>{
+ const f=choicesFixture();f.app.performSecondaryAction=async()=>{};
+ await assert.rejects(f.workflow.selectOptions({choices:[{name:'Country',option:'Japan'}],submit:{name:'Save'}}),/does not match/);assert.equal(f.calls.length,0);
+});
+test('a later selection cannot invalidate an earlier selection and still submit',async()=>{
+ const f=choicesFixture(),act=f.app.performSecondaryAction;
+ f.app.performSecondaryAction=async(i,a)=>{await act(i,a);if(i===7)f.elements.find(e=>e.index===5).states=[];};
+ await assert.rejects(f.workflow.selectOptions({choices:[{name:'Country',option:'Japan'},{name:'Other',option:'Japan'}],submit:{name:'Save'}}),/changed after/);assert.ok(!f.calls.some(c=>c[0]==='click'));
+});

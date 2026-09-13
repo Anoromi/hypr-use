@@ -84,7 +84,7 @@ The API instructions now explain the existing keyboard batching support. For a s
 
 ### Common workflow tools
 
-Four additional MCP tools are available alongside `js`: `fill_form`, `replace_text`, `navigate`, and `wait_for`. The same implementations are exposed as `app.fillForm(options)`, `app.replaceText(options)`, `app.navigate(options)` and `app.waitFor(options)`; omit `app` from the arguments when using an already bound JS app. No table-writing helper is added.
+Five additional MCP tools are available alongside `js`: `fill_form`, `select_options`, `replace_text`, `navigate`, and `wait_for`. The same implementations are exposed as `app.fillForm(options)`, `app.selectOptions(options)`, `app.replaceText(options)`, `app.navigate(options)` and `app.waitFor(options)`; omit `app` from the arguments when using an already bound JS app. No table-writing helper is added.
 
 ```json
 {"app":"hypr-use-r50-browser","fields":[{"name":"Full name","value":"Grace Hopper"},{"name":"Email","value":"grace@example.test"}],"submit":{"name":"Save profile"}}
@@ -111,3 +111,5 @@ Within a workflow, the latest preflight or verification snapshot is reused until
 `typeText(text,{replaceAll:true,submit:true})` can prepend Ctrl+A and append Enter in one keyboard transaction. Empty replacement clears the selected field. The 4096-key limit includes those extra keys. Workflow key input uses this path automatically where it fits; each complete transaction retains the ordinary popup guard.
 
 Checkbox fields are clicked only when their checked state differs from the requested boolean, then verified. Repeating an already-satisfied checkbox operation performs no input. Mixed/unknown checkbox states fail before changing fields; AX reports mixed state explicitly.
+
+`select_options` (or `app.selectOptions`) batches `choices:[{name,role?,option}]` and optionally a `submit` selector. It targets single-choice combo boxes whose options are already exposed in the AX tree with a `select` action. Option names are scoped to their parent control. It verifies each selection and the complete final set, skips already selected options, and does not open hidden menus. Duplicate controls or ambiguous options fail before input.

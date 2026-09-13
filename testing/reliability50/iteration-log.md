@@ -73,3 +73,9 @@ Two controlled direct-form probes passed. AX reads fell from six to five includi
 ## Timing alignment for direct tools
 
 Timing attribution now matches tool names and complete argument objects, rather than comparing only JS code (which is absent on every direct workflow call). Mismatched direct tools or arguments now stop attribution instead of silently aligning. Three deterministic cases pass; existing unchanged-form and direct-binding phases align completely with the stricter check. The 59.57 s prefilled run had 53.74 s of non-failure agent gaps (90.2%), not MCP execution. Those gaps combine model/provider/CLI time; they are not direct inference telemetry.
+
+## Batch dropdown selection
+
+Added `select_options` / `app.selectOptions` for exposed single-choice combo-box options. Exact option names are scoped to the combo box's AX ancestry. It validates all choices before input, skips selected options, verifies each mutation and the final complete set, optionally submits, and stops without retries. Hidden/unexposed menus remain an explicit inspect/open step.
+
+Two controlled two-dropdown probes passed, including unchanged repeat calls. Fresh Astra used the new tool in both selection tasks; single dropdown plus Save used two calls and passed in 29.64 s. The two-dropdown task went from three calls/35.01 s to two calls/33.20 s. This single pair demonstrates one fewer agent round trip, not a statistically established speedup. No tool errors/refocuses; all 30 JS/protocol tests passed. Evidence: loop-dropdown-before/after and loop-dropdown-probe.
