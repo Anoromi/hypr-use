@@ -17,3 +17,9 @@ Field operations now match editable/value controls, excluding same-name labels. 
 The next browser probe exposed a regression in the editability filter: Chromium's AT-SPI `entry` nodes can omit both EDITABLE and EditableText while native input still works. Field matching now also recognizes entry/password/spin-button roles. Default form input uses a supported setter when available, otherwise native keys. An explicitly requested unsupported setter is rejected before input rather than silently falling back.
 
 The failed probe is retained in `diagnostics/loop-workflow-cost-before`. Two fresh browser probes passed after correction (`loop-field-browser-fix`), followed by a fresh Astra profile task using the default form method: 36.36 s, pass, zero tool errors and zero refocuses. Seventeen unit/protocol tests pass.
+
+## Blocking application-name enumeration
+
+Several following probes timed out at six seconds, including initial AX reads. An opt-in child stack dump showed the scanner blocked in `atspi_name` inside `atspi_iter_apps`, before target PID matching. Removing eager app-name requests from enumeration made both failed form probes pass again. PID matching and mutation identity checks remain unchanged. Empty names are explicitly excluded from the later name fallback.
+
+Debug support uses `HYPR_USE_AX_DEBUG_STACK=1`; binary stderr from timed-out children is now retained so stack traces are not discarded. Evidence: `diagnostics/loop-ax-timeout-stack`, `diagnostics/loop-ax-enumeration-fix`. Two fresh Astra tasks passed (`loop-enumeration-astra`): navigation 22.6 s and form fill 37.6 s, with no timeouts or refocuses. Four enumeration/diagnostic tests and existing AX semantics checks passed. The scan-reuse candidate was set aside during this investigation.

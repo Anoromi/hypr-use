@@ -1,6 +1,6 @@
 {
   "upstream": "https://github.com/gfhdhytghd/Hypr-Agent-Portal.git",
   "base": "bc0b100719dafb8bdf893ace4d3be1d78b1a0876",
-  "local_commit": "68bffaadc641eb3b67a72d0afbbdcddc1be6bfec",
+  "local_commit": "437147294e3ad3bf33b0967bef5e5af5aa10581e",
   "patch": "portal-checkpoint.patch"
 }

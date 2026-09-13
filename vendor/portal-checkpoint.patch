@@ -53,7 +53,7 @@ index d32e312..8b36eee 100644
  `request_confirmation` with the exact tool name and exact arguments. It returns
  a pending challenge ID, not a self-authorizing token. A person must run the
 diff --git a/mcp/hypr-agent-portal-mcp.py b/mcp/hypr-agent-portal-mcp.py
-index 84175d4..fafebd9 100755
+index 84175d4..2b7e33b 100755
 --- a/mcp/hypr-agent-portal-mcp.py
 +++ b/mcp/hypr-agent-portal-mcp.py
 @@ -452,7 +452,7 @@ def tool_definitions() -> list[dict[str, Any]]:
@@ -121,7 +121,25 @@ index 84175d4..fafebd9 100755
          logical_x = bounds["x"]
          logical_y = bounds["y"]
      else:
-@@ -3021,6 +3036,8 @@ def atspi_resolve_window(hypr_window: dict[str, Any]) -> tuple[Any, int, Any] |
+@@ -2892,7 +2907,7 @@ def atspi_iter_apps() -> list[Any]:
+     apps = []
+     for index in range(atspi_child_count(root)):
+         app = atspi_child_at(root, index)
+-        if app is not None and atspi_name(app):
++        if app is not None:
+             apps.append(app)
+     return apps
+ 
+@@ -3013,6 +3028,8 @@ def atspi_resolve_window(hypr_window: dict[str, Any]) -> tuple[Any, int, Any] |
+                 return app, matched[0], matched[1]
+     for app in atspi_iter_apps():
+         name = normalize(atspi_name(app))
++        if not name:
++            continue
+         if (klass and (klass == name or klass in name or name in klass)) or (title and title in name):
+             matched = atspi_match_window(app, hypr_window)
+             if matched:
+@@ -3021,6 +3038,8 @@ def atspi_resolve_window(hypr_window: dict[str, Any]) -> tuple[Any, int, Any] |
  
  
  def atspi_action_names(node: Any) -> list[str]:
@@ -130,7 +148,7 @@ index 84175d4..fafebd9 100755
      names = []
      count = int(atspi_safe(node.get_n_actions, 0) or 0)
      for index in range(count):
-@@ -3046,10 +3063,14 @@ def atspi_text_value(node: Any) -> str:
+@@ -3046,10 +3065,14 @@ def atspi_text_value(node: Any) -> str:
      if count <= 0:
          return ""
      value = str(atspi_safe(lambda: _ATSPI.Text.get_text(text_iface, 0, min(count, 500)), "") or "")
@@ -145,7 +163,7 @@ index 84175d4..fafebd9 100755
      value_iface = atspi_safe(node.get_value_iface)
      if value_iface is None:
          return ""
-@@ -3057,6 +3078,27 @@ def atspi_numeric_value(node: Any) -> str:
+@@ -3057,6 +3080,27 @@ def atspi_numeric_value(node: Any) -> str:
      return "" if current is None else str(current)
  
  
@@ -173,7 +191,7 @@ index 84175d4..fafebd9 100755
  def atspi_image_frame(
      node: Any,
      bounds: dict[str, float] | None,
-@@ -3071,6 +3113,60 @@ def atspi_image_frame(
+@@ -3071,6 +3115,60 @@ def atspi_image_frame(
      return atspi_bounds_to_screenshot_frame(bounds, atspi_window_bounds, screenshot, hypr_window)
  
  
@@ -234,7 +252,7 @@ index 84175d4..fafebd9 100755
  def corrected_large_grid_cell_bounds(
      cell_bounds: dict[str, float],
      table_bounds: dict[str, float],
-@@ -3090,6 +3186,17 @@ def corrected_large_grid_cell_bounds(
+@@ -3090,6 +3188,17 @@ def corrected_large_grid_cell_bounds(
      return cell_bounds, header_y_offset
  
  
@@ -252,7 +270,7 @@ index 84175d4..fafebd9 100755
  def atspi_record_for(
      node: Any,
      index: int,
-@@ -3100,6 +3207,13 @@ def atspi_record_for(
+@@ -3100,6 +3209,13 @@ def atspi_record_for(
      hypr_window: dict[str, Any],
  ) -> dict[str, Any]:
      role = atspi_role(node)
@@ -266,7 +284,7 @@ index 84175d4..fafebd9 100755
      return {
          "index": index,
          "runtimeId": path[:],
-@@ -3108,12 +3222,16 @@ def atspi_record_for(
+@@ -3108,12 +3224,16 @@ def atspi_record_for(
          "controlType": role,
          "localizedControlType": role,
          "className": str(atspi_safe(node.get_toolkit_name, "") or ""),
@@ -286,7 +304,7 @@ index 84175d4..fafebd9 100755
          "source": "atspi",
      }
  
-@@ -3124,6 +3242,8 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3124,6 +3244,8 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
      atspi_window_bounds = atspi_extents(root)
      deadline = time.monotonic() + 4.5
      truncated_reason = ""
@@ -295,7 +313,7 @@ index 84175d4..fafebd9 100755
  
      def mark_truncated(reason: str) -> None:
          nonlocal truncated_reason
-@@ -3139,7 +3259,7 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3139,7 +3261,7 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
              return True
          return False
  
@@ -304,7 +322,7 @@ index 84175d4..fafebd9 100755
          if node is None or len(records) >= 500 or depth > 64:
              if len(records) >= 500:
                  mark_truncated("record-limit")
-@@ -3147,6 +3267,23 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3147,6 +3269,23 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
          if budget_exhausted():
              return
          bounds = bounds_hint if bounds_hint is not None else atspi_extents(node)
@@ -328,7 +346,7 @@ index 84175d4..fafebd9 100755
          if depth > 0 and not atspi_node_is_currently_visible(node, bounds):
              return
          index = len(records)
-@@ -3159,7 +3296,14 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3159,7 +3298,14 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
          if record["value"] and record["value"] != title:
              safe_value = str(record["value"]).replace("\r", "\\r").replace("\n", "\\n")
              value_segment = " Value: " + safe_value
@@ -343,7 +361,7 @@ index 84175d4..fafebd9 100755
          frame_segment = ""
          if isinstance(record["frame"], dict):
              frame = record["frame"]
-@@ -3168,16 +3312,19 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3168,16 +3314,19 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
              )
          lines.append(("\t" * (depth + 1)) + f"{index} {role} {title}{value_segment}{actions_segment}{frame_segment}".rstrip())
  
@@ -365,7 +383,7 @@ index 84175d4..fafebd9 100755
          if table_bounds is None or not bool(atspi_safe(node.is_table, False)):
              return False
          table_iface = atspi_safe(node.get_table_iface)
-@@ -3189,7 +3336,8 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3189,7 +3338,8 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
          max_rows = min(total_rows, 200)
          max_cols = min(total_cols, 200)
          large_grid = total_rows > 1000 or total_cols > 100
@@ -375,7 +393,7 @@ index 84175d4..fafebd9 100755
          empty_rows = 0
          for row in range(max_rows):
              if budget_exhausted():
-@@ -3219,8 +3367,23 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3219,8 +3369,23 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
                      large_grid=large_grid,
                      header_y_offset=header_y_offset,
                  )
@@ -399,7 +417,7 @@ index 84175d4..fafebd9 100755
                  child_index = atspi_safe(lambda r=row, c=col: _ATSPI.Table.get_index_at(table_iface, r, c))
                  if isinstance(child_index, int) and child_index >= 0:
                      child_path = path + [child_index]
-@@ -3236,6 +3399,11 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+@@ -3236,6 +3401,11 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
          return True
  
      visit(root, 0, root_path)
@@ -411,7 +429,7 @@ index 84175d4..fafebd9 100755
      return records, lines, atspi_window_bounds, truncated_reason
  
  
-@@ -3335,6 +3503,8 @@ def atspi_insert_text(snapshot: dict[str, Any], text: str, *, focused_only: bool
+@@ -3335,6 +3505,8 @@ def atspi_insert_text(snapshot: dict[str, Any], text: str, *, focused_only: bool
  def atspi_node_is_editable(node: Any, *, focused_only: bool = False) -> bool:
      if node is None or not bool(atspi_safe(node.is_editable_text, False)) or not bool(atspi_safe(node.is_text, False)):
          return False
@@ -420,7 +438,7 @@ index 84175d4..fafebd9 100755
      return not focused_only or atspi_state_contains(node, _ATSPI.StateType.FOCUSED)
  
  
-@@ -3372,16 +3542,32 @@ def atspi_insert_text_in_window(
+@@ -3372,16 +3544,32 @@ def atspi_insert_text_in_window(
  def atspi_set_node_value(node: Any, value: str) -> bool:
      if node is None:
          return False
@@ -459,7 +477,17 @@ index 84175d4..fafebd9 100755
      return False
  
  
-@@ -3492,6 +3678,39 @@ def atspi_child_probe() -> dict[str, Any]:
+@@ -3446,7 +3634,8 @@ def run_atspi_child(mode: str, payload: dict[str, Any], *, timeout: float = 5.0)
+             timeout=timeout,
+         )
+     except subprocess.TimeoutExpired as exc:
+-        stderr = trim_process_output(exc.stderr or "") if isinstance(exc.stderr, str) else ""
++        stderr_data = exc.stderr.decode("utf-8", errors="replace") if isinstance(exc.stderr, bytes) else exc.stderr
++        stderr = trim_process_output(stderr_data or "")
+         detail = f"AT-SPI child timed out after {timeout:g}s"
+         if stderr:
+             detail = f"{detail}: {stderr}"
+@@ -3492,6 +3681,39 @@ def atspi_child_probe() -> dict[str, Any]:
      return {"available": False, "mode": "isolated-child", "status": result.get("status", "error"), "error": str(result.get("error") or "AT-SPI child probe failed")}
  
  
@@ -499,7 +527,7 @@ index 84175d4..fafebd9 100755
  def require_atspi_mutation_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
      """Revalidate the full Hypr/AT-SPI binding before launching a mutator."""
      window = snapshot.get("window")
-@@ -3532,11 +3751,14 @@ def require_atspi_mutation_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
+@@ -3532,11 +3754,14 @@ def require_atspi_mutation_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
          "initialTitle": normalize(live.get("initialTitle")),
      }
      if actual_fields != expected_fields:
@@ -516,7 +544,7 @@ index 84175d4..fafebd9 100755
      return window
  
  
-@@ -3807,6 +4029,11 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
+@@ -3807,6 +4032,11 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
              "status": "ok",
          }
  
@@ -528,7 +556,7 @@ index 84175d4..fafebd9 100755
      runtime_id = payload.get("runtimeId")
      if not isinstance(runtime_id, list):
          return {"ok": False, "status": "error", "error": "AT-SPI action requires runtimeId"}
-@@ -3814,6 +4041,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
+@@ -3814,6 +4044,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
      if node is None:
          return {"ok": False, "status": "not-found", "error": "AT-SPI runtimeId no longer resolves."}
  
@@ -538,7 +566,17 @@ index 84175d4..fafebd9 100755
      if operation == "do_action":
          action = payload.get("action")
          return {"ok": atspi_do_action(node, action if isinstance(action, str) and action else None), "status": "ok"}
-@@ -4063,16 +4293,25 @@ def can_type_with_keys(text: str) -> bool:
+@@ -3826,6 +4059,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
+ 
+ 
+ def atspi_child_main(mode: str) -> int:
++    if os.environ.get("HYPR_USE_AX_DEBUG_STACK") == "1":
++        import faulthandler
++        faulthandler.dump_traceback_later(4.0)
+     os.environ[ATSPI_CHILD_ENV] = "1"
+     ensure_session_environment()
+     try:
+@@ -4063,16 +4299,25 @@ def can_type_with_keys(text: str) -> bool:
  
  
  def type_with_keys(target: str, text: str, *, delay: float = 0.015) -> dict[str, Any]:
@@ -570,7 +608,7 @@ index 84175d4..fafebd9 100755
  
  
  def prefer_related_target(target: str, enabled: bool = False) -> tuple[str, dict[str, Any] | None]:
-@@ -4100,6 +4339,13 @@ def key_from_args(args: dict[str, Any]) -> tuple[str, str]:
+@@ -4100,6 +4345,13 @@ def key_from_args(args: dict[str, Any]) -> tuple[str, str]:
      if not isinstance(key, str) or not key:
          raise RuntimeError("key action requires key or keys")
      modifiers = args.get("modifiers") if isinstance(args.get("modifiers"), str) else ""
@@ -584,7 +622,7 @@ index 84175d4..fafebd9 100755
      return key, modifiers
  
  
-@@ -4217,7 +4463,14 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
+@@ -4217,7 +4469,14 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
          related_error = str(exc)
      else:
          related_error = ""
@@ -600,7 +638,7 @@ index 84175d4..fafebd9 100755
      png_bytes = base64.b64decode(png_base64, validate=True)
      captured_at = time.time()
      screenshot_id = f"snap_{secrets.token_urlsafe(18)}"
-@@ -4225,16 +4478,17 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
+@@ -4225,16 +4484,17 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
      screenshot.update(
          {
              "id": screenshot_id,
@@ -621,7 +659,7 @@ index 84175d4..fafebd9 100755
      elements = atspi["elements"] if atspi["status"] == "ok" and atspi["elements"] else []
      tree_lines = atspi["treeLines"] if atspi["status"] == "ok" and atspi["treeLines"] else []
      if not elements:
-@@ -4816,12 +5070,45 @@ def tool_get_cursor_position(args: dict[str, Any]) -> dict[str, Any]:
+@@ -4816,12 +5076,45 @@ def tool_get_cursor_position(args: dict[str, Any]) -> dict[str, Any]:
      return mcp_text(json.dumps(result, ensure_ascii=False), structured=result)
  
  
@@ -667,7 +705,7 @@ index 84175d4..fafebd9 100755
      element = None
      refresh_info = None
      if isinstance(element_index, str) and element_index:
-@@ -4836,58 +5123,75 @@ def semantic_click(args: dict[str, Any]) -> dict[str, Any]:
+@@ -4836,58 +5129,75 @@ def semantic_click(args: dict[str, Any]) -> dict[str, Any]:
  
      target = str(snapshot["target"])
      session_info = begin_related_action_session(target)
@@ -791,7 +829,7 @@ index 84175d4..fafebd9 100755
  
  
  def semantic_perform_secondary_action(args: dict[str, Any]) -> dict[str, Any]:
-@@ -5085,7 +5389,10 @@ def semantic_type_text(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5085,7 +5395,10 @@ def semantic_type_text(args: dict[str, Any]) -> dict[str, Any]:
              return mcp_snapshot_result(snapshot_after_action(app, snapshot, {"method": "atspi", "targeting": "editable"}))
          raise RuntimeError("explicit AT-SPI text insertion failed; no keyboard or clipboard fallback was attempted")
      type_args = dict(args)
@@ -803,7 +841,7 @@ index 84175d4..fafebd9 100755
      info = type_text(str(snapshot["target"]), text, type_args)
      return mcp_snapshot_result(snapshot_after_action(app, snapshot, info))
  
-@@ -5113,29 +5420,54 @@ def semantic_paste_text(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5113,29 +5426,54 @@ def semantic_paste_text(args: dict[str, Any]) -> dict[str, Any]:
  def semantic_press_key(args: dict[str, Any]) -> dict[str, Any]:
      app = str(args.get("app") or "")
      snapshot = current_snapshot(app)
@@ -872,7 +910,7 @@ index 84175d4..fafebd9 100755
  def semantic_set_value(args: dict[str, Any]) -> dict[str, Any]:
      app = str(args.get("app") or "")
      value = args.get("value")
-@@ -5150,7 +5482,7 @@ def semantic_set_value(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5150,7 +5488,7 @@ def semantic_set_value(args: dict[str, Any]) -> dict[str, Any]:
      except Exception:
          control_overlay(snapshot, action="set_value")
      if not atspi_set_element_value_isolated(snapshot, element, value):
@@ -881,7 +919,7 @@ index 84175d4..fafebd9 100755
      action_result = {"method": "atspi", "action": "set_value"}
      if element_point is not None:
          action_result["element"] = compact_element_info(element, element_point[0], element_point[1], "screenshot")
-@@ -6071,6 +6403,7 @@ SEMANTIC_TOOLS = {
+@@ -6071,6 +6409,7 @@ SEMANTIC_TOOLS = {
      "paste_text": semantic_paste_text,
      "press_key": semantic_press_key,
      "key": semantic_press_key,
@@ -889,7 +927,7 @@ index 84175d4..fafebd9 100755
      "set_value": semantic_set_value,
      "wait": semantic_wait,
      "wait_for_window": semantic_wait_for_window,
-@@ -6438,6 +6771,7 @@ FULL_LEVEL_ACTIONS = {
+@@ -6438,6 +6777,7 @@ FULL_LEVEL_ACTIONS = {
      "paste_image",
      "session",
      "set_value",

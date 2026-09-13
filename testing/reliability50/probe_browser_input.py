@@ -34,6 +34,7 @@ try:
   assert windows and all(w['workspace']['id']==902 for w in windows)
   env={k:v for k,v in os.environ.items() if not k.startswith(('HYPR_USE_','HYPR_AGENT_PORTAL_'))}
   env.update(HYPR_AGENT_PORTAL_PERMISSION_MODE='full',HYPR_AGENT_PORTAL_APPROVAL_POLICY='never',HYPR_AGENT_PORTAL_CONFINE='class:'+app,HYPR_USE_WIRE_LOG=str(d/'wire.jsonl'),HYPR_USE_PORTAL_LOG=str(d/'portal.jsonl'))
+  if 'debug' in case:env['HYPR_USE_AX_DEBUG_STACK']='1'
   p=subprocess.Popen(['node',str(root/'mcp/unified/server.mjs')],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=(d/'stderr.txt').open('w'),text=True,env=env,start_new_session=True)
   steps=[]
   def js(code,allow_error=False):

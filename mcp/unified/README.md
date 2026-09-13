@@ -103,3 +103,5 @@ Tests: `node --test mcp/unified/test.mjs mcp/unified/workflows.test.mjs`. Fresh 
 Agent adoption: all four tools were used directly by fresh Astra CLI instances; seven focused runs passed with no refocuses. One old `selectText` call failed and the agent recovered using `replace_text`. See `testing/reliability50/workflow-tools.md`; no paired speedup is claimed.
 
 Field selectors ignore same-name labels and match editable/value controls or text-entry roles, because Chromium can omit editability interface flags. Multiple matching fields remain an error; supply a role to disambiguate. Selection readback now allows 150 ms for asynchronous AT-SPI updates without repeating the mutation.
+
+Target PID matching no longer requests every application name first. This avoids a blocked name query preventing access to a healthy target. `HYPR_USE_AX_DEBUG_STACK=1` enables a four-second stack dump in isolated AT-SPI children for private diagnostics; normal operation leaves it disabled.
