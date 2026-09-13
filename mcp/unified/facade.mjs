@@ -85,7 +85,7 @@ export function createFacade(call, output, options={}) {
         if(keys>4096)throw Error('typeText supports at most 4096 keys including selection/submission; use paste for longer text');
         await act('type_text',{text,method:'keys',...(opt.replaceAll?{replace_all:true}:{}),...(opt.submit?{submit:true}:{})});
       },
-      paste:async(text,opt={})=>{if(opt.format&&opt.format!=='text')throw Error('Rich paste is not implemented; use format=text');await act('paste_text',{text:string(text,'text')});},
+      paste:async(text,opt={})=>{if(opt.format&&opt.format!=='text')throw Error('Rich paste is not implemented; use format=text');await act('paste_text',{text:string(text,'text'),prepare_grid:false});},
       setValue:async(index,value)=>{const t=targetArgs(index);if(!t.element_index)throw Error('setValue requires element index');await act('set_value',{...t,value:string(value,'value')});},
       selectText:async(index,text,opt={})=>{const t=targetArgs(index);if(!t.element_index)throw Error('selectText requires element index');if(opt.selectionType&&!['text','cursor_before','cursor_after'].includes(opt.selectionType))throw Error('Invalid selectionType');await act('select_text',{...t,text:string(text,'text'),prefix:opt.prefix??'',suffix:opt.suffix??'',selection:opt.selectionType??'text'});},
       performSecondaryAction:async(index,action)=>{const t=targetArgs(index);if(!t.element_index)throw Error('Secondary action requires element index');await act('perform_secondary_action',{...t,action:string(action,'action')});}

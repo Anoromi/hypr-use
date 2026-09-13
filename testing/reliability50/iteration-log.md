@@ -79,3 +79,9 @@ Timing attribution now matches tool names and complete argument objects, rather 
 Added `select_options` / `app.selectOptions` for exposed single-choice combo-box options. Exact option names are scoped to the combo box's AX ancestry. It validates all choices before input, skips selected options, verifies each mutation and the final complete set, optionally submits, and stops without retries. Hidden/unexposed menus remain an explicit inspect/open step.
 
 Two controlled two-dropdown probes passed, including unchanged repeat calls. Fresh Astra used the new tool in both selection tasks; single dropdown plus Save used two calls and passed in 29.64 s. The two-dropdown task went from three calls/35.01 s to two calls/33.20 s. This single pair demonstrates one fewer agent round trip, not a statistically established speedup. No tool errors/refocuses; all 30 JS/protocol tests passed. Evidence: loop-dropdown-before/after and loop-dropdown-probe.
+
+## Preserve paste editing context
+
+The production paste handler reproduced an unwanted Escape before any bulk paste in a snapshot containing a table, even when the focused control was an unrelated entry. Unified paste now passes prepare_grid=false. The standalone portal retains its legacy default, with the option exposed in its schema. Clipboard and input authorization are unchanged.
+
+Three production-handler regression tests cover the old unwanted Escape, the corrected path, and rejecting a malformed flag before clipboard/input mutation. The facade test verifies the actual option sent. All 31 JS/protocol and ten general regression tests pass. This correction has isolated handler coverage; a live clipboard paste was not benchmarked in this iteration.

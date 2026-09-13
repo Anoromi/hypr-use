@@ -59,3 +59,9 @@ test('direct workflow reuses binding read and emits only the final observation',
  assert.equal(out.length,1);assert.match(out[0].text,/Value: new/);assert.doesNotMatch(out[0].text,/Value: old/);
  calls.length=0;await assert.rejects(executeWorkflow('fill_form',{app:'Editor',fields:[]}),/array length/);assert.equal(calls.length,0);
 });
+
+test('paste preserves the current edit context instead of guessing from table presence',async()=>{
+ const calls=[];const {cua}=createFacade(async(name,args)=>{calls.push([name,args]);return {content:[],structuredContent:{target:'owned'}};},()=>{});
+ const app=await cua.getApp('Editor');await app.paste('text\nmore text');
+ assert.deepEqual(calls.at(-1),['paste_text',{app:'owned',text:'text\nmore text',prepare_grid:false}]);
+});
