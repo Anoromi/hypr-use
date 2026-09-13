@@ -53,7 +53,7 @@ index d32e312..8b36eee 100644
  `request_confirmation` with the exact tool name and exact arguments. It returns
  a pending challenge ID, not a self-authorizing token. A person must run the
 diff --git a/mcp/hypr-agent-portal-mcp.py b/mcp/hypr-agent-portal-mcp.py
-index 84175d4..b5ddb54 100755
+index 84175d4..14aa380 100755
 --- a/mcp/hypr-agent-portal-mcp.py
 +++ b/mcp/hypr-agent-portal-mcp.py
 @@ -452,7 +452,7 @@ def tool_definitions() -> list[dict[str, Any]]:
@@ -294,7 +294,7 @@ index 84175d4..b5ddb54 100755
      role = atspi_role(node)
 +    state_set = atspi_safe(node.get_state_set)
 +    states = []
-+    for name in ("FOCUSED", "CHECKED", "SELECTED", "EXPANDED", "ENABLED", "SHOWING", "VISIBLE", "ACTIVE"):
++    for name in ("FOCUSED", "CHECKED", "SELECTED", "EXPANDED", "ENABLED", "SHOWING", "VISIBLE", "ACTIVE", "INDETERMINATE"):
 +        state = getattr(_ATSPI.StateType, name, None)
 +        if state is not None and state_set is not None and atspi_safe(lambda: state_set.contains(state), False):
 +            states.append(name.lower())
@@ -315,7 +315,7 @@ index 84175d4..b5ddb54 100755
 -        "editable": bool(atspi_safe(node.is_editable_text, False)) and bool(atspi_safe(node.is_text, False)),
 +        "focused": "focused" in states,
 +        "states": states,
-+        **({"checked": "checked" in states} if normalize(role) in {"check box", "check menu item", "toggle button", "radio button"} else {}),
++        **({"checked": None if "indeterminate" in states else "checked" in states} if normalize(role) in {"check box", "check menu item", "toggle button", "radio button"} else {}),
 +        "editable": atspi_node_is_editable(node),
 +        "supportsEditableText": bool(atspi_safe(node.is_editable_text, False)) and bool(atspi_safe(node.is_text, False)),
 +        "supportsValue": bool(atspi_safe(node.is_value, False)),
@@ -372,7 +372,7 @@ index 84175d4..b5ddb54 100755
 +            value_segment += " SetValue: " + ("supported" if record.get("supportsEditableText") or record.get("supportsValue") else "unsupported")
          actions_segment = " Secondary Actions: " + ", ".join(record["actions"]) if record["actions"] else ""
 +        if "checked" in record:
-+            value_segment += " Checked: " + str(record["checked"]).lower()
++            value_segment += " Checked: " + ("mixed" if record["checked"] is None else str(record["checked"]).lower())
 +        informative_states = [v for v in record.get("states", []) if v in {"focused", "selected", "expanded"}]
 +        if informative_states:
 +            value_segment += " States: " + ", ".join(informative_states)

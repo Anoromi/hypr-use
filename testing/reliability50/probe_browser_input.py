@@ -57,7 +57,11 @@ try:
   if case.startswith('left'):click=f"await app.click([{frame['x']+150}, {point[1]}]);"
   if case.startswith('shortcut'):click="await app.pressKey('Ctrl+l');"
   keys=["await app.pressKey('Ctrl+a');",'await app.typeText('+json.dumps(destination)+');',"await app.pressKey('Return');"]
-  if case.startswith('form'):
+  if case.startswith('form-checkbox'):
+   fields=[{'name':'Email updates','value':True},{'name':'SMS updates','value':False}]
+   js('await app.fillForm('+json.dumps({'fields':fields,'submit':{'name':'Save profile'}})+');')
+   js('await app.fillForm('+json.dumps({'fields':fields})+'); await app.waitFor({target:{name:"Email updates"},value:true});')
+  elif case.startswith('form'):
    method='keys' if 'keys' in case else None
    js('await app.fillForm('+json.dumps({'fields':[{'name':'Full name','value':'Grace Hopper',**({'method':method} if method else {})},{'name':'Email','value':'grace@example.test',**({'method':method} if method else {})}],'submit':{'name':'Save profile'}})+');')
   elif case.startswith('workflow-replace'):
@@ -92,6 +96,7 @@ try:
   if case.startswith('select'):passed=fixture.state.get('note')=='alpha DELTA gamma' and fixture.state.get('saved') is True
   if case.startswith('form'):passed=fixture.state.get('name')=='Grace Hopper' and fixture.state.get('email')=='grace@example.test' and fixture.state.get('saved') is True
   if case.startswith('workflow-replace'):passed=fixture.state.get('note')==('' if case.endswith('clear') else 'alpha DELTA gamma') and fixture.state.get('saved') is True
+  if case.startswith('form-checkbox'):passed=fixture.state.get('updates') is True and fixture.state.get('sms') is False and fixture.state.get('saved') is True
   row={'case':case,'passed':passed,'urls':urls,'steps':steps,'refocus':m.trigger.is_set()}
   if case.startswith(('date','select','form','workflow-replace')):row['state']=fixture.state
   results.append(row);print(json.dumps(row),flush=True)

@@ -39,3 +39,9 @@ Probe cleanup now verifies process start time before terminating its owned app, 
 Five controlled cases passed, plus a separate nonempty-to-empty replacement check. Two form input segments fell from 1.922/1.879 s over four backend calls to 0.866/1.390 s over two calls. Whole-form timings were noisier: 6.557/6.865 → 5.765/6.788 s. Navigation plus wait was 3.493 → 2.838 s in one probe each; these small samples are not universal latency estimates.
 
 Fresh Astra runs `loop-fused-astra` all passed: new Google tab 30.61 s, form fill 32.81 s, note edit 43.32 s. No refocuses. Evidence: `diagnostics/loop-fused-input`, `diagnostics/loop-fused-clear`. Nineteen JS/protocol tests, four fused-input tests and ten general-fix tests passed. No native plugin rebuild was needed; the existing sequence dispatcher handles these keys.
+
+## Checkbox form fields
+
+`fill_form` now accepts boolean checkbox values alongside string text fields. It skips already-correct states, verifies changed states, and rejects mixed/unknown states before mutation. `wait_for` can match boolean checked state. AT-SPI indeterminate checkboxes are reported as mixed rather than unchecked.
+
+Two repeated-call browser probes passed; their second calls issued only AX reads, no input (`diagnostics/loop-checkbox-probe`). Fresh Astra before/after pairs passed with no errors/refocuses: mixed native form 34.1 → 32.6 s and browser checkboxes 33.7 → 32.1 s. Native task calls fell from three to two; browser calls stayed at two. These single-run task timings do not establish a general speedup. Both updated agents chose the combined `fill_form`. Twenty-one JS/protocol tests and the mixed-state Python regression passed.

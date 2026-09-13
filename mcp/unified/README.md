@@ -90,11 +90,11 @@ Four additional MCP tools are available alongside `js`: `fill_form`, `replace_te
 {"app":"hypr-use-r50-browser","fields":[{"name":"Full name","value":"Grace Hopper"},{"name":"Email","value":"grace@example.test"}],"submit":{"name":"Save profile"}}
 ```
 
-Pass that object to `fill_form`. Selectors use an exact accessible name and optional role; ambiguous names fail. Fields are editable text/value controls, not checkboxes or selects. Values are strings. Default field input uses a supported setter, otherwise native keys, verified by AX readback; explicit `keys` and `paste` methods are available.
+Pass that object to `fill_form`. Selectors use an exact accessible name and optional role; ambiguous names fail. String values edit text/value controls; boolean values set checkbox state. Dropdown selection is not included. Text methods apply only to string fields. Default field input uses a supported setter, otherwise native keys, verified by AX readback; explicit `keys` and `paste` methods are available.
 
 `replace_text` takes `target`, `text`, optional `method` and boolean `submit`. It replaces the entire field, not every matching word in a document. Native keys are the default. `navigate` takes an http(s) `url`, optional `new_tab` and an `address` selector when its default address-bar names do not match the browser. Navigation returns submitted status; use `wait_for` for a page condition.
 
-`wait_for` takes exactly one of `target` with optional exact `value`, AX substring `text`, or `dialog_title`, plus optional `timeout_ms` up to 30000. It returns the matching element index or related-dialog target where applicable. Observations are bounded polls with a 300 ms minimum interval between scans; an in-progress scan can exceed the deadline. Timeout returns an error.
+`wait_for` takes exactly one of `target` with optional exact string `value` or boolean checked state, AX substring `text`, or `dialog_title`, plus optional `timeout_ms` up to 30000. It returns the matching element index or related-dialog target where applicable. Observations are bounded polls with a 300 ms minimum interval between scans; an in-progress scan can exceed the deadline. Timeout returns an error.
 
 Workflows validate arguments before mutations, retain ordinary portal identity and background checks, stop on the first error, and return completed-step timings. They are not atomic: completed actions remain applied. They reduce model/tool round trips; they do not remove per-action guard waits or automatically retry failed actions. Final AX is emitted once. Worker cancellation and timeout retain the existing partial-output behavior.
 
@@ -109,3 +109,5 @@ Target PID matching no longer requests every application name first. This avoids
 Within a workflow, the latest preflight or verification snapshot is reused until another mutation. Each indexed action still performs the backend's fresh identity rematch. This avoids duplicate reads without weakening target checks.
 
 `typeText(text,{replaceAll:true,submit:true})` can prepend Ctrl+A and append Enter in one keyboard transaction. Empty replacement clears the selected field. The 4096-key limit includes those extra keys. Workflow key input uses this path automatically where it fits; each complete transaction retains the ordinary popup guard.
+
+Checkbox fields are clicked only when their checked state differs from the requested boolean, then verified. Repeating an already-satisfied checkbox operation performs no input. Mixed/unknown checkbox states fail before changing fields; AX reports mixed state explicitly.

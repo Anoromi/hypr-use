@@ -67,3 +67,17 @@ test('form reuses each verification snapshot until the next action',async()=>{
  await w.fillForm({fields:[{name:'Name',value:'Ada'},{name:'Email',value:'a@test'}],submit:{name:'Save'}});
  assert.equal(reads,3);assert.deepEqual(f.calls,[['set',1,'Ada'],['set',2,'a@test'],['click',3],['observe']]);
 });
+
+test('checkbox form values change only differing states and verify them',async()=>{
+ const f=fixture();f.elements.push({index:4,name:'Updates',controlType:'check box',checked:false});
+ const click=f.app.click;f.app.click=async i=>{await click(i);if(i===4)f.elements.at(-1).checked=!f.elements.at(-1).checked;};
+ await f.workflow.fillForm({fields:[{name:'Name',value:'Ada'},{name:'Updates',value:true}]});
+ await f.workflow.fillForm({fields:[{name:'Updates',value:true}]});
+ assert.equal(f.calls.filter(c=>c[0]==='click').length,1);assert.equal(f.elements[0].value,'Ada');
+ assert.equal((await f.workflow.waitFor({target:{name:'Updates'},value:true})).status,'matched');
+});
+test('mixed checkbox and text-method misuse fail before any input',async()=>{
+ const f=fixture();f.elements.push({index:4,name:'Updates',controlType:'check box',checked:null});
+ await assert.rejects(f.workflow.fillForm({fields:[{name:'Name',value:'Ada'},{name:'Updates',value:true}]}),/mixed/);assert.equal(f.calls.length,0);
+ await assert.rejects(f.workflow.fillForm({fields:[{name:'Updates',value:true,method:'keys'}]}),/text method/);assert.equal(f.calls.length,0);
+});
