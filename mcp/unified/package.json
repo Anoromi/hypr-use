@@ -7,6 +7,6 @@
     "acorn": "8.15.0"
   },
   "scripts": {
-    "test": "node --test test.mjs workflows.test.mjs"
+    "test": "node --test test.mjs workflows.test.mjs image-block.test.mjs"
   }
 }

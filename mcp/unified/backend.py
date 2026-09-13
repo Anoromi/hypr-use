@@ -8,6 +8,7 @@ b=load_backend();b.ensure_session_environment()
 if os.environ.get('HYPR_USE_FAST_CONTROL','1') != '0':
  from control import install
  control=install(b)
+from image_transport import optimize_images
 from observations import Observations
 observations=Observations(b)
 from session_events import SessionEvents
@@ -34,6 +35,7 @@ for line in sys.stdin:
   b.SNAPSHOT_INCLUDE_AX=name!='get_screenshot'
   if name in {'get_ax_state','get_screenshot'}:params['name']='get_app_state'
   start=time.monotonic();res=b.handle(req)
+  if res and isinstance(res.get("result"),dict):optimize_images(res["result"])
   if name in {'get_ax_state','get_screenshot'}:params['name']=name
   if name in {'get_ax_state','get_app_state'} and res and not res.get('result',{}).get('isError'):
    observations.publish(params.get('arguments',{}).get('app'),res.get('result',{}).get('structuredContent'))

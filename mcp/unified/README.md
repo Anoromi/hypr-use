@@ -121,3 +121,11 @@ Isolated AT-SPI children use a hash-validated bytecode loader to avoid parsing t
 Unnamed AT-SPI input controls can use an unambiguous provider-declared `LABELLED_BY` name. Editable children may inherit that relationship from their immediate combo-box parent. Existing names are preserved; nearby labels and arbitrary ancestors are not guessed. Structured records retain `nativeName` and `nameSource` for derived names. This makes native Find/Replace fields usable with `fill_form`.
 
 `var dialog = await app.getDialog({title:"Find and Replace",timeout_ms:10000})` waits for a currently related dialog with the exact title, binds its current target, and emits its AX state. It does not open or dismiss dialogs. Use it after an explicit shortcut or click instead of reusing an earlier dialog binding; window addresses can change or be recycled. Polls are read-only and the bound window title is checked again.
+
+### Screenshot transport
+
+Screenshots default to `HYPR_USE_IMAGE_FORMAT=auto`: PNG images above 128 KiB are encoded as JPEG quality 85 when this reduces size. Pixel dimensions are unchanged, so click coordinates remain valid. Images with transparency and smaller PNGs remain lossless. Set `HYPR_USE_IMAGE_FORMAT=png` in the MCP server environment for lossless screenshots. Restart the MCP connection after changing the setting.
+
+Returned screenshot bytes can be PNG or JPEG. `nodeRepl.emitImage(bytes)` detects either format; explicit MIME types must match. Images still emit automatically unless `emit:false` is requested. Do not emit the same observation twice. Timing metadata includes encoding time, image dimensions, and before/after byte counts.
+
+This reduces history upload size; it cannot change Codex's WebSocket retries or remove images already in a conversation. Long image-heavy threads can still require compaction or a fresh thread. Prefer AX observations when sufficient.
