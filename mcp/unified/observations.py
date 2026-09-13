@@ -80,7 +80,7 @@ class Observations:
         for name in ('click', 'scroll', 'set_value', 'select_text', 'perform_secondary_action'):
             fn = b.SEMANTIC_TOOLS[name]
 
-            def invoke(args, fn=fn):
+            def invoke(args, fn=fn, tool=name):
                 index = args.get('element_index')
                 if index is not None:
                     app = str(args['app'])
@@ -91,6 +91,17 @@ class Observations:
                     fresh = b.build_app_snapshot(b.snapshot_window_query(previous, app))
                     selected = self.rematch(old, fresh)
                     args = {**args, 'element_index': str(selected['index'])}
+                    # GTK popup pointer clicks can dismiss the menu without
+                    # selecting its item. Its explicit AX action is verified by
+                    # the ordinary semantic handler and guarded popup session.
+                    if (tool == 'click' and args.get('element_click_mode') == 'pointer'
+                            and args.get('mouse_button', 'left') == 'left'
+                            and args.get('click_count', 1) == 1
+                            and selected.get('source') == 'atspi'
+                            and str(selected.get('className', '')).casefold() == 'gtk'
+                            and b.element_role(selected) == 'menu item'
+                            and 'click' in selected.get('actions', [])):
+                        args['element_click_mode'] = 'atspi'
                 return fn(args)
 
             b.SEMANTIC_TOOLS[name] = invoke

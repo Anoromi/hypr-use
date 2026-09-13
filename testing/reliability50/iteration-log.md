@@ -99,3 +99,11 @@ AT-SPI children load through checked-hash bytecode, avoiding repeated parsing wh
 Initial paired probes averaged 477.39 → 414.57 ms per read. Alternating legacy/cached runs then averaged 489.46 → 392.91 ms (19.7% lower) across twelve repeated reads per route. All 56 observed trees, including initial binds, were healthy and had over 100 elements; no refocuses. Probe phases now hash runtime sources and record route flags.
 
 Fresh Astra native Country task passed after recovering from an existing pointer-menu failure (43.17 s); controlled legacy and cached pointer routes both reproduced it, while semantic and keyboard routes passed. Fresh Calc table entry passed independently (61.11 s, zero tool errors/refocuses). Evidence: loop-ax-startup-before/after/alternating, loop-native-choice-cause, loop-ax-bytecode-astra, loop-ax-bytecode-calc. Three new loader tests, four AX enumeration tests, and all 31 JS/protocol tests pass. No native plugin changes are included.
+
+## GTK menu activation
+
+Two controlled native menu pointer clicks returned success without selecting Germany. Semantic activation and keyboard selection worked. Unified AX-indexed single left clicks on GTK menu items with an explicit click action now use the existing guarded semantic handler. Coordinate clicks, other toolkits/roles, right clicks and double clicks retain their routing.
+
+Both failed probes now pass through ordinary app.click(index), with no refocuses (`loop-native-menu-semantic`). Fresh Astra native Country selection passed with three calls/35.98 s versus the preceding five calls/43.17 s with recovery. Browser dropdown selection also passed (24.34 s). No new tool failures/refocuses. Three routing regression tests pass. Single-run timings are not a general speedup estimate.
+
+A separate native popup hit-test candidate reproduced/fixed the problem in a disposable compositor but did not fix live GTK selection, despite inspection confirming the popup surface was targeted. The original live plugin was restored. That incomplete native candidate is not included in this runtime fix. Raw isolated/live diagnostics and the candidate patch remain available for further investigation.
