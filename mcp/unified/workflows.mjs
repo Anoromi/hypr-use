@@ -9,7 +9,7 @@ const schemas={
 };
 const required={fill_form:['fields'],replace_text:['target','text'],navigate:['url'],wait_for:[]};
 const descriptions={
- fill_form:'Fill named text fields and checkboxes in order and optionally click a named submit button. Exact accessible names; labels are excluded from field matches, and multiple editable matches fail. String values use a supported setter or native keys. Boolean values set checkbox state, clicking only when it differs. Verifies changes; mixed checkbox states fail before input. Stops on first failure and reports completed steps; no rollback or retries. Final AX included.',
+ fill_form:'Fill named text fields and checkboxes in order and optionally click a named submit button. Exact accessible names; labels are excluded from field matches, and multiple editable matches fail. String values use a supported setter or native keys; already matching visible text is skipped unless an explicit method requests re-entry. Boolean values set checkbox state, clicking only when it differs. Verifies changes; mixed checkbox states fail before input. Stops on first failure and reports completed steps; no rollback or retries. Final AX included.',
  replace_text:'Replace the entire contents of one named field, optionally press Enter. Default native keys: click, Ctrl+A, type; method=setValue or paste is explicit. This is not document-wide find/replace. Final AX included.',
  navigate:'Navigate a running browser via native background address-bar input, optionally opening a new tab. Uses http(s) URLs and an unambiguous known address-bar name, or an explicit address selector. Returns AX after submission; does not claim the page finished loading. Use wait_for for expected page content.',
  wait_for:'Observe until an exact named element (optionally exact text value or boolean checked state), AX text substring, or related dialog title appears. Choose exactly one condition. Bounded polling, final AX only; timeout is an error. Dialog result supplies its target for explicit binding. Does not focus windows.'
@@ -81,7 +81,11 @@ export function createWorkflows(app,read,emit,showState){
       if(typeof e.checked!=='boolean')throw Error('Checkbox state is mixed or unavailable');
       if(e.checked===f.value){steps.push({step:`keep ${f.name}`,status:'unchanged',ms:0});continue;}
       await step(`set ${f.name} to ${f.value}`,()=>app.click(e.index));
-     }else await replace(f,f.value,f.method,state);
+     }else{
+      const e=select(state,f,'field');
+      if(f.method===undefined&&typeof e.value==='string'&&e.value===f.value&&e.controlType!=='password text'){steps.push({step:`keep ${f.name}`,status:'unchanged',ms:0});continue;}
+      await replace(f,f.value,f.method,state);
+     }
      await step(`verify ${f.name}`,async()=>{const actual=select(await refresh(),f,checkbox?'checkbox':'field');if((checkbox?actual.checked:String(actual.value??''))!==f.value)throw Error('Field value does not match requested value');});
     }
     await step('verify final form',async()=>{

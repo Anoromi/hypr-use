@@ -68,6 +68,10 @@ try:
    fields=[{'name':'Email updates','value':True},{'name':'SMS updates','value':False}]
    js('await app.fillForm('+json.dumps({'fields':fields,'submit':{'name':'Save profile'}})+');')
    js('await app.fillForm('+json.dumps({'fields':fields})+'); await app.waitFor({target:{name:"Email updates"},value:true});')
+  elif case.startswith('form-repeat'):
+   fields=[{'name':'Full name','value':'Grace Hopper'},{'name':'Email','value':'grace@example.test'}]
+   js('await app.fillForm('+json.dumps({'fields':fields,'submit':{'name':'Save profile'}})+');')
+   js('await app.fillForm('+json.dumps({'fields':fields})+');')
   elif case.startswith('form'):
    method='keys' if 'keys' in case else None
    js('await app.fillForm('+json.dumps({'fields':[{'name':'Full name','value':'Grace Hopper',**({'method':method} if method else {})},{'name':'Email','value':'grace@example.test',**({'method':method} if method else {})}],'submit':{'name':'Save profile'}})+');')

@@ -87,3 +87,16 @@ test('a later field cannot invalidate an earlier field and still submit',async()
  await assert.rejects(f.workflow.fillForm({fields:[{name:'Name',value:'Ada'},{name:'Email',value:'a@test'}],submit:{name:'Save'}}),/changed after a later input/);
  assert.equal(f.calls.filter(c=>c[0]==='click').length,0);assert.equal(JSON.parse(f.out.at(-1).text).steps.at(-1).step,'verify final form');
 });
+
+ test('matching text skips input by default but explicit method still re-enters',async()=>{
+ const f=fixture();await f.workflow.fillForm({fields:[{name:'Name',value:'old'}]});
+ assert.deepEqual(f.calls,[['observe']]);f.calls.length=0;
+ await f.workflow.fillForm({fields:[{name:'Name',value:'old',method:'setValue'}]});
+ assert.deepEqual(f.calls,[['set',1,'old'],['observe']]);
+ });
+ test('missing and password values are not treated as visible matching text',async()=>{
+ const f=fixture();delete f.elements[0].value;
+ await f.workflow.fillForm({fields:[{name:'Name',value:''}]});assert.equal(f.calls[0][0],'set');
+ f.calls.length=0;f.elements[0].controlType='password text';
+ await f.workflow.fillForm({fields:[{name:'Name',value:''}]});assert.equal(f.calls[0][0],'set');
+ });

@@ -9,8 +9,8 @@ from web_fixture import Fixture
 import odf
 phase=sys.argv[1];selected=set(sys.argv[2:]);out=here/'runs'/phase;out.mkdir(parents=True,exist_ok=True)
 variant=os.environ.get('HYPR_USE_SUITE_VARIANT','standard')
-assert variant in ['standard','reactive-form'],'Unknown suite variant'
-if variant=='reactive-form':assert selected=={'21-web-profile'},'Reactive variant requires only task 21-web-profile'
+assert variant in ['standard','reactive-form','prefilled-form'],'Unknown suite variant'
+if variant!='standard':assert selected=={'21-web-profile'},'Form variants require only task 21-web-profile'
 source_files=list((root/'mcp/unified').glob('*.py'))+list((root/'mcp/unified').glob('*.mjs'))+[root/'vendor/hypr-agent-portal-0.56.2/scripts/hypr-agent-portalctl',root/'vendor/hypr-agent-portal-0.56.2/mcp/hypr-agent-portal-mcp.py',*[here/name for name in ['run_suite.py','catalog.py','web_fixture.py','odf.py','launch_owned.py']],here/'cdp.mjs',old/'run.py']
 source_files += list((root/'vendor/hypr-agent-portal-0.56.2/mcp').glob('*.py'))
 def hashes():return {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_files}
@@ -50,6 +50,8 @@ def grade(task,d,fixture=None,port=None):
  if group=='web':
   actual=fixture.state.copy();checks={k:actual.get(k)==v for k,v in check.items()}
   if variant=='reactive-form':checks['no_incorrect_submission']=all(all(st.get(k)==v for k,v in check.items()) for st in fixture.state_history if st.get('saved'))
+  if variant=='prefilled-form':
+   count=cdp(pages(port)[0],'Runtime.evaluate',{'expression':'window.__nameInputCount','returnByValue':True})['result']['result']['value'];checks['no_unnecessary_name_input']=count==0;actual['name_input_count']=count
   return {'passed':all(checks.values()),'checks':checks,'evidence':actual,'state_history':fixture.state_history}
  ps=pages(port);urls=[p['url'] for p in ps];checks={};evidence={'urls':urls,'visited':fixture.visited}
  if 'url_contains' in check:checks['url']=any(check['url_contains'] in u for u in urls)
@@ -125,6 +127,8 @@ try:
      except Exception:pass
      time.sleep(.2)
     else:raise RuntimeError('Browser setup did not commit pages')
+    if variant=='prefilled-form':
+     seeded=cdp(ps[0],'Runtime.evaluate',{'expression':"document.getElementById('name').value='Grace Hopper';window.__nameInputCount=0;document.getElementById('name').addEventListener('input',()=>window.__nameInputCount++);true",'returnByValue':True});assert seeded['result']['result']['value'] is True
     if variant=='reactive-form':
      cdp(ps[0],'Runtime.evaluate',{'expression':"document.getElementById('email').addEventListener('input',()=>{document.getElementById('name').value='Reset by email change'});true",'returnByValue':True})
     if task.get('closed_tab'):

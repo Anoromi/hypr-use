@@ -51,3 +51,9 @@ Two repeated-call browser probes passed; their second calls issued only AX reads
 A reactive Email input reset the previously verified Full name. The old helper still submitted the wrong name and returned completed (`loop-final-form-before`). The helper now rechecks all requested fields against its final verification snapshot before submission, without another scan. A mismatch emits that snapshot and stops. This catches changes visible in that snapshot; it is not an atomic guarantee against later application changes.
 
 Two negative probes now correctly rejected the invalid form without saving; an ordinary form passed (`loop-final-form-after`). A fresh Astra reactive-form variant recovered from the error, restored only the name, and saved correct data in 43.16 s. Its entire submission history contained no incorrect save. No refocuses. The variant is explicitly recorded separately from standard suite results. All 22 JS/protocol tests pass.
+
+## Skip already-matching text
+
+Default `fill_form` skips visible string values already equal to the request, just as it already skipped matching checkboxes. An explicit method forces re-entry; missing values and password fields are never assumed to match. The final whole-form verification remains active.
+
+Two repeated-fill probes changed from 3.593/3.633 s to 0.360/0.350 s (median 3.613 → 0.355 s, 90.2% less helper time). Fresh first fills and the reactive negative test still passed. Fresh Astra selected combined fill_form on a separately labeled prefilled-form variant, skipped the correct name, and saved the correct email. Independent input-event grading confirmed zero unnecessary name input. Agent run 59.57 s: helper savings did not translate into a demonstrated end-to-end gain in this single run. No refocuses. All 24 JS/protocol tests pass. Evidence: loop-unchanged-before/after diagnostics and loop-unchanged-astra.
