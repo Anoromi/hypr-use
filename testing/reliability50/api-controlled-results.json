@@ -1,0 +1,40 @@
+{
+  "observation": {
+    "design": "Same untouched Calc window; four fresh MCP sessions in menu-on/off/off/on order. First observation includes startup and is excluded from steady samples.",
+    "before_s": [
+      1.5308280469907913,
+      1.7244714730186388,
+      1.699345077999169,
+      1.5224388269998599,
+      1.7195850959978998,
+      1.591768457001308
+    ],
+    "after_s": [
+      0.7302728630020283,
+      0.7148134199960623,
+      0.7192957390216179,
+      0.703931850992376,
+      0.6973952440021094,
+      0.7430863620247692
+    ],
+    "median_before_s": 1.6455567675002385,
+    "median_after_s": 0.7170545795088401,
+    "all_16_outputs_identical": false,
+    "all_12_steady_outputs_identical": true,
+    "startup_difference": "The first startup output preceded the Welcome popup and omitted its attention line. All steady observations match exactly."
+  },
+  "keyboard": {
+    "design": "Fresh seeded Calc files; split/combined/combined/split order. Same four cells and formulas. Only input-call duration compared.",
+    "split_s": [
+      3.436666405003052,
+      3.421138322999468
+    ],
+    "combined_s": [
+      0.4243437570112292,
+      0.42399816401302814
+    ],
+    "all_four_saved_documents_passed": true
+  },
+  "refocus": [],
+  "source_directory": "testing/reliability50/diagnostics/api-cost-controlled"
+}

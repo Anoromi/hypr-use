@@ -1,5 +1,6 @@
 """Lazy observations and bounded discovery caches for the unified adapter."""
 import copy
+import os
 import time
 
 
@@ -35,6 +36,13 @@ class Observations:
 
     def install(self):
         b = self.b
+        # The unified JS facade exposes AT-SPI elements, not the portal's
+        # separate globalMenu collection or activate_menu_item operation.
+        # Discovering that unused collection adds D-Bus work to observations
+        # and every indexed action's identity-rematching scan. Visible AX
+        # menus remain available. Retain an opt-in for paired diagnostics.
+        if os.environ.get('HYPR_USE_GLOBAL_MENU', '0') != '1':
+            b.global_menu_for_window = lambda window: {'status': 'not-requested', 'items': []}
         original_after = b.snapshot_after_action
         original_atspi = b.atspi_snapshot_isolated
 

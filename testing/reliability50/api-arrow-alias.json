@@ -1,0 +1,43 @@
+{
+  "cases": [
+    {
+      "case": "arrow-down",
+      "input_s": 0.4221025269944221,
+      "passed": true,
+      "refocus": false,
+      "steps": [
+        {
+          "code": "var app = await cua.getApp('libreoffice-calc');",
+          "seconds": 1.0606963830068707,
+          "error": false
+        },
+        {
+          "code": "var dialog = await cua.getApp(\"address:0x62b753731b30@pid=2528998@start=14575444\"); await dialog.pressKey('Escape'); await app.getAXState();",
+          "seconds": 1.0341778580041137,
+          "error": false
+        },
+        {
+          "code": "await app.click(119);",
+          "seconds": 1.1075833599898033,
+          "error": false
+        },
+        {
+          "code": "await app.typeText(\"Total\\n=B2*C2\\n=B3*C3\\n=B4*C4\\n\");",
+          "seconds": 0.4221025269944221,
+          "error": false
+        },
+        {
+          "code": "await app.pressKey('Ctrl+s'); await app.getAXState();",
+          "seconds": 1.1589504519943148,
+          "error": false
+        },
+        {
+          "code": "await app.click(135); await app.pressKey('ArrowDown'); await app.getAXState();",
+          "seconds": 2.37351914102328,
+          "error": false
+        }
+      ]
+    }
+  ],
+  "refocus": []
+}

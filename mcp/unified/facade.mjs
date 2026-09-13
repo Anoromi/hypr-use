@@ -70,7 +70,8 @@ export function createFacade(call, output, options={}) {
       pressKey:async(key)=>{
         const sequence=string(key,'key').trim().split(/\s+/);
         if(!sequence[0])throw Error('key must not be empty');
-        key=sequence.map(combination=>combination.split('+').map(t=>['super','cmd','command'].includes(t.toLowerCase())?(options.commandModifier??'ctrl'):t).join('+')).join(' ');
+        const arrowKeys={arrowup:'up',arrowdown:'down',arrowleft:'left',arrowright:'right'};
+        key=sequence.map(combination=>combination.split('+').map(t=>['super','cmd','command'].includes(t.toLowerCase())?(options.commandModifier??'ctrl'):(arrowKeys[t.toLowerCase()]??t)).join('+')).join(' ');
         await act('press_key',{key});
       },
       typeText:async(text)=>act('type_text',{text:string(text,'text'),method:'keys'}),

@@ -1,0 +1,29 @@
+{
+  "id": "32-calc-formula",
+  "group": "calc",
+  "setup_s": 1.8122820854187012,
+  "duration_s": 71.06856775283813,
+  "exit": 0,
+  "timeout": false,
+  "verified": null,
+  "refocus": false,
+  "outcome": "pass",
+  "provider_errors": [],
+  "failure_kind": null,
+  "grade_passed": true,
+  "source_unchanged": true,
+  "wall_s": 73.0385069847107,
+  "typing_calls": [
+    {
+      "arguments": {
+        "app": "address:0x62b753684600@pid=2524465@start=14557862",
+        "text": "Total\n=B2*C2\n=B3*C3\n=B4*C4\n",
+        "method": "keys"
+      },
+      "seconds": 0.4399935030087363
+    }
+  ],
+  "handler_s": 12.138324318017112,
+  "js_calls": 8,
+  "tool_errors": 1
+}

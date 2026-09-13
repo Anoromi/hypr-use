@@ -71,3 +71,13 @@ Current shared changes normalize mixed web-document AX scales, summarize blank-t
 `typeText` and space-separated `pressKey` sequences use one native keyboard transaction, avoiding a blur between characters. Each call supports at most 4096 key events; use explicit plain-text paste for longer or unsupported text. Individual `pressKey` calls are separate transactions. Shortcut-only Ctrl+L navigation in a fresh inactive Chromium window still fails a diagnostic probe; clicking the address bar first works. Other applications and XWayland need their own coverage.
 
 The sequence implementation requires `testing/plugin-reliability-sequence-result/lib/libhypr-agent-portal.so` or a newer matching build. It is loaded for this compositor session only. Regression checks are `node --test mcp/unified/test.mjs`, `python3 testing/reliability50/test_general_fixes.py`, `python3 testing/reliability50/test_function_keys.py`, and `python3 testing/test-ax-frame-preparation.py`.
+
+### API cost experiments
+
+The unified adapter now skips the portal's separate D-Bus global-menu discovery. The JS API exposes AT-SPI elements and never returned that menu collection or offered `activate_menu_item`; visible menus in the AX tree still work. `HYPR_USE_GLOBAL_MENU=1` restores discovery for controlled comparisons. Ordinary portal clients retain their original behavior. Input identity rematching, frame preparation and popup guards are unchanged.
+
+Focused before/after Astra runs and controlled action probes are described in `testing/reliability50/api-performance.md`. The 50-task suite was not rerun for this experiment.
+
+The API instructions now explain the existing keyboard batching support. For a selected spreadsheet cell, `await app.typeText("Total\n=B2*C2\n=B3*C3\n=B4*C4\n")` sends one transaction. Newlines press Enter and tabs press Tab; they are not clipboard insertion. Batch only when the next action does not depend on an intermediate observation. There is no automatic conversion of separate awaited calls into a batch.
+
+`pressKey` accepts both `Down` and `ArrowDown` spellings, likewise Up/Left/Right, including modifier chords. This prevents browser-style arrow names from reaching the native dispatcher as unknown keys.

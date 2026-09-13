@@ -5,6 +5,8 @@ test('AX clicks use pointer input and key sequences preserve order',async()=>{
  assert.equal(calls.at(-1)[1].element_click_mode,'pointer');
  await app.pressKey('  CMD+a   1 0 Return  ');
  assert.equal(calls.at(-1)[1].key,'ctrl+a 1 0 Return');
+ await app.pressKey('ArrowDown SHIFT+ArrowUp ctrl+ArrowLeft CMD+ArrowRight');
+ assert.equal(calls.at(-1)[1].key,'down SHIFT+up ctrl+left ctrl+right');
  const count=calls.length;await assert.rejects(app.pressKey('  '),/empty/);assert.equal(calls.length,count);
 });
 test('facade bindings, numeric targets, diff output and images',async()=>{const calls=[],out=[];const response={content:[{type:'text',text:'1: Button\n2: Entry'},{type:'image',mimeType:'image/png',data:'YQ=='}],structuredContent:{target:'address:owned'}};const {cua}=createFacade(async(n,a)=>{calls.push([n,a]);return response;},b=>out.push(b));const app=await cua.getApp('Editor');assert.equal(out.length,1);await app.click(1);assert.equal(calls.at(-1)[1].element_index,'1');assert.equal(calls.at(-1)[1].app,'address:owned');await app.selectText(2,'x',{selectionType:'cursor_after'});assert.equal(calls.at(-1)[1].selection,'cursor_after');assert.equal(await app.getAXState(),'Accessibility state unchanged.');assert.equal((await app.getScreenshot({emit:false}))[0],97);assert.equal(out.length,2);await assert.rejects(app.click([1]),/target/);await assert.rejects(app.paste('x',{format:'html'}),/Rich paste/);});
