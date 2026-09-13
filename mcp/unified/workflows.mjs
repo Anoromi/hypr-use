@@ -3,14 +3,16 @@ const selector={type:'object',properties:{name:{type:'string',minLength:1},role:
 const field={type:'object',properties:{...selector.properties,value:{type:['string','boolean']},method:{enum:['setValue','keys','paste']}},required:['name','value'],additionalProperties:false};
 const choice={type:'object',properties:{...selector.properties,option:{type:'string',minLength:1}},required:['name','option'],additionalProperties:false};
 const schemas={
+ set_date:{target:selector,date:{type:"string"},parts:{type:"object",properties:{year:selector,month:selector,day:selector},required:["year","month","day"],additionalProperties:false},submit:selector},
  select_options:{choices:{type:'array',minItems:1,maxItems:20,items:choice},submit:selector},
  fill_form:{fields:{type:'array',minItems:1,maxItems:20,items:field},submit:selector},
  replace_text:{target:selector,text:{type:'string'},method:{enum:['setValue','keys','paste']},submit:{type:'boolean'}},
  navigate:{url:{type:'string'},new_tab:{type:'boolean'},address:selector},
  wait_for:{target:selector,value:{type:['string','boolean']},text:{type:'string',minLength:1},dialog_title:{type:'string',minLength:1},timeout_ms:{type:'integer',minimum:1,maximum:30000}}
 };
-const required={select_options:['choices'],fill_form:['fields'],replace_text:['target','text'],navigate:['url'],wait_for:[]};
+const required={set_date:['target','date'],select_options:['choices'],fill_form:['fields'],replace_text:['target','text'],navigate:['url'],wait_for:[]};
 const descriptions={
+ set_date:"Set a segmented date editor to an ISO YYYY-MM-DD date using background keyboard input. target is its exact accessible name. Defaults to Year/Month/Day plus the editor name; parts can supply explicit selectors for other labels. Resolves segments within the editor, validates the calendar date, verifies every segment and the complete date before optional submit. Skips matching segments; no automatic retries. Final AX included.",
  select_options:'Select options in named single-choice combo boxes, in order, and optionally click submit. choices contains {name,role?,option}, using exact accessible names. Opens a combo box when its options are not yet exposed in AX. Uses an exposed select action or GTK menu click action; verifies the selected option or combo-box value. Skips selected options, verifies each selection and the final set, stops on failure without retry or rollback. Final AX included.',
  fill_form:'Fill named text fields and checkboxes in order and optionally click a named submit button. Exact accessible names; labels are excluded from field matches, and multiple editable matches fail. String values use a supported setter or native keys; already matching visible text is skipped unless an explicit method requests re-entry. Boolean values set checkbox state, clicking only when it differs. Verifies changes; mixed checkbox states fail before input. Stops on first failure and reports completed steps; no rollback or retries. Final AX included.',
  replace_text:'Replace the entire contents of one named field, optionally press Enter. Default native keys: click, Ctrl+A, type; method=setValue or paste is explicit. This is not document-wide find/replace. Final AX included.',
@@ -18,7 +20,7 @@ const descriptions={
  wait_for:'Observe until an exact named element (optionally exact text value or boolean checked state), AX text substring, or related dialog title appears. Choose exactly one condition. Bounded polling, final AX only; timeout is an error. Dialog result supplies its target for explicit binding. Does not focus windows.'
 };
 export const workflowTools=Object.keys(schemas).map(name=>({name,description:descriptions[name],inputSchema:{type:'object',properties:{app:{type:'string',minLength:1},...schemas[name]},required:['app',...required[name]],additionalProperties:false}}));
-export const workflowMethods={select_options:'selectOptions',fill_form:'fillForm',replace_text:'replaceText',navigate:'navigate',wait_for:'waitFor'};
+export const workflowMethods={set_date:'setDate',select_options:'selectOptions',fill_form:'fillForm',replace_text:'replaceText',navigate:'navigate',wait_for:'waitFor'};
 function check(schema,value,path){
  if(Array.isArray(schema.type)){if(!schema.type.includes(typeof value))throw Error(`${path} must be a string or boolean`);return;}
  if(schema.enum&&!schema.enum.includes(value))throw Error(`${path}: invalid option`);
@@ -37,6 +39,7 @@ function check(schema,value,path){
 }
 export function validateWorkflow(name,args){
  const tool=workflowTools.find(t=>t.name===name);if(!tool)throw Error('Unknown workflow');check(tool.inputSchema,args,name);
+ if(name==='set_date'){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(args.date);if(!m)throw Error('Use YYYY-MM-DD');const [y,mo,d]=m.slice(1).map(Number),leap=y%4===0&&(y%100!==0||y%400===0);if(y<1||mo<1||mo>12||d<1||d>[31,leap?29:28,31,30,31,30,31,31,30,31,30,31][mo-1])throw Error('Invalid calendar date');}
  if(name==='wait_for'&&(['target','text','dialog_title'].filter(k=>args[k]!==undefined).length!==1||args.value!==undefined&&!args.target))throw Error('wait_for requires exactly one condition; value requires target');
  if(name==='navigate'){let url;try{url=new URL(args.url);}catch{throw Error('Invalid URL');}if(!['http:','https:'].includes(url.protocol))throw Error('navigate requires http(s)');if(/[^\x20-\x7e]/.test(args.url)||args.url.length>4095)throw Error('Use an ASCII-encoded URL of at most 4095 characters');}
  if(name==='fill_form'&&args.fields.some(f=>typeof f.value==='boolean'&&f.method!==undefined))throw Error('Checkbox values do not take a text method');
@@ -87,7 +90,31 @@ export function createWorkflows(app,read,emit,showState){
   }
   try{
    let result={status:'completed'};
-   if(name==='select_options'){
+   if(name==='set_date'){
+    await refresh();
+    const values=Object.fromEntries(['year','month','day'].map((k,i)=>[k,Number(args.date.split('-')[i])]));
+    const parts=args.parts??Object.fromEntries(['year','month','day'].map(k=>[k,{name:k[0].toUpperCase()+k.slice(1)+' '+args.target.name,role:'spin button'}]));
+    function segments(){
+     const editor=select(state,args.target),path=editor.runtimeId;
+     if(editor.controlType!=='date editor'||!Array.isArray(path)||!path.length)throw Error('Target must be a segmented date editor with AX ancestry');
+     const scoped={elements:state.elements.filter(e=>Array.isArray(e.runtimeId)&&e.runtimeId.length>path.length&&path.every((v,i)=>e.runtimeId[i]===v))};
+     const found=Object.fromEntries(Object.entries(parts).map(([k,t])=>[k,select(scoped,t,'field')]));
+     if(new Set(Object.values(found).map(e=>e.index)).size!==3||Object.values(found).some(e=>e.controlType!=='spin button'))throw Error('Date requires three distinct spin-button segments');
+     return found;
+    }
+    segments();if(args.submit)select(state,args.submit);let changed=false;
+    const matches=(e,v)=>e.value!==null&&e.value!==undefined&&String(e.value).trim()!==''&&Number(e.value)===v;
+    for(const key of ['year','month','day']){
+     const e=segments()[key];
+     if(matches(e,values[key])){steps.push({step:`keep ${key}`,status:'unchanged',ms:0});continue;}
+     await step(`click ${key}`,()=>app.click(e.index));
+     await step(`type ${key}`,()=>app.typeText(String(values[key])));changed=true;
+     await step(`verify ${key}`,async()=>{await refresh();if(!matches(segments()[key],values[key]))throw Error('Date segment does not match requested value');});
+    }
+    if(changed){await step('commit date',()=>app.pressKey('Tab'));await refresh();}
+    await step('verify complete date',async()=>{const actual=segments();for(const k of Object.keys(values))if(!matches(actual[k],values[k]))throw Error('Complete date does not match request');});
+    if(args.submit){const e=select(state,args.submit);await step('submit date',()=>app.click(e.index));}
+   }else if(name==='select_options'){
     await refresh();const controls=new Set();
     for(const c of args.choices){const {control}=choiceOption(state,c,true);if(controls.has(control.index))throw Error('Each combo box must appear only once');controls.add(control.index);}
     if(args.submit)select(state,args.submit);
@@ -154,7 +181,7 @@ export function createWorkflows(app,read,emit,showState){
      await new Promise(resolve=>setTimeout(resolve,Math.min(300,timeout-(performance.now()-begin))));
     }
    }
-   if((name==='wait_for'||['fill_form','select_options'].includes(name)&&!args.submit)&&showState)showState(state);else await app.getAXState();return {...result,steps};
+   if((name==='wait_for'||['fill_form','select_options','set_date'].includes(name)&&!args.submit)&&showState)showState(state);else await app.getAXState();return {...result,steps};
   }catch(e){emit({type:'text',text:JSON.stringify({status:'failed',steps,message:e.message,notice:'Completed steps remain applied; inspect state before retrying.'})});throw e;}
  }
  return Object.fromEntries(Object.entries(workflowMethods).map(([name,method])=>[method,args=>run(name,args)]));

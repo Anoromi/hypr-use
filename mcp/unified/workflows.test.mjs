@@ -7,8 +7,8 @@ function fixture(){
  const read=async()=>({elements,treeLines:['Ready']});
  return {calls,out,app,elements,workflow:createWorkflows(app,read,v=>out.push(v))};
 }
-test('five explicit tools and strict preflight',()=>{
- assert.equal(workflowTools.length,5);
+test('six explicit tools and strict preflight',()=>{
+ assert.equal(workflowTools.length,6);
  for(const a of [{app:'a',target:{name:'Name'},text:'東京'},{app:'a',target:{name:'Name'},text:'x',typo:true}])assert.throws(()=>validateWorkflow('replace_text',a));
  assert.throws(()=>validateWorkflow('navigate',{app:'a',url:'file:///tmp/x'}));
  assert.throws(()=>validateWorkflow('wait_for',{app:'a',text:'a',target:{name:'b'}}));
@@ -140,4 +140,23 @@ test('unexposed missing option stops after opening and reports partial progress'
  const out=[],calls=[];const app={click:async()=>calls.push('open')};
  const w=createWorkflows(app,async()=>({elements:[{index:1,name:'Country',controlType:'combo box',runtimeId:[0],value:'Germany'}]}),v=>out.push(v));
  await assert.rejects(w.selectOptions({choices:[{name:'Country',option:'Missing'}]}),/exposed option/);assert.deepEqual(calls,['open']);assert.equal(JSON.parse(out[0].text).steps[0].step,'open Country');
+});
+
+function dateFixture({ignore=false,clamp=false}={}){
+ const calls=[];let focused;
+ const elements=[{index:1,name:'Appointment',controlType:'date editor',runtimeId:[1]},...['Year','Month','Day'].map((k,i)=>({index:i+2,name:k+' Appointment',controlType:'spin button',runtimeId:[1,i],value:'0.0'})),{index:5,name:'Save'}];
+ const app={click:async i=>{focused=i;calls.push(['click',i]);},typeText:async t=>{calls.push(['text',t]);if(!ignore)elements.find(e=>e.index===focused).value=t+'.0';if(clamp&&focused===4)elements[1].value='2025.0';},pressKey:async k=>calls.push(['key',k]),getAXState:async()=>{}};
+ return {calls,elements,w:createWorkflows(app,async()=>({elements}),()=>{},()=>{})};
+}
+test('date validates calendar and all segments before input',async()=>{
+ const f=dateFixture();for(const date of ['2025-02-29','2026-13-01','0000-01-01','10/21/2026'])await assert.rejects(f.w.setDate({target:{name:'Appointment'},date}));
+ f.elements.pop();f.elements.pop();await assert.rejects(f.w.setDate({target:{name:'Appointment'},date:'2024-02-29'}),/found 0/);assert.equal(f.calls.length,0);
+});
+test('date types explicitly, accepts numeric AX formatting, skips a matching repeat',async()=>{
+ const f=dateFixture();await f.w.setDate({target:{name:'Appointment'},date:'2024-02-29',submit:{name:'Save'}});
+ assert.deepEqual(f.calls,[['click',2],['text','2024'],['click',3],['text','2'],['click',4],['text','29'],['key','Tab'],['click',5]]);
+ f.calls.length=0;await f.w.setDate({target:{name:'Appointment'},date:'2024-02-29'});assert.equal(f.calls.length,0);
+});
+test('failed or clamped date cannot submit',async()=>{
+ for(const mode of [{ignore:true},{clamp:true}]){const f=dateFixture(mode);await assert.rejects(f.w.setDate({target:{name:'Appointment'},date:'2024-02-29',submit:{name:'Save'}}),/does not match/);assert.ok(!f.calls.some(c=>c[0]==='click'&&c[1]===5));}
 });

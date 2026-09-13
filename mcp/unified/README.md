@@ -84,7 +84,7 @@ The API instructions now explain the existing keyboard batching support. For a s
 
 ### Common workflow tools
 
-Five additional MCP tools are available alongside `js`: `fill_form`, `select_options`, `replace_text`, `navigate`, and `wait_for`. The same implementations are exposed as `app.fillForm(options)`, `app.selectOptions(options)`, `app.replaceText(options)`, `app.navigate(options)` and `app.waitFor(options)`; omit `app` from the arguments when using an already bound JS app. No table-writing helper is added.
+Six additional MCP tools are available alongside `js`: `fill_form`, `select_options`, `set_date`, `replace_text`, `navigate`, and `wait_for`. The same implementations are exposed as `app.fillForm(options)`, `app.selectOptions(options)`, `app.setDate(options)`, `app.replaceText(options)`, `app.navigate(options)` and `app.waitFor(options)`; omit `app` from the arguments when using an already bound JS app. No table-writing helper is added.
 
 ```json
 {"app":"hypr-use-r50-browser","fields":[{"name":"Full name","value":"Grace Hopper"},{"name":"Email","value":"grace@example.test"}],"submit":{"name":"Save profile"}}
@@ -115,3 +115,5 @@ Checkbox fields are clicked only when their checked state differs from the reque
 `select_options` (or `app.selectOptions`) batches `choices:[{name,role?,option}]` and optionally a `submit` selector. It targets single-choice combo boxes and opens them when their options are not yet exposed in AX. Option names are scoped to their parent control. It supports exposed `select` actions and GTK menu `click` actions, verifies the selected state or displayed combo value, and skips already selected options. Duplicate controls and invalid already-exposed options fail before input; discovering an invalid hidden option can leave its menu open.
 
 Isolated AT-SPI children use a hash-validated bytecode loader to avoid parsing the portal on every scan. Each scan still gets a fresh process. Hash validation detects same-size source edits within one timestamp tick. Unwritable caches fall back to the original script; `HYPR_USE_AX_BYTECODE=0` explicitly selects that path.
+
+`set_date` / `app.setDate` accepts `{target:{name:"Appointment"},date:"2026-10-21",submit?:{name:"Save"}}`. It types the year, month, and day into distinct AX spin-button descendants, verifies each segment and the complete date, then submits. Optional `parts:{year:selector,month:selector,day:selector}` supports other accessible labels. Only segmented date editors are supported. Invalid dates fail before input; matching dates require no input. Numeric Value-interface presence alone does not guarantee a working provider setter.

@@ -119,3 +119,11 @@ The disposable compositor harness uses a short private runtime path, its own ses
 The dropdown helper now opens unexposed combo boxes, supports GTK menu click actions, and verifies the displayed combo value after a native popup closes. Already matching closed controls are skipped without opening. Duplicate controls and invalid exposed options still fail before input; an invalid previously hidden option can leave its menu open, with completed steps reported.
 
 Two controlled native selections and unchanged repeats passed; repeat helpers only observed AX (0.229/0.223 s). Fresh Astra chose select_options for both native and browser tasks. Native Country: two calls/20.25 s versus the preceding three calls/35.98 s; browser two-dropdown filter: two calls/29.16 s. All passed without errors/refocuses. These single-run timings do not establish an average speedup. All 33 JS/protocol tests pass. Evidence: loop-native-dropdown-workflow and loop-native-dropdown-astra.
+
+## Verified segmented date workflow
+
+The old date task needed six MCP calls/52.32 s: the advertised Value setter failed confirmation, and tab-separated typing left segments incomplete. Default fill_form reproduced the setter failure (1.34 s) without saving. Numeric interface presence does not prove provider write support; the setter already waits up to 150 ms for confirmation.
+
+Added set_date/app.setDate with calendar validation, scoped distinct date segments, explicit background year/month/day typing, per-segment and final verification before optional submission, and unchanged-value skipping. No table helper. Controlled fill/save probes both passed (6.298/6.299 s); matching repeats needed only observation (0.306/0.297 s). All 36 JS/protocol tests pass, including invalid dates, missing parts, ignored input, and later clamping.
+
+Fresh Astra task 25 chose the helper and passed in 28.06 s with no tool failures or refocuses. Breakdown: backend 26.2%, MCP overhead 1.0%, other agent/provider/CLI gaps 59.3%, startup/teardown 13.5%. One run is not an average speedup estimate. Evidence: loop-date-current, loop-date-form-probe, loop-date-helper, loop-date-helper-astra.

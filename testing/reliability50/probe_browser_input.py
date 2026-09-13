@@ -79,6 +79,11 @@ try:
    fields=[{'name':'Email updates','value':True},{'name':'SMS updates','value':False}]
    js('await app.fillForm('+json.dumps({'fields':fields,'submit':{'name':'Save profile'}})+');')
    js('await app.fillForm('+json.dumps({'fields':fields})+'); await app.waitFor({target:{name:"Email updates"},value:true});')
+  elif case.startswith('form-date-helper'):
+   js({'app':app,'target':{'name':'Appointment'},'date':'2026-10-21','submit':{'name':'Save profile'}},tool='set_date')
+   js("await app.setDate({target:{name:'Appointment'},date:'2026-10-21'});")
+  elif case.startswith('form-date'):
+   js("await app.fillForm({fields:[{name:'Month Appointment',value:'10'},{name:'Day Appointment',value:'21'},{name:'Year Appointment',value:'2026'}],submit:{name:'Save profile'}});",allow_error=True)
   elif case.startswith('form-options'):
    choices=[{'name':'Category','option':'Accessories'},{'name':'Sort by price','option':'Lowest first'}]
    js({'app':app,'choices':choices},tool='select_options')
@@ -128,6 +133,7 @@ try:
   if case.startswith('form'):passed=fixture.state.get('name')=='Grace Hopper' and fixture.state.get('email')=='grace@example.test' and fixture.state.get('saved') is True
   if case.startswith('workflow-replace'):passed=fixture.state.get('note')==('' if case.endswith('clear') else 'alpha DELTA gamma') and fixture.state.get('saved') is True
   if case.startswith('form-checkbox'):passed=fixture.state.get('updates') is True and fixture.state.get('sms') is False and fixture.state.get('saved') is True
+  if case.startswith('form-date'):passed=fixture.state.get('date')=='2026-10-21' and fixture.state.get('saved') is True
   if case.startswith('form-options'):passed=fixture.state.get('category')=='Accessories' and fixture.state.get('sort')=='ascending'
   if case.startswith('form-cascade'):passed=cascade['result'].get('isError') is True and 'changed after a later input' in json.dumps(cascade) and fixture.state.get('saved') is not True
   row={'ax_bytecode':env.get('HYPR_USE_AX_BYTECODE','1'),'case':case,'passed':passed,'urls':urls,'steps':steps,'refocus':m.trigger.is_set()}

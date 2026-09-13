@@ -155,6 +155,17 @@
         ],
         "reason": "Pointer click on Germany closed the native menu without changing Country. The next observation diagnosed the unchanged value and a keyboard retry recovered."
       }
+    },
+    "loop-date-current": {
+      "25-web-date": {
+        "gaps": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "reason": "The advertised Value setter failed confirmation. The next tab-separated date input left segments incomplete; an explicit Day/Year click-and-type repair was needed."
+      }
     }
   }
 }
