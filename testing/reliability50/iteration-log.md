@@ -127,3 +127,7 @@ The old date task needed six MCP calls/52.32 s: the advertised Value setter fail
 Added set_date/app.setDate with calendar validation, scoped distinct date segments, explicit background year/month/day typing, per-segment and final verification before optional submission, and unchanged-value skipping. No table helper. Controlled fill/save probes both passed (6.298/6.299 s); matching repeats needed only observation (0.306/0.297 s). All 36 JS/protocol tests pass, including invalid dates, missing parts, ignored input, and later clamping.
 
 Fresh Astra task 25 chose the helper and passed in 28.06 s with no tool failures or refocuses. Breakdown: backend 26.2%, MCP overhead 1.0%, other agent/provider/CLI gaps 59.3%, startup/teardown 13.5%. One run is not an average speedup estimate. Evidence: loop-date-current, loop-date-form-probe, loop-date-helper, loop-date-helper-astra.
+
+## Explicit benchmark resumption
+
+Existing phase directories now fail before desktop access unless --resume is explicitly supplied. New runs cannot silently return old completed summaries. Resumption still requires matching runtime hashes and variant; every accepted invocation records selected tasks and resume status. Two regression tests cover preserved old results, explicit resumption, invalid IDs, path traversal, and missing manifests.

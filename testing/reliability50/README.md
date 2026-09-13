@@ -18,3 +18,5 @@ The completed comparison is `baseline-v2`, 43 passes and 7 failures, versus `imp
 One attempt per task does not prove that a passing task is reliable on repetition. The final full rerun must use the same task definitions, starting conditions, model, effort and limits, and must report regressions as well as fixes. Do not combine successful retries into a replacement baseline.
 
 The report includes handler time separately from total agent-run time. Remaining time includes model inference, provider/CLI waiting and orchestration; it is not a direct measurement of pure inference. Failed actions can return successful acknowledgements, so error flags alone are insufficient for classifying recovery time.
+
+Phase names must be new by default. Existing phases are rejected before desktop access. Use `run_suite.py phase-name --resume` only to explicitly reuse completed results and continue missing tasks; matching source hashes and variant are still required. Each invocation is recorded in `invocations.jsonl`.
