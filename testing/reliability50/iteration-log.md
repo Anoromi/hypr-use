@@ -131,3 +131,7 @@ Fresh Astra task 25 chose the helper and passed in 28.06 s with no tool failures
 ## Explicit benchmark resumption
 
 Existing phase directories now fail before desktop access unless --resume is explicitly supplied. New runs cannot silently return old completed summaries. Resumption still requires matching runtime hashes and variant; every accepted invocation records selected tasks and resume status. Two regression tests cover preserved old results, explicit resumption, invalid IDs, path traversal, and missing manifests.
+
+## Direct workflow guidance
+
+Server instructions now document set_date and explain that direct workflow tools bind/inspect internally. Fresh Astra profile, date, and filter tasks passed (26.29/31.19/24.14 s), no refocuses or tool failures. Agents still inspected before using exact accessible names, so this does not demonstrate removal of discovery calls or a speedup. Kept as accurate API documentation. All 36 JS/protocol tests pass. Evidence: loop-direct-guidance.
