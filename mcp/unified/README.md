@@ -101,3 +101,5 @@ Workflows validate arguments before mutations, retain ordinary portal identity a
 Tests: `node --test mcp/unified/test.mjs mcp/unified/workflows.test.mjs`. Fresh Astra test evidence is under `testing/reliability50/runs/workflow-tools-v1`.
 
 Agent adoption: all four tools were used directly by fresh Astra CLI instances; seven focused runs passed with no refocuses. One old `selectText` call failed and the agent recovered using `replace_text`. See `testing/reliability50/workflow-tools.md`; no paired speedup is claimed.
+
+Field selectors ignore same-name labels and match only editable/value controls. Multiple matching fields remain an error; supply a role to disambiguate. Selection readback now allows 150 ms for asynchronous AT-SPI updates without repeating the mutation.

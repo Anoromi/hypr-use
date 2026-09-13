@@ -9,7 +9,7 @@ const schemas={
 };
 const required={fill_form:['fields'],replace_text:['target','text'],navigate:['url'],wait_for:[]};
 const descriptions={
- fill_form:'Fill named editable fields in order and optionally click a named submit button. Exact accessible names; ambiguous matches fail. Default uses setValue and verifies each field. Stops on first failure and reports completed steps; no rollback or retries. Final AX included.',
+ fill_form:'Fill named editable fields in order and optionally click a named submit button. Exact accessible names; labels are excluded from field matches, and multiple editable matches fail. Default uses setValue and verifies each field. Stops on first failure and reports completed steps; no rollback or retries. Final AX included.',
  replace_text:'Replace the entire contents of one named field, optionally press Enter. Default native keys: click, Ctrl+A, type; method=setValue or paste is explicit. This is not document-wide find/replace. Final AX included.',
  navigate:'Navigate a running browser via native background address-bar input, optionally opening a new tab. Uses http(s) URLs and an unambiguous known address-bar name, or an explicit address selector. Returns AX after submission; does not claim the page finished loading. Use wait_for for expected page content.',
  wait_for:'Observe until an exact named element (optionally exact value), AX text substring, or related dialog title appears. Choose exactly one condition. Bounded polling, final AX only; timeout is an error. Dialog result supplies its target for explicit binding. Does not focus windows.'
@@ -38,8 +38,8 @@ export function validateWorkflow(name,args){
  const texts=name==='fill_form'?args.fields.map(f=>[f.value,f.method??'setValue']):name==='replace_text'?[[args.text,args.method??'keys']]:[];
  for(const [text,method] of texts)if(method==='keys'&&(/[^\x20-\x7e\n\r\t]/.test(text)||text.length>4096))throw Error('keys accepts at most 4096 supported characters; choose paste for Unicode');
 }
-function select(state,target){
- const found=(state.elements??[]).filter(e=>e.name===target.name&&(!target.role||[e.controlType,e.localizedControlType].includes(target.role)));
+function select(state,target,purpose){
+ const found=(state.elements??[]).filter(e=>e.name===target.name&&(!target.role||[e.controlType,e.localizedControlType].includes(target.role))&&(purpose!=='field'||e.editable===true||e.supportsValue===true));
  if(found.length!==1)throw Error(`Expected one element named ${JSON.stringify(target.name)}, found ${found.length}; inspect AX and supply a role if needed`);
  return found[0];
 }
@@ -50,7 +50,7 @@ export function createWorkflows(app,read,emit,showState){
   async function step(label,fn){const start=performance.now();try{const v=await fn();steps.push({step:label,status:'completed',ms:performance.now()-start});return v;}catch(e){steps.push({step:label,status:'failed',ms:performance.now()-start,error:e.message});throw e;}}
   async function refresh(){state=await read();return state;}
   async function replace(target,text,method){
-   const e=select(await refresh(),target);
+   const e=select(await refresh(),target,'field');
    if(method==='setValue')await step(`set ${target.name}`,()=>app.setValue(e.index,text));
    else{
     await step(`click ${target.name}`,()=>app.click(e.index));
@@ -63,10 +63,10 @@ export function createWorkflows(app,read,emit,showState){
    let result={status:'completed'};
    if(name==='fill_form'){
     // Validate selectors before the first mutation, then resolve afresh per field.
-    await refresh();for(const f of args.fields)select(state,f);if(args.submit)select(state,args.submit);
+    await refresh();for(const f of args.fields)select(state,f,'field');if(args.submit)select(state,args.submit);
     for(const f of args.fields){
      await replace(f,f.value,f.method??'setValue');
-     await step(`verify ${f.name}`,async()=>{const actual=select(await refresh(),f);if(String(actual.value??'')!==f.value)throw Error('Field value does not match requested value');});
+     await step(`verify ${f.name}`,async()=>{const actual=select(await refresh(),f,'field');if(String(actual.value??'')!==f.value)throw Error('Field value does not match requested value');});
     }
     if(args.submit){const e=select(await refresh(),args.submit);await step('submit form',()=>app.click(e.index));}
    }else if(name==='replace_text'){
