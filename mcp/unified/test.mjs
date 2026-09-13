@@ -65,3 +65,22 @@ test('paste preserves the current edit context instead of guessing from table pr
  const app=await cua.getApp('Editor');await app.paste('text\nmore text');
  assert.deepEqual(calls.at(-1),['paste_text',{app:'owned',text:'text\nmore text',prepare_grid:false}]);
 });
+
+test('dialog binding follows fresh relationship and checks title again',async()=>{
+ const calls=[],out=[];let pending=true;
+ const facade=createFacade(async(tool,args)=>{
+  calls.push([tool,args.app]);
+  const target=args.app==='Root'?'root':args.app;
+  const state={target,windowTitle:target==='dialog-new'?'Find and Replace':'Root',treeLines:['ready'],elements:[],accessibility:{status:'ok'}};
+  if(target==='root'&&!pending)state.attention={type:'active-related-popup',title:'Find and Replace',target:'dialog-new'};
+  return {structuredContent:state,content:[]};
+ },v=>out.push(v));
+ const root=await facade.cua.getApp('Root');pending=false;const dialog=await root.getDialog({title:'Find and Replace'});
+ await dialog.pressKey('Escape');assert.deepEqual(calls.slice(-3),[['get_ax_state','root'],['get_ax_state','dialog-new'],['press_key','dialog-new']]);
+ await assert.rejects(root.getDialog({title:'',timeout_ms:1}),/nonempty/);
+ await assert.rejects(root.getDialog({title:'Missing',timeout_ms:1}),/timed out/);
+});
+test('dialog recycled into a different title is not returned as requested dialog',async()=>{
+ const f=createFacade(async(tool,args)=>({structuredContent:{target:args.app,windowTitle:args.app==='child'?'Other':'Root',attention:{type:'active-related-popup',title:'Wanted',target:'child'},elements:[],treeLines:[]},content:[]}),()=>{});
+ const root=await f.cua.getApp('root');await assert.rejects(root.getDialog({title:'Wanted'}),/changed before binding/);
+});

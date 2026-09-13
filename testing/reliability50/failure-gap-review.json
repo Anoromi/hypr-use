@@ -166,6 +166,15 @@
         ],
         "reason": "The advertised Value setter failed confirmation. The next tab-separated date input left segments incomplete; an explicit Day/Year click-and-type repair was needed."
       }
+    },
+    "loop-dialog-binding-astra": {
+      "43-writer-replace": {
+        "gaps": [
+          3,
+          4
+        ],
+        "reason": "Pointer click on Other options left its checked state false and panel closed. The next call used semantic activate to expand it. Gap 3 also includes planning successful form fill batched with that click; call-level timing cannot separate that planning."
+      }
     }
   }
 }

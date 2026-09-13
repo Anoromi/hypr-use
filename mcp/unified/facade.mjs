@@ -46,9 +46,10 @@ export function createFacade(call, output, options={}) {
     const rows=windows.map(w=>({id:w.target,displayName:w.class,isRunning:true,title:w.title}));
     if(opt.emit!==false)output({type:'text',text:JSON.stringify(rows)});return rows;
   }
-  async function bindApp(input,workflow=false) {
+  async function bindApp(input,workflow=false,expectedTitle) {
     let name=aliases[string(input,'app')]??input;
     const r=await call('get_ax_state',{app:name});
+    if(expectedTitle!==undefined&&r.structuredContent?.windowTitle!==expectedTitle)throw Error('Related dialog changed before binding; inspect the root app again');
     name=r.structuredContent?.target??name;bound.add(name);
     if(!workflow)ax(r,name,{disableDiffing:true});
     let recent=workflow?{result:r,time:Date.now()}:null;
@@ -60,6 +61,18 @@ export function createFacade(call, output, options={}) {
     };
     const observe=async()=>{const saved=recent;recent=null;return saved&&Date.now()-saved.time<=100?saved.result:await call('get_ax_state',{app:name});};
     const app={
+      getDialog:async(opt={})=>{
+        if(!opt||typeof opt!=='object'||Array.isArray(opt)||Object.keys(opt).some(k=>!['title','timeout_ms'].includes(k))||typeof opt.title!=='string'||!opt.title)throw Error('getDialog requires an exact nonempty title');
+        const timeout=opt.timeout_ms??10000;
+        if(!Number.isInteger(timeout)||timeout<1||timeout>30000)throw Error('getDialog timeout_ms must be 1–30000');
+        const start=Date.now();
+        while(true){
+          const state=(await observe()).structuredContent,attention=state?.attention;
+          if(attention?.type==='active-related-popup'&&attention.title===opt.title&&typeof attention.target==='string'&&attention.target&&attention.target!==name)return bindApp(attention.target,false,opt.title);
+          if(Date.now()-start>=timeout)throw Error(`getDialog timed out waiting for ${JSON.stringify(opt.title)}`);
+          await new Promise(resolve=>setTimeout(resolve,Math.min(300,timeout-(Date.now()-start))));
+        }
+      },
       getAXState:async(opt={})=>ax(await observe(),name,opt),
       getScreenshot:async(opt={})=>{recent=null;diffs.delete(name);return image(await call('get_screenshot',{app:name}),opt);},
       getAXStateAndScreenshot:async(opt={})=>{recent=null;const r=await call('get_app_state',{app:name});const state=ax(r,name,opt);const has=r.content.some(x=>x.type==='image');return {state,...(has?{screenshot:image(r,opt)}:{})};},

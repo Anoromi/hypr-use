@@ -92,13 +92,17 @@ try:
         attention = snapshot().get('attention')
         if attention:
             js('var dialog = await cua.getApp(' + json.dumps(attention['target']) + "); await dialog.pressKey('Escape'); await app.getAXState();")
-        js("await app.pressKey('Ctrl+h'); await app.getAXState();")
-        js("await app.waitFor({dialog_title:'Find and Replace',timeout_ms:5000});")
-        attention=snapshot().get('attention');assert attention and attention['title']=='Find and Replace'
-        js('var replace=await cua.getApp('+json.dumps(attention['target'])+');')
+        if case.startswith('dialog'):
+            js("await app.pressKey('Ctrl+h'); var replace=await app.getDialog({title:'Find and Replace',timeout_ms:5000});")
+            assert snapshot()['windowTitle']=='Find and Replace'
+        else:
+            js("await app.pressKey('Ctrl+h'); await app.getAXState();")
+            js("await app.waitFor({dialog_title:'Find and Replace',timeout_ms:5000});")
+            attention=snapshot().get('attention');assert attention and attention['title']=='Find and Replace'
+            js('var replace=await cua.getApp('+json.dumps(attention['target'])+');')
         (d/'dialog-window.json').write_text(json.dumps(snapshot()['window']))
         subprocess.run([str(root/'testing/runtime-result/bin/python3'),str(here/'inspect_ax_relations.py'),str(d/'dialog-window.json'),str(d/'relations.json')],env=env,check=True,timeout=20)
-        if case.startswith('fill'):
+        if case.startswith(('fill','dialog')):
             js("await replace.fillForm({fields:[{name:'Find:',value:'draft'},{name:'Replace:',value:'final'}],submit:{name:'Replace All'}});")
             close=next(e for e in snapshot()['elements'] if e.get('name')=='Close' and e.get('controlType')=='button')
             js(f"await replace.click({close['index']}); await app.pressKey('Ctrl+s'); await app.getAXState();")
