@@ -107,3 +107,5 @@ Field selectors ignore same-name labels and match editable/value controls or tex
 Target PID matching no longer requests every application name first. This avoids a blocked name query preventing access to a healthy target. `HYPR_USE_AX_DEBUG_STACK=1` enables a four-second stack dump in isolated AT-SPI children for private diagnostics; normal operation leaves it disabled.
 
 Within a workflow, the latest preflight or verification snapshot is reused until another mutation. Each indexed action still performs the backend's fresh identity rematch. This avoids duplicate reads without weakening target checks.
+
+`typeText(text,{replaceAll:true,submit:true})` can prepend Ctrl+A and append Enter in one keyboard transaction. Empty replacement clears the selected field. The 4096-key limit includes those extra keys. Workflow key input uses this path automatically where it fits; each complete transaction retains the ordinary popup guard.

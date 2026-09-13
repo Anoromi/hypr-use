@@ -31,3 +31,10 @@ test('large AX changes emit a complete tree while small changes retain diffs',as
  lines[4]='4 button Updated';const small=JSON.parse(await app.getAXState({emit:false}));assert.deepEqual(small.added,['4 button Updated']);assert.deepEqual(small.removed,['4 button New 3']);
  assert.equal(await app.getAXState({emit:false}),'Accessibility state unchanged.');
 });
+
+test('fused typing keeps flags explicit and validates key budget before dispatch',async()=>{
+ const calls=[];const {cua}=createFacade(async(n,a)=>{calls.push([n,a]);return {content:[],structuredContent:{target:'owned'}};},()=>{});
+ const app=await cua.getApp('Editor');await app.typeText('hello',{replaceAll:true,submit:true});
+ assert.deepEqual(calls.at(-1),['type_text',{app:'owned',text:'hello',method:'keys',replace_all:true,submit:true}]);
+ const count=calls.length;await assert.rejects(app.typeText('x'.repeat(4096),{replaceAll:true}),/4096/);await assert.rejects(app.typeText('x',{submit:'yes'}),/booleans/);assert.equal(calls.length,count);
+});

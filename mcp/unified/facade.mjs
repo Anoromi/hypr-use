@@ -75,7 +75,13 @@ export function createFacade(call, output, options={}) {
         key=sequence.map(combination=>combination.split('+').map(t=>['super','cmd','command'].includes(t.toLowerCase())?(options.commandModifier??'ctrl'):(arrowKeys[t.toLowerCase()]??t)).join('+')).join(' ');
         await act('press_key',{key});
       },
-      typeText:async(text)=>act('type_text',{text:string(text,'text'),method:'keys'}),
+      typeText:async(text,opt={})=>{
+        string(text,'text');
+        if(!opt||typeof opt!=='object'||Array.isArray(opt)||Object.keys(opt).some(k=>!['replaceAll','submit'].includes(k))||Object.values(opt).some(v=>typeof v!=='boolean'))throw Error('typeText options must be replaceAll/submit booleans');
+        const keys=text.length+(opt.replaceAll?1:0)+(opt.replaceAll&&!text?1:0)+(opt.submit?1:0);
+        if(keys>4096)throw Error('typeText supports at most 4096 keys including selection/submission; use paste for longer text');
+        await act('type_text',{text,method:'keys',...(opt.replaceAll?{replace_all:true}:{}),...(opt.submit?{submit:true}:{})});
+      },
       paste:async(text,opt={})=>{if(opt.format&&opt.format!=='text')throw Error('Rich paste is not implemented; use format=text');await act('paste_text',{text:string(text,'text')});},
       setValue:async(index,value)=>{const t=targetArgs(index);if(!t.element_index)throw Error('setValue requires element index');await act('set_value',{...t,value:string(value,'value')});},
       selectText:async(index,text,opt={})=>{const t=targetArgs(index);if(!t.element_index)throw Error('selectText requires element index');if(opt.selectionType&&!['text','cursor_before','cursor_after'].includes(opt.selectionType))throw Error('Invalid selectionType');await act('select_text',{...t,text:string(text,'text'),prefix:opt.prefix??'',suffix:opt.suffix??'',selection:opt.selectionType??'text'});},

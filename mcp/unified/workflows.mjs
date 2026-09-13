@@ -49,7 +49,7 @@ export function createWorkflows(app,read,emit,showState){
   const steps=[];let state;
   async function step(label,fn){const start=performance.now();try{const v=await fn();steps.push({step:label,status:'completed',ms:performance.now()-start});return v;}catch(e){steps.push({step:label,status:'failed',ms:performance.now()-start,error:e.message});throw e;}}
   async function refresh(){state=await read();return state;}
-  async function replace(target,text,method,current){
+  async function replace(target,text,method,current,submit=false){
    const e=select(current??await refresh(),target,'field');
    method ??= e.supportsValue===true||(e.editable===true&&e.supportsEditableText===true)?'setValue':'keys';
    if(method==='keys'&&(/[^\x20-\x7e\n\r\t]/.test(text)||text.length>4096))throw Error('Choose method=paste for unsupported or long text');
@@ -57,10 +57,15 @@ export function createWorkflows(app,read,emit,showState){
    if(method==='setValue')await step(`set ${target.name}`,()=>app.setValue(e.index,text));
    else{
     await step(`click ${target.name}`,()=>app.click(e.index));
+    if(method==='keys'&&text.length+1+(submit?1:0)<=4096){
+     await step(`replace ${target.name}${submit?' and submit':''}`,()=>app.typeText(text,{replaceAll:true,submit}));
+     return;
+    }
     await step('select all',()=>app.pressKey('Ctrl+a'));
     if(text)await step(`replace ${target.name}`,()=>method==='paste'?app.paste(text):app.typeText(text));
     else await step('clear selection',()=>app.pressKey('BackSpace'));
    }
+   if(submit)await step('submit',()=>app.pressKey('Return'));
   }
   try{
    let result={status:'completed'};
@@ -73,15 +78,14 @@ export function createWorkflows(app,read,emit,showState){
     }
     if(args.submit){const e=select(state,args.submit);await step('submit form',()=>app.click(e.index));}
    }else if(name==='replace_text'){
-    await replace(args.target,args.text,args.method??'keys');
-    if(args.submit)await step('submit',()=>app.pressKey('Return'));
+    await replace(args.target,args.text,args.method??'keys',undefined,args.submit??false);
    }else if(name==='navigate'){
     await refresh();
     let target=args.address;
     if(!target){const known=['Address and search bar','Search or enter address','Search with Google or enter address'];const found=(state.elements??[]).filter(e=>known.includes(e.name));if(found.length!==1)throw Error('Address bar is ambiguous or unknown; provide address selector');target={name:found[0].name};}
     const e=select(state,target);
     if(args.new_tab){await step('activate address bar',()=>app.click(e.index));await step('new tab',()=>app.pressKey('Ctrl+t'));}
-    await replace(target,args.url,'keys',args.new_tab?undefined:state);await step('navigate',()=>app.pressKey('Return'));
+    await replace(target,args.url,'keys',args.new_tab?undefined:state,true);
     result.status='submitted';
    }else{
     const begin=performance.now(),timeout=args.timeout_ms??10000;let polls=0;

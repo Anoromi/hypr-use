@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createWorkflows,validateWorkflow,workflowTools} from './workflows.mjs';
 function fixture(){
  const calls=[],out=[];let elements=[{index:1,name:'Name',value:'old',editable:true,supportsEditableText:true},{index:2,name:'Email',value:'',editable:true,supportsEditableText:true},{index:3,name:'Save',value:''}];
- const app={setValue:async(i,v)=>{calls.push(['set',i,v]);elements.find(e=>e.index===i).value=v;},click:async i=>calls.push(['click',i]),pressKey:async k=>calls.push(['key',k]),typeText:async t=>calls.push(['text',t]),paste:async t=>calls.push(['paste',t]),getAXState:async()=>calls.push(['observe'])};
+ const app={setValue:async(i,v)=>{calls.push(['set',i,v]);elements.find(e=>e.index===i).value=v;},click:async i=>calls.push(['click',i]),pressKey:async k=>calls.push(['key',k]),typeText:async(t,opt)=>calls.push(['text',t,...(opt?[opt]:[])]),paste:async t=>calls.push(['paste',t]),getAXState:async()=>calls.push(['observe'])};
  const read=async()=>({elements,treeLines:['Ready']});
  return {calls,out,app,elements,workflow:createWorkflows(app,read,v=>out.push(v))};
 }
@@ -27,7 +27,7 @@ test('failed verification stops later mutations and reports partial progress',as
  assert.equal(f.calls.length,0);assert.equal(JSON.parse(f.out[0].text).steps.at(-1).status,'failed');
 });
 test('empty replacement deletes selection; no implicit paste',async()=>{
- const f=fixture();await f.workflow.replaceText({target:{name:'Name'},text:''});assert.deepEqual(f.calls,[['click',1],['key','Ctrl+a'],['key','BackSpace'],['observe']]);
+ const f=fixture();await f.workflow.replaceText({target:{name:'Name'},text:''});assert.deepEqual(f.calls,[['click',1],['text','',{replaceAll:true,submit:false}],['observe']]);
 });
 test('wait condition, dialog target and timeout',async()=>{
  const f=fixture();assert.equal((await f.workflow.waitFor({target:{name:'Name'},value:'old'})).status,'matched');
@@ -42,7 +42,7 @@ test('wait emits its matched snapshot without a second scan',async()=>{
 });
 test('navigate avoids double activation and reports submission only',async()=>{
  const f=fixture();f.elements[0].name='Address and search bar';
- const r=await f.workflow.navigate({url:'https://example.com'});assert.equal(r.status,'submitted');assert.equal(f.calls.filter(c=>c[0]==='click').length,1);assert.deepEqual(f.calls.at(-2),['key','Return']);
+ const r=await f.workflow.navigate({url:'https://example.com'});assert.equal(r.status,'submitted');assert.equal(f.calls.filter(c=>c[0]==='click').length,1);assert.deepEqual(f.calls.at(-2),['text','https://example.com',{replaceAll:true,submit:true}]);
 });
 
 test('prototype property names are rejected as unknown arguments',()=>{
@@ -57,8 +57,8 @@ test('field workflows ignore same-name labels but reject an explicit label',asyn
 
 test('Chromium entry without editable flags uses native keys, not a setter',async()=>{
  const f=fixture();Object.assign(f.elements[0],{controlType:'entry',editable:false,supportsEditableText:false});
- f.app.typeText=async text=>{f.calls.push(['text',text]);f.elements[0].value=text;};
- await f.workflow.fillForm({fields:[{name:'Name',value:'Ada'}]});assert.deepEqual(f.calls.slice(0,3),[['click',1],['key','Ctrl+a'],['text','Ada']]);
+ f.app.typeText=async(text,opt)=>{f.calls.push(['text',text,opt]);f.elements[0].value=text;};
+ await f.workflow.fillForm({fields:[{name:'Name',value:'Ada'}]});assert.deepEqual(f.calls.slice(0,2),[['click',1],['text','Ada',{replaceAll:true,submit:false}]]);
  f.calls.length=0;await assert.rejects(f.workflow.fillForm({fields:[{name:'Name',value:'Ada',method:'setValue'}]}),/no setter/);assert.equal(f.calls.length,0);
 });
 

@@ -62,6 +62,10 @@ try:
    js('await app.fillForm('+json.dumps({'fields':[{'name':'Full name','value':'Grace Hopper',**({'method':method} if method else {})},{'name':'Email','value':'grace@example.test',**({'method':method} if method else {})}],'submit':{'name':'Save profile'}})+');')
   elif case.startswith('workflow-replace'):
    js("await app.replaceText({target:{name:'Note'},text:'alpha DELTA gamma'});")
+   if case.endswith('clear'):
+    state=json.loads((d/'portal.jsonl').read_text().splitlines()[-1])['response']['result']['structuredContent']
+    assert any(e.get('name')=='Note' and e.get('value')=='alpha DELTA gamma' for e in state['elements'])
+    js("await app.replaceText({target:{name:'Note'},text:''});")
    save=next(e for e in observation['elements'] if e['name']=='Save profile');js(f"await app.click({save['index']}); await app.getAXState();")
   elif case.startswith('workflow-nav'):
    js('await app.navigate('+json.dumps({'url':destination})+'); await app.waitFor({text:"heading Second"});')
@@ -87,7 +91,7 @@ try:
   passed=fixture.state.get('date')=='2026-10-21' and fixture.state.get('saved') is True if case.startswith('date') else destination in urls
   if case.startswith('select'):passed=fixture.state.get('note')=='alpha DELTA gamma' and fixture.state.get('saved') is True
   if case.startswith('form'):passed=fixture.state.get('name')=='Grace Hopper' and fixture.state.get('email')=='grace@example.test' and fixture.state.get('saved') is True
-  if case.startswith('workflow-replace'):passed=fixture.state.get('note')=='alpha DELTA gamma' and fixture.state.get('saved') is True
+  if case.startswith('workflow-replace'):passed=fixture.state.get('note')==('' if case.endswith('clear') else 'alpha DELTA gamma') and fixture.state.get('saved') is True
   row={'case':case,'passed':passed,'urls':urls,'steps':steps,'refocus':m.trigger.is_set()}
   if case.startswith(('date','select','form','workflow-replace')):row['state']=fixture.state
   results.append(row);print(json.dumps(row),flush=True)
