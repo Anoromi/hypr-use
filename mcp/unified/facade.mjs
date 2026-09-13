@@ -1,3 +1,4 @@
+import {createWorkflows} from './workflows.mjs';
 export function createFacade(call, output, options={}) {
   const aliases=options.aliases??{};
   const diffs=new Map();
@@ -80,6 +81,7 @@ export function createFacade(call, output, options={}) {
       selectText:async(index,text,opt={})=>{const t=targetArgs(index);if(!t.element_index)throw Error('selectText requires element index');if(opt.selectionType&&!['text','cursor_before','cursor_after'].includes(opt.selectionType))throw Error('Invalid selectionType');await act('select_text',{...t,text:string(text,'text'),prefix:opt.prefix??'',suffix:opt.suffix??'',selection:opt.selectionType??'text'});},
       performSecondaryAction:async(index,action)=>{const t=targetArgs(index);if(!t.element_index)throw Error('Secondary action requires element index');await act('perform_secondary_action',{...t,action:string(action,'action')});}
     };
+    Object.assign(app,createWorkflows(app,async()=> (await observe()).structuredContent,output,state=>ax({structuredContent:state,content:[]},name,{disableDiffing:true})));
     return Object.freeze(app);
   }
   const cua={getApp,listApps:apps,getState:async(opt={})=>{const state={apps:await apps({emit:false}),browsers:[]};if(opt.emit!==false)output({type:'text',text:JSON.stringify(state)});return state;}};

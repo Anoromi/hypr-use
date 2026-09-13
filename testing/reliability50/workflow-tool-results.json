@@ -1,0 +1,219 @@
+{
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "rows": [
+    {
+      "phase": "workflow-tools-v1",
+      "id": "01-profile-name",
+      "passed": true,
+      "seconds": 22.436843633651733,
+      "refocus": false,
+      "source_unchanged": true,
+      "calls": [
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 600.3608869999989
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 1299.1335660000004
+        }
+      ]
+    },
+    {
+      "phase": "workflow-tools-v1",
+      "id": "10-delayed-dialog",
+      "passed": true,
+      "seconds": 60.026411056518555,
+      "refocus": false,
+      "source_unchanged": true,
+      "calls": [
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 624.5817160000006
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 1130.1061660000014
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 106.41261099999974
+        },
+        {
+          "name": "wait_for",
+          "error": false,
+          "milliseconds": 1020.8449900000014
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 452.5385860000024
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 1760.2769350000017
+        }
+      ]
+    },
+    {
+      "phase": "workflow-tools-v1",
+      "id": "12-example",
+      "passed": true,
+      "seconds": 31.043604612350464,
+      "refocus": false,
+      "source_unchanged": true,
+      "calls": [
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 625.2747899999995
+        },
+        {
+          "name": "navigate",
+          "error": false,
+          "milliseconds": 4138.482186000001
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 446.9226669999989
+        }
+      ]
+    },
+    {
+      "phase": "workflow-tools-v1",
+      "id": "21-web-profile",
+      "passed": true,
+      "seconds": 37.450835943222046,
+      "refocus": false,
+      "source_unchanged": true,
+      "calls": [
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 677.015354000001
+        },
+        {
+          "name": "fill_form",
+          "error": false,
+          "milliseconds": 7106.5244109999985
+        }
+      ]
+    },
+    {
+      "phase": "workflow-tools-v2",
+      "id": "10-delayed-dialog",
+      "passed": true,
+      "seconds": 69.38020920753479,
+      "refocus": false,
+      "source_unchanged": true,
+      "calls": [
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 610.3082529999992
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 1087.411712000001
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 118.68028200000117
+        },
+        {
+          "name": "wait_for",
+          "error": false,
+          "milliseconds": 760.1372510000001
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 422.8657069999972
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 1740.6421829999963
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 472.7484540000005
+        }
+      ]
+    },
+    {
+      "phase": "workflow-tools-v2",
+      "id": "11-google",
+      "passed": true,
+      "seconds": 28.09087562561035,
+      "refocus": false,
+      "source_unchanged": true,
+      "calls": [
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 592.7414980000012
+        },
+        {
+          "name": "navigate",
+          "error": false,
+          "milliseconds": 4731.033791999998
+        }
+      ]
+    },
+    {
+      "phase": "workflow-tools-v2",
+      "id": "30-web-edit",
+      "passed": true,
+      "seconds": 48.261444330215454,
+      "refocus": false,
+      "source_unchanged": true,
+      "calls": [
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 669.2847259999999
+        },
+        {
+          "name": "replace_text",
+          "error": false,
+          "milliseconds": 2803.1047039999976
+        },
+        {
+          "name": "js",
+          "error": true,
+          "milliseconds": 1780.1404570000013
+        },
+        {
+          "name": "replace_text",
+          "error": false,
+          "milliseconds": 2807.3875590000025
+        },
+        {
+          "name": "js",
+          "error": false,
+          "milliseconds": 1610.877343
+        }
+      ]
+    }
+  ],
+  "direct_tool_calls": {
+    "js": 20,
+    "wait_for": 2,
+    "navigate": 2,
+    "fill_form": 1,
+    "replace_text": 2
+  },
+  "notes": "Fresh owned apps, fresh CLI threads, independent grades and foreground monitoring. Exploratory adoption tests, not a paired performance benchmark. V2 removes a redundant navigation click and emits the exact matched wait snapshot. No table tool."
+}

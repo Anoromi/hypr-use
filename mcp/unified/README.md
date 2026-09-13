@@ -1,6 +1,6 @@
 # Unified Hypr-use MCP
 
-`node server.mjs` exposes the three tools enabled by the inspected OpenAI unified plugin: `js`, `js_reset`, `turn_ended`. It implements the native-app `cua` surface over Hypr-Agent-Portal. No model API calls or API key are needed by the server.
+`node server.mjs` retains the three tools from the inspected OpenAI unified plugin: `js`, `js_reset`, `turn_ended`. It implements the native-app `cua` surface over Hypr-Agent-Portal. No model API calls or API key are needed by the server.
 
 ```toml
 [mcp_servers.cua_repl]
@@ -81,3 +81,23 @@ Focused before/after Astra runs and controlled action probes are described in `t
 The API instructions now explain the existing keyboard batching support. For a selected spreadsheet cell, `await app.typeText("Total\n=B2*C2\n=B3*C3\n=B4*C4\n")` sends one transaction. Newlines press Enter and tabs press Tab; they are not clipboard insertion. Batch only when the next action does not depend on an intermediate observation. There is no automatic conversion of separate awaited calls into a batch.
 
 `pressKey` accepts both `Down` and `ArrowDown` spellings, likewise Up/Left/Right, including modifier chords. This prevents browser-style arrow names from reaching the native dispatcher as unknown keys.
+
+### Common workflow tools
+
+Four additional MCP tools are available alongside `js`: `fill_form`, `replace_text`, `navigate`, and `wait_for`. The same implementations are exposed as `app.fillForm(options)`, `app.replaceText(options)`, `app.navigate(options)` and `app.waitFor(options)`; omit `app` from the arguments when using an already bound JS app. No table-writing helper is added.
+
+```json
+{"app":"hypr-use-r50-browser","fields":[{"name":"Full name","value":"Grace Hopper"},{"name":"Email","value":"grace@example.test"}],"submit":{"name":"Save profile"}}
+```
+
+Pass that object to `fill_form`. Selectors use an exact accessible name and optional role; ambiguous names fail. Fields are editable text/value controls, not checkboxes or selects. Values are strings. Default field method is `setValue`, verified by AX readback; explicit `keys` and `paste` methods are available.
+
+`replace_text` takes `target`, `text`, optional `method` and boolean `submit`. It replaces the entire field, not every matching word in a document. Native keys are the default. `navigate` takes an http(s) `url`, optional `new_tab` and an `address` selector when its default address-bar names do not match the browser. Navigation returns submitted status; use `wait_for` for a page condition.
+
+`wait_for` takes exactly one of `target` with optional exact `value`, AX substring `text`, or `dialog_title`, plus optional `timeout_ms` up to 30000. It returns the matching element index or related-dialog target where applicable. Observations are bounded polls with a 300 ms minimum interval between scans; an in-progress scan can exceed the deadline. Timeout returns an error.
+
+Workflows validate arguments before mutations, retain ordinary portal identity and background checks, stop on the first error, and return completed-step timings. They are not atomic: completed actions remain applied. They reduce model/tool round trips; they do not remove per-action guard waits or automatically retry failed actions. Final AX is emitted once. Worker cancellation and timeout retain the existing partial-output behavior.
+
+Tests: `node --test mcp/unified/test.mjs mcp/unified/workflows.test.mjs`. Fresh Astra test evidence is under `testing/reliability50/runs/workflow-tools-v1`.
+
+Agent adoption: all four tools were used directly by fresh Astra CLI instances; seven focused runs passed with no refocuses. One old `selectText` call failed and the agent recovered using `replace_text`. See `testing/reliability50/workflow-tools.md`; no paired speedup is claimed.

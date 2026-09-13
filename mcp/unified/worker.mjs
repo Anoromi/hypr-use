@@ -1,3 +1,4 @@
+import {validateWorkflow,workflowMethods} from './workflows.mjs';
 import vm from 'node:vm';
 import {spawn} from 'node:child_process';
 import readline from 'node:readline';
@@ -27,6 +28,7 @@ function rewrite(code){const ast=parse(code,{ecmaVersion:'latest',allowAwaitOuts
  return out+code.slice(last);
 }
 process.on('message',async msg=>{content=[];timings=[];try{if(msg.kind==='cleanup'){await cleanup();process.send({ok:true,content:[],timings});return;}
+ if(msg.kind==='workflow'){validateWorkflow(msg.name,msg.args);const {app:target,...args}=msg.args;const app=await cua.getApp(target);const value=await app[workflowMethods[msg.name]](args);output({type:'text',text:JSON.stringify(value)});process.send({ok:true,content,timings});return;}
  const transformed=rewrite(msg.code);await new vm.Script(`(async()=>{${transformed}\n})()`).runInContext(context,{timeout:Math.min(msg.timeout,1000)});
  while(inFlight.size)await Promise.all([...inFlight]);
  process.send({ok:true,content,timings});
