@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-06",
+  "repository": "gfhdhytghd/Hypr-Agent-Portal",
+  "commit": "bc0b100719dafb8bdf893ace4d3be1d78b1a0876",
+  "note": "Offline fixture checks with inaccessible display/session endpoints; no native plugin loaded.",
+  "results": [
+    {
+      "test": "keyboard_routing.py",
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "test": "mcp_geometry.py",
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "test": "identity_binding.py",
+      "returncode": 0,
+      "output": ""
+    },
+    {
+      "test": "process_lease.py",
+      "returncode": 0,
+      "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.019s\n\nOK\n"
+    }
+  ]
+}

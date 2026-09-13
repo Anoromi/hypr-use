@@ -1,0 +1,271 @@
+diff --git a/src/plugin/main.cpp b/src/plugin/main.cpp
+index 2881342..bc2e585 100644
+--- a/src/plugin/main.cpp
++++ b/src/plugin/main.cpp
+@@ -9,9 +9,6 @@
+ #define private public
+ #include <hyprland/src/Compositor.hpp>
+ #include <hyprland/src/desktop/Workspace.hpp>
+-#include <hyprland/src/desktop/state/GlobalWindowController.hpp>
+-#include <hyprland/src/desktop/state/ViewState.hpp>
+-#include <hyprland/src/desktop/state/WindowState.hpp>
+ #include <hyprland/src/desktop/view/Window.hpp>
+ #include <hyprland/src/event/EventBus.hpp>
+ #include <hyprland/src/helpers/time/Time.hpp>
+@@ -27,8 +24,6 @@
+ #include <hyprland/src/render/Texture.hpp>
+ #include <hyprland/src/render/gl/GLTexture.hpp>
+ #include <hyprland/src/render/pass/TexPassElement.hpp>
+-#include <hyprland/src/state/MonitorState.hpp>
+-#include <hyprland/src/state/WorkspaceState.hpp>
+ #include <hyprland/src/xwayland/XSurface.hpp>
+ #include <hyprland/src/xwayland/XWayland.hpp>
+ #undef private
+@@ -1302,14 +1297,17 @@ CBox windowMainSurfaceGoalBox(const PHLWINDOW& window) {
+     if (!window)
+         return {};
+ 
+-    return window->geometricBox(Desktop::View::IGeometric::GEOMETRIC_GOAL);
++    return CBox{window->m_realPosition ? window->m_realPosition->goal().x : window->m_position.x,
++                window->m_realPosition ? window->m_realPosition->goal().y : window->m_position.y,
++                window->m_realSize ? window->m_realSize->goal().x : window->m_size.x,
++                window->m_realSize ? window->m_realSize->goal().y : window->m_size.y};
+ }
+ 
+ bool sameXWaylandClientFamily(const PHLWINDOW& root, const PHLWINDOW& candidate) {
+     if (!root || !candidate || root == candidate || !root->m_isX11 || !candidate->m_isX11)
+         return false;
+ 
+-    const auto transientFor = candidate->x11Parent();
++    const auto transientFor = candidate->x11TransientFor();
+     if (transientFor && transientFor == root)
+         return true;
+ 
+@@ -1341,7 +1339,7 @@ PHLWINDOW xwaylandRelatedWindowAt(const PHLWINDOW& root, const Vector2D& globalP
+     PHLWINDOW best = root;
+     double    bestArea = std::numeric_limits<double>::infinity();
+ 
+-    for (const auto& candidate : Desktop::windowState()->windows()) {
++    for (const auto& candidate : g_pCompositor->m_windows) {
+         if (!candidate || !candidate->m_isMapped || candidate->isHidden() || !sameXWaylandClientFamily(root, candidate))
+             continue;
+ 
+@@ -1383,6 +1381,7 @@ void constrainRelatedWindowFocusAndLayer(const PHLWINDOW& window) {
+         return;
+ 
+     window->m_noInitialFocus = true;
++    window->m_createdOverFullscreen = false;
+     window->m_suppressedEvents |= Desktop::View::SUPPRESS_ACTIVATE | Desktop::View::SUPPRESS_ACTIVATE_FOCUSONLY;
+ }
+ 
+@@ -1392,7 +1391,34 @@ void restackRelatedWindowWithRoot(const PHLWINDOW& root, const PHLWINDOW& window
+ 
+     constrainRelatedWindowFocusAndLayer(window);
+ 
+-    Desktop::windowState()->raise(window);
++    auto& windows = g_pCompositor->m_windows;
++    auto  windowIt = std::find(windows.begin(), windows.end(), window);
++    if (windowIt == windows.end())
++        return;
++
++    const auto moved = *windowIt;
++    windows.erase(windowIt);
++
++    auto insertionIt = windows.end();
++    if (window->m_isFloating && window->m_workspace) {
++        insertionIt = std::find_if(windows.begin(), windows.end(), [&root, &window](const auto& candidate) {
++            if (!candidate || candidate == root || candidate == window || !candidate->m_isMapped || candidate->isHidden() || !candidate->m_isFloating)
++                return false;
++            if (candidate->m_workspace != window->m_workspace)
++                return false;
++            return !sameClientFamily(root, candidate);
++        });
++    }
++
++    if (insertionIt != windows.end()) {
++        windows.insert(insertionIt, moved);
++    } else {
++        auto rootIt = std::find(windows.begin(), windows.end(), root);
++        if (rootIt == windows.end())
++            windows.push_back(moved);
++        else
++            windows.insert(std::next(rootIt), moved);
++    }
+ 
+     if (g_pHyprRenderer) {
+         g_pHyprRenderer->damageWindow(root);
+@@ -1463,7 +1489,7 @@ void moveRelatedWindowToSessionWorkspace(WorkspaceSession& session, const PHLWIN
+         return;
+ 
+     if (window->m_workspace != targetWorkspace)
+-        Desktop::globalWindowController()->moveWindowToWorkspace(window, targetWorkspace);
++        g_pCompositor->moveWindowToWorkspaceSafe(window, targetWorkspace);
+ 
+     if (root) {
+         restackRelatedWindowWithRoot(root, window);
+@@ -1475,7 +1501,7 @@ void syncWorkspaceSession(WorkspaceSession& session) {
+     if (!g_pCompositor)
+         return;
+ 
+-    for (const auto& window : Desktop::windowState()->windows()) {
++    for (const auto& window : g_pCompositor->m_windows) {
+         if (workspaceSessionMatchesWindow(session, window))
+             moveRelatedWindowToSessionWorkspace(session, window);
+     }
+@@ -1567,7 +1593,7 @@ PHLWINDOW resolveTargetWindow(const std::string& rawSelector) {
+     const auto identity = parseTargetSelectorIdentity(rawSelector);
+     if (!identity.valid)
+         return {};
+-    auto window = Desktop::viewState()->query().selector(identity.selector).mappedOnly().runWindow();
++    auto window = g_pCompositor->getWindowByRegex(identity.selector);
+     // Keep the compositor-owned strong reference while validating the process
+     // identity, so an address cannot be recycled between lookup and use.
+     if (!window || !window->m_isMapped)
+@@ -1605,8 +1631,7 @@ std::optional<TargetSurface> resolveTargetSurface(const std::string& targetRegex
+ 
+     Vector2D local;
+     const auto mainBox = windowMainSurfaceGoalBox(window);
+-    auto [surface, surfaceLocal] = window->wlSurface()->resource()->at(globalPos - mainBox.pos(), true);
+-    local = surfaceLocal;
++    auto surface = g_pCompositor->vectorWindowToSurface(globalPos, window, local);
+     if (!surface && window->wlSurface() && window->wlSurface()->resource()) {
+         local = globalPos - mainBox.pos();
+         surface = window->wlSurface()->resource();
+@@ -2569,7 +2594,7 @@ SDispatchResult dispatchScreenshot(const std::string& args) {
+         // Full capture serializes metadata for every mapped window, including
+         // hidden windows and windows on inactive workspaces. Apply privacy to
+         // that exact superset, not only to windows visible in monitor pixels.
+-        const bool privateMappedWindow = std::ranges::any_of(Desktop::windowState()->windows(), [](const auto& window) {
++        const bool privateMappedWindow = std::ranges::any_of(g_pCompositor->m_windows, [](const auto& window) {
+             return window && window->m_isMapped && screenshotPrivacyDenied(window);
+         });
+         if (privateMappedWindow)
+@@ -2700,9 +2725,9 @@ SDispatchResult manageActionResult(Config::Actions::ActionResult result) {
+ }
+ 
+ PHLWORKSPACE resolveManageWorkspace(const std::string& selector) {
+-    if (!State::workspaceState())
++    if (!g_pCompositor)
+         return {};
+-    return State::workspaceState()->query().string(selector).run();
++    return g_pCompositor->getWorkspaceByString(selector);
+ }
+ 
+ bool validManageWorkspaceName(const std::string& name) {
+@@ -2754,7 +2779,7 @@ SDispatchResult dispatchWorkspaceManage(const std::string& action, const std::ve
+             return {.success = false, .error = "special workspace target is stale or invalid"};
+ 
+         std::vector<PHLMONITOR> visibleOn;
+-        for (const auto& monitor : State::monitorState()->monitors()) {
++        for (const auto& monitor : g_pCompositor->m_monitors) {
+             if (monitor && monitor->activeSpecialWorkspaceID() == workspace->m_id)
+                 visibleOn.push_back(monitor);
+         }
+diff --git a/src/plugin/screenshot_capture.cpp b/src/plugin/screenshot_capture.cpp
+index 48157d9..d0aaa40 100644
+--- a/src/plugin/screenshot_capture.cpp
++++ b/src/plugin/screenshot_capture.cpp
+@@ -6,15 +6,12 @@
+ #define protected public
+ #include <hyprland/src/Compositor.hpp>
+ #include <hyprland/src/desktop/Workspace.hpp>
+-#include <hyprland/src/desktop/state/ViewState.hpp>
+-#include <hyprland/src/desktop/state/WindowState.hpp>
+ #include <hyprland/src/desktop/view/WLSurface.hpp>
+ #include <hyprland/src/helpers/time/Time.hpp>
+ #include <hyprland/src/managers/input/InputManager.hpp>
+ #include <hyprland/src/render/OpenGL.hpp>
+ #include <hyprland/src/render/Renderer.hpp>
+ #include <hyprland/src/render/gl/GLFramebuffer.hpp>
+-#include <hyprland/src/state/MonitorState.hpp>
+ #undef protected
+ #undef private
+ 
+@@ -335,11 +332,11 @@ CBox renderedWindowBox(const PHLWINDOW& window, CBox box) {
+ }
+ 
+ CBox renderedWindowMainSurfaceBox(const PHLWINDOW& window) {
+-    if (!window || !window->positionAnimation() || !window->sizeAnimation())
++    if (!window || !window->m_realPosition || !window->m_realSize)
+         return {};
+ 
+-    CBox box{window->positionAnimation()->goal().x, window->positionAnimation()->goal().y, window->sizeAnimation()->goal().x,
+-             window->sizeAnimation()->goal().y};
++    CBox box{window->m_realPosition->goal().x, window->m_realPosition->goal().y, window->m_realSize->goal().x,
++             window->m_realSize->goal().y};
+     return renderedWindowBox(window, box);
+ }
+ 
+@@ -353,30 +350,30 @@ CBox inputWindowBox(const PHLWINDOW& window, CBox renderedBox) {
+ class WindowAnimationGoalOverride {
+   public:
+     explicit WindowAnimationGoalOverride(const PHLWINDOW& window) : m_window(window) {
+-        if (!m_window || !m_window->positionAnimation() || !m_window->sizeAnimation())
++        if (!m_window || !m_window->m_realPosition || !m_window->m_realSize)
+             return;
+ 
+-        m_position = m_window->positionAnimation()->value();
+-        m_size = m_window->sizeAnimation()->value();
++        m_position = m_window->m_realPosition->value();
++        m_size = m_window->m_realSize->value();
+         m_active = true;
+         setPositionOffset({});
+     }
+ 
+     void setPositionOffset(const Vector2D& offset) {
+-        if (!m_active || !m_window || !m_window->positionAnimation() || !m_window->sizeAnimation())
++        if (!m_active || !m_window || !m_window->m_realPosition || !m_window->m_realSize)
+             return;
+ 
+-        m_window->positionAnimation()->value() = m_window->positionAnimation()->goal() + offset;
+-        m_window->sizeAnimation()->value() = m_window->sizeAnimation()->goal();
++        m_window->m_realPosition->value() = m_window->m_realPosition->goal() + offset;
++        m_window->m_realSize->value() = m_window->m_realSize->goal();
+         m_window->updateWindowDecos();
+     }
+ 
+     ~WindowAnimationGoalOverride() {
+-        if (!m_active || !m_window || !m_window->positionAnimation() || !m_window->sizeAnimation())
++        if (!m_active || !m_window || !m_window->m_realPosition || !m_window->m_realSize)
+             return;
+ 
+-        m_window->positionAnimation()->value() = m_position;
+-        m_window->sizeAnimation()->value() = m_size;
++        m_window->m_realPosition->value() = m_position;
++        m_window->m_realSize->value() = m_size;
+         m_window->updateWindowDecos();
+     }
+ 
+@@ -520,9 +517,12 @@ bool isWindowVisible(const PHLWINDOW& window) {
+ }
+ 
+ Json windowJson(const PHLWINDOW& window) {
+-    CBox visible = window->geometricBox(Desktop::View::IGeometric::GEOMETRIC_GOAL);
++    CBox visible{window->m_realPosition ? window->m_realPosition->goal().x : window->m_position.x,
++                 window->m_realPosition ? window->m_realPosition->goal().y : window->m_position.y,
++                 window->m_realSize ? window->m_realSize->goal().x : window->m_size.x,
++                 window->m_realSize ? window->m_realSize->goal().y : window->m_size.y};
+     const auto full = window->getFullWindowBoundingBox();
+-    const auto transientFor = window->m_isX11 ? window->x11Parent() : PHLWINDOW{};
++    const auto transientFor = window->m_isX11 ? window->x11TransientFor() : PHLWINDOW{};
+ 
+     return Json{
+         {"address", "0x" + pointerId(window.get())},
+@@ -737,7 +737,7 @@ ScreenshotResult captureScreenshotSession(const std::filesystem::path& outputJso
+     }
+ 
+     int        monitorIndex = 0;
+-    for (const auto& monitor : State::monitorState()->monitors()) {
++    for (const auto& monitor : g_pCompositor->m_monitors) {
+         if (!monitor)
+             continue;
+ 
+@@ -761,7 +761,7 @@ ScreenshotResult captureScreenshotSession(const std::filesystem::path& outputJso
+         ++monitorIndex;
+     }
+ 
+-    for (const auto& window : Desktop::windowState()->windows()) {
++    for (const auto& window : g_pCompositor->m_windows) {
+         if (!window || !window->m_isMapped)
+             continue;
+         root["windows"].push_back(windowJson(window));

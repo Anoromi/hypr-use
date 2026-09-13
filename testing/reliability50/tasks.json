@@ -1,0 +1,554 @@
+[
+  {
+    "id": "01-profile-name",
+    "group": "native",
+    "prompt": "Set Name to Ada Lovelace.",
+    "check": {
+      "Name": "Ada Lovelace"
+    }
+  },
+  {
+    "id": "02-contact-options",
+    "group": "native",
+    "prompt": "Set Email to ada@example.test and enable Newsletter.",
+    "check": {
+      "Email": "ada@example.test",
+      "Newsletter": true
+    }
+  },
+  {
+    "id": "03-country",
+    "group": "native",
+    "prompt": "Choose Germany in Country.",
+    "check": {
+      "Country": "Germany"
+    }
+  },
+  {
+    "id": "04-save-note",
+    "group": "native",
+    "prompt": "Write Background automation works in Note and save the note.",
+    "check": {
+      "saved_note": "Background automation works"
+    }
+  },
+  {
+    "id": "05-reopen-note",
+    "group": "native",
+    "prompt": "Replace Note with temporary edit, then reopen the saved note. It should read Original note.",
+    "check": {
+      "Note": "Original note"
+    },
+    "saved_note": "Original note"
+  },
+  {
+    "id": "06-replace-word",
+    "group": "native",
+    "prompt": "Set Note to alpha beta gamma, then replace only beta with DELTA.",
+    "check": {
+      "Note": "alpha DELTA gamma"
+    }
+  },
+  {
+    "id": "07-create-folder",
+    "group": "native",
+    "prompt": "Set Name to project-notes and use the create-folder button.",
+    "check": {
+      "folder": "project-notes"
+    }
+  },
+  {
+    "id": "08-confirm-dialog",
+    "group": "native",
+    "prompt": "Open the confirmation dialog and confirm it.",
+    "check": {
+      "dialog_result": "confirmed"
+    }
+  },
+  {
+    "id": "09-cancel-dialog",
+    "group": "native",
+    "prompt": "Open the confirmation dialog and cancel it.",
+    "check": {
+      "dialog_result": "cancelled"
+    }
+  },
+  {
+    "id": "10-delayed-dialog",
+    "group": "native",
+    "prompt": "Open the confirmation dialog, wait for it to appear, and confirm it.",
+    "check": {
+      "dialog_result": "confirmed"
+    },
+    "delay_ms": 900
+  },
+  {
+    "id": "11-google",
+    "group": "navigation",
+    "prompt": "Open a new tab at https://www.google.com.",
+    "check": {
+      "url_contains": "google.com"
+    }
+  },
+  {
+    "id": "12-example",
+    "group": "navigation",
+    "prompt": "Navigate to https://example.com and report the page heading.",
+    "check": {
+      "url_contains": "example.com",
+      "answer": "Example Domain"
+    }
+  },
+  {
+    "id": "13-wikipedia",
+    "group": "navigation",
+    "prompt": "Navigate to https://en.wikipedia.org/wiki/Ada_Lovelace and report her birth year.",
+    "check": {
+      "url_contains": "Ada_Lovelace",
+      "answer": "1815"
+    }
+  },
+  {
+    "id": "14-iana",
+    "group": "navigation",
+    "prompt": "Navigate to https://www.iana.org/help/example-domains and report the heading.",
+    "check": {
+      "url_contains": "iana.org/help/example-domains",
+      "answer": "Example Domains"
+    }
+  },
+  {
+    "id": "15-python",
+    "group": "navigation",
+    "prompt": "Navigate to https://www.python.org/about/ and report which programming language this site describes.",
+    "check": {
+      "url_contains": "python.org/about",
+      "answer": "Python"
+    }
+  },
+  {
+    "id": "16-restore-tab",
+    "group": "navigation",
+    "prompt": "Bring back the last tab that was closed.",
+    "check": {
+      "tabs": [
+        "/start",
+        "/second",
+        "/third"
+      ]
+    },
+    "closed_tab": true
+  },
+  {
+    "id": "17-back",
+    "group": "navigation",
+    "prompt": "Go to the Second page using its link, then go back to Start.",
+    "check": {
+      "path": "/start",
+      "visited": "/second"
+    }
+  },
+  {
+    "id": "18-forward",
+    "group": "navigation",
+    "prompt": "Visit Second using its link, go back, then go forward again.",
+    "check": {
+      "path": "/second",
+      "visited": "/start"
+    }
+  },
+  {
+    "id": "19-two-tabs",
+    "group": "navigation",
+    "prompt": "Open Second and Third in separate new tabs. Keep Start open.",
+    "check": {
+      "tabs": [
+        "/start",
+        "/second",
+        "/third"
+      ]
+    }
+  },
+  {
+    "id": "20-scroll-target",
+    "group": "navigation",
+    "prompt": "Follow Long article and scroll down to its final section, then report the final code.",
+    "check": {
+      "path": "/article",
+      "answer": "MAPLE-72",
+      "scrolled": true
+    }
+  },
+  {
+    "id": "21-web-profile",
+    "group": "web",
+    "prompt": "Set Full name to Grace Hopper and Email to grace@example.test, then save the profile.",
+    "check": {
+      "name": "Grace Hopper",
+      "email": "grace@example.test",
+      "saved": true
+    }
+  },
+  {
+    "id": "22-web-select",
+    "group": "web",
+    "prompt": "Select Japan as Country and save the profile.",
+    "check": {
+      "country": "Japan",
+      "saved": true
+    }
+  },
+  {
+    "id": "23-web-checks",
+    "group": "web",
+    "prompt": "Enable Email updates and disable SMS updates, then save.",
+    "check": {
+      "updates": true,
+      "sms": false,
+      "saved": true
+    }
+  },
+  {
+    "id": "24-web-radio",
+    "group": "web",
+    "prompt": "Choose Express shipping and save.",
+    "check": {
+      "shipping": "Express",
+      "saved": true
+    }
+  },
+  {
+    "id": "25-web-date",
+    "group": "web",
+    "prompt": "Set Appointment to 2026-10-21 and save.",
+    "check": {
+      "date": "2026-10-21",
+      "saved": true
+    }
+  },
+  {
+    "id": "26-web-modal",
+    "group": "web",
+    "prompt": "Open Review, then confirm the review in the dialog.",
+    "check": {
+      "review": "confirmed"
+    }
+  },
+  {
+    "id": "27-web-filter",
+    "group": "web",
+    "prompt": "Filter products to Accessories and sort by price, lowest first.",
+    "check": {
+      "category": "Accessories",
+      "sort": "ascending"
+    }
+  },
+  {
+    "id": "28-web-cart",
+    "group": "web",
+    "prompt": "Add one Cedar Keyboard and two Birch Mice to the local demo cart. Do not check out.",
+    "check": {
+      "cart": {
+        "Cedar Keyboard": 1,
+        "Birch Mouse": 2
+      }
+    }
+  },
+  {
+    "id": "29-web-compare",
+    "group": "web",
+    "prompt": "Compare Cedar Keyboard and Birch Mouse. Write their combined price in Comparison total and save.",
+    "check": {
+      "total": "75",
+      "saved": true
+    }
+  },
+  {
+    "id": "30-web-edit",
+    "group": "web",
+    "prompt": "Change the note to alpha beta gamma, then replace beta with DELTA and save.",
+    "check": {
+      "note": "alpha DELTA gamma",
+      "saved": true
+    }
+  },
+  {
+    "id": "31-calc-table",
+    "group": "calc",
+    "prompt": "Enter A1:C4 as Product,Quantity,Price / Pens,3,2 / Paper,5,4 / Clips,2,1. Save the existing workbook with Ctrl+S.",
+    "check": {
+      "cells": {
+        "A1": "Product",
+        "B1": "Quantity",
+        "C1": "Price",
+        "A2": "Pens",
+        "B2": "3",
+        "C2": "2",
+        "A3": "Paper",
+        "B3": "5",
+        "C3": "4",
+        "A4": "Clips",
+        "B4": "2",
+        "C4": "1"
+      }
+    },
+    "seed": "empty"
+  },
+  {
+    "id": "32-calc-formula",
+    "group": "calc",
+    "prompt": "Set D1 to Total and D2:D4 to formulas multiplying Quantity by Price for each row. Save the existing workbook with Ctrl+S.",
+    "check": {
+      "cells": {
+        "D1": "Total",
+        "D2": "6",
+        "D3": "20",
+        "D4": "2"
+      },
+      "formulas": [
+        "D2",
+        "D3",
+        "D4"
+      ]
+    },
+    "seed": "table"
+  },
+  {
+    "id": "33-calc-sum",
+    "group": "calc",
+    "prompt": "Set C5 to Grand total and D5 to the SUM of D2:D4. Save the existing workbook with Ctrl+S.",
+    "check": {
+      "cells": {
+        "C5": "Grand total",
+        "D5": "28"
+      },
+      "formulas": [
+        "D5"
+      ]
+    },
+    "seed": "totals"
+  },
+  {
+    "id": "34-calc-average",
+    "group": "calc",
+    "prompt": "Set F1 to Average quantity and F2 to a formula averaging B2:B4. Save the existing workbook with Ctrl+S.",
+    "check": {
+      "cells": {
+        "F1": "Average quantity"
+      },
+      "numeric": {
+        "F2": 3.3333333333333335
+      },
+      "formulas": [
+        "F2"
+      ]
+    },
+    "seed": "totals"
+  },
+  {
+    "id": "35-calc-sort",
+    "group": "calc",
+    "prompt": "Sort A1:D4 by Product ascending, keeping the header. Save the existing workbook with Ctrl+S.",
+    "check": {
+      "cells": {
+        "A1": "Product",
+        "A2": "Clips",
+        "A3": "Paper",
+        "A4": "Pens",
+        "B2": "2",
+        "B3": "5",
+        "B4": "3"
+      }
+    },
+    "seed": "totals"
+  },
+  {
+    "id": "36-calc-bold",
+    "group": "calc",
+    "prompt": "Make A1:D1 bold. Save the existing workbook with Ctrl+S.",
+    "check": {
+      "bold": [
+        "A1",
+        "B1",
+        "C1",
+        "D1"
+      ]
+    },
+    "seed": "totals"
+  },
+  {
+    "id": "37-calc-replace",
+    "group": "calc",
+    "prompt": "Replace Paper in A3 with Notebooks, leaving the numbers unchanged. Save the existing workbook with Ctrl+S.",
+    "check": {
+      "cells": {
+        "A3": "Notebooks",
+        "B3": "5",
+        "C3": "4"
+      }
+    },
+    "seed": "totals"
+  },
+  {
+    "id": "38-calc-sheet-name",
+    "group": "calc",
+    "prompt": "Rename Sheet1 to Inventory. Save the existing workbook with Ctrl+S.",
+    "check": {
+      "sheet": "Inventory"
+    },
+    "seed": "totals"
+  },
+  {
+    "id": "39-calc-chart",
+    "group": "calc",
+    "prompt": "Create a column chart of the products and quantities in A1:B4. Save the existing workbook with Ctrl+S.",
+    "check": {
+      "chart": true
+    },
+    "seed": "totals"
+  },
+  {
+    "id": "40-calc-copy-range",
+    "group": "calc",
+    "prompt": "Copy A1:C4 into F1:H4, preserving the original. Save the existing workbook with Ctrl+S.",
+    "check": {
+      "cells": {
+        "F1": "Product",
+        "G1": "Quantity",
+        "H1": "Price",
+        "F2": "Pens",
+        "G2": "3",
+        "H2": "2",
+        "F3": "Paper",
+        "F4": "Clips",
+        "A1": "Product"
+      }
+    },
+    "seed": "table"
+  },
+  {
+    "id": "41-writer-text",
+    "group": "writer",
+    "prompt": "Replace the document text with Meeting notes followed by a new paragraph saying Discuss the launch schedule. Save the existing document with Ctrl+S.",
+    "check": {
+      "contains": [
+        "Meeting notes",
+        "Discuss the launch schedule."
+      ]
+    },
+    "seed": ""
+  },
+  {
+    "id": "42-writer-append",
+    "group": "writer",
+    "prompt": "Add a final paragraph saying Next review: Friday. Save the existing document with Ctrl+S.",
+    "check": {
+      "contains": [
+        "Project briefing",
+        "Next review: Friday."
+      ]
+    },
+    "seed": "Project briefing\nThe launch is planned for October."
+  },
+  {
+    "id": "43-writer-replace",
+    "group": "writer",
+    "prompt": "Replace every occurrence of draft with final. Save the existing document with Ctrl+S.",
+    "check": {
+      "contains": [
+        "final plan",
+        "final review"
+      ],
+      "absent": [
+        "draft"
+      ]
+    },
+    "seed": "draft plan\nThe draft review is ready."
+  },
+  {
+    "id": "44-writer-bold",
+    "group": "writer",
+    "prompt": "Make the words Project briefing bold. Save the existing document with Ctrl+S.",
+    "check": {
+      "bold_text": "Project briefing"
+    },
+    "seed": "Project briefing\nThe launch is planned for October."
+  },
+  {
+    "id": "45-writer-heading",
+    "group": "writer",
+    "prompt": "Apply Heading 1 style to the first paragraph, Project briefing. Save the existing document with Ctrl+S.",
+    "check": {
+      "heading": "Project briefing"
+    },
+    "seed": "Project briefing\nThe launch is planned for October."
+  },
+  {
+    "id": "46-writer-bullets",
+    "group": "writer",
+    "prompt": "Turn the three paragraphs Apples, Pears, and Plums into a bulleted list. Save the existing document with Ctrl+S.",
+    "check": {
+      "list": true,
+      "contains": [
+        "Apples",
+        "Pears",
+        "Plums"
+      ]
+    },
+    "seed": "Apples\nPears\nPlums"
+  },
+  {
+    "id": "47-writer-table",
+    "group": "writer",
+    "prompt": "Insert a table with two columns and three rows. Save the existing document with Ctrl+S.",
+    "check": {
+      "table_shape": [
+        3,
+        2
+      ]
+    },
+    "seed": ""
+  },
+  {
+    "id": "48-writer-undo",
+    "group": "writer",
+    "prompt": "Append a paragraph saying Keep this addition. Then append another paragraph saying temporary text and undo that last addition. Save the existing document with Ctrl+S.",
+    "check": {
+      "contains": [
+        "Original document",
+        "Keep this addition"
+      ],
+      "absent": [
+        "temporary text"
+      ]
+    },
+    "seed": "Original document"
+  },
+  {
+    "id": "49-writer-unicode",
+    "group": "writer",
+    "prompt": "Replace the document text with Tokyo \u6771\u4eac and Caf\u00e9 r\u00e9sum\u00e9 on separate paragraphs. Save the existing document with Ctrl+S.",
+    "check": {
+      "contains": [
+        "Tokyo \u6771\u4eac",
+        "Caf\u00e9 r\u00e9sum\u00e9"
+      ]
+    },
+    "seed": ""
+  },
+  {
+    "id": "50-writer-delete",
+    "group": "writer",
+    "prompt": "Delete only the middle paragraph Remove this paragraph. Keep the first and last paragraphs. Save the existing document with Ctrl+S.",
+    "check": {
+      "contains": [
+        "First paragraph",
+        "Last paragraph"
+      ],
+      "absent": [
+        "Remove this paragraph"
+      ]
+    },
+    "seed": "First paragraph\nRemove this paragraph\nLast paragraph"
+  }
+]

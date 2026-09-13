@@ -1,0 +1,378 @@
+{
+  "requests": [
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "method": "initialize",
+      "params": {
+        "protocolVersion": "2025-06-18",
+        "capabilities": {},
+        "clientInfo": {
+          "name": "test",
+          "version": "1"
+        }
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "method": "notifications/initialized"
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "method": "tools/list"
+    },
+    [],
+    {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "method": "tools/call",
+      "params": {
+        "name": "type_text",
+        "arguments": {}
+      }
+    }
+  ],
+  "responses": [
+    {
+      "jsonrpc": "2.0",
+      "id": 1,
+      "result": {
+        "protocolVersion": "2025-06-18",
+        "serverInfo": {
+          "name": "hypr-use",
+          "version": "0.1.0"
+        },
+        "capabilities": {
+          "tools": {
+            "listChanged": false
+          }
+        },
+        "instructions": "Linux/Hyprland background computer use. Use Linux app classes or configured aliases. Call get_app_state before interacting; element IDs and coordinates belong to that snapshot. Mac super/cmd/command modifiers map to ctrl. No app launch, recording or computer-history tools are provided. App support and focus isolation depend on the portal plugin; errors are not evidence of completion."
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "result": {
+        "tools": [
+          {
+            "name": "list_apps",
+            "description": "List running Linux applications/windows. No usage history is collected.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "readOnlyHint": true,
+              "openWorldHint": true
+            }
+          },
+          {
+            "name": "get_app_state",
+            "description": "Get a screenshot and AT-SPI accessibility tree. Call before interacting with an app. IDs and pixel coordinates refer to this snapshot.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "app": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "app"
+              ],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "readOnlyHint": true,
+              "openWorldHint": true
+            }
+          },
+          {
+            "name": "click",
+            "description": "Click an element_index or screenshot pixel x,y in the target app.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "app": {
+                  "type": "string"
+                },
+                "element_index": {
+                  "type": "string"
+                },
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                },
+                "click_count": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "mouse_button": {
+                  "type": "string",
+                  "enum": [
+                    "left",
+                    "right",
+                    "middle"
+                  ]
+                }
+              },
+              "required": [
+                "app"
+              ],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "readOnlyHint": false,
+              "openWorldHint": true
+            }
+          },
+          {
+            "name": "perform_secondary_action",
+            "description": "Invoke an accessibility action exposed by the selected element.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "app": {
+                  "type": "string"
+                },
+                "element_index": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "app",
+                "element_index",
+                "action"
+              ],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "readOnlyHint": false,
+              "openWorldHint": true
+            }
+          },
+          {
+            "name": "set_value",
+            "description": "Set a writable accessibility element value.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "app": {
+                  "type": "string"
+                },
+                "element_index": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "app",
+                "element_index",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "readOnlyHint": false,
+              "openWorldHint": true
+            }
+          },
+          {
+            "name": "select_text",
+            "description": "Select matching text, or place the caret before/after it. Optional prefix/suffix disambiguate. Uses the focused text element when element_index is omitted. Requires AT-SPI Text support.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "app": {
+                  "type": "string"
+                },
+                "element_index": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "prefix": {
+                  "type": "string"
+                },
+                "suffix": {
+                  "type": "string"
+                },
+                "selection": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "cursor_before",
+                    "cursor_after"
+                  ]
+                }
+              },
+              "required": [
+                "app",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "readOnlyHint": false,
+              "openWorldHint": true
+            }
+          },
+          {
+            "name": "scroll",
+            "description": "Scroll an element up/down/left/right by pages; fractional pages are supported.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "app": {
+                  "type": "string"
+                },
+                "element_index": {
+                  "type": "string"
+                },
+                "direction": {
+                  "type": "string",
+                  "enum": [
+                    "up",
+                    "down",
+                    "left",
+                    "right"
+                  ]
+                },
+                "pages": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "app",
+                "element_index",
+                "direction"
+              ],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "readOnlyHint": false,
+              "openWorldHint": true
+            }
+          },
+          {
+            "name": "drag",
+            "description": "Drag between screenshot pixel coordinates in the target app.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "app": {
+                  "type": "string"
+                },
+                "from_x": {
+                  "type": "number"
+                },
+                "from_y": {
+                  "type": "number"
+                },
+                "to_x": {
+                  "type": "number"
+                },
+                "to_y": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "app",
+                "from_x",
+                "from_y",
+                "to_x",
+                "to_y"
+              ],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "readOnlyHint": false,
+              "openWorldHint": true
+            }
+          },
+          {
+            "name": "press_key",
+            "description": "Press xdotool-style keys, e.g. Return, Tab, ctrl+l. Mac super/cmd/command maps to the configured Linux modifier (default ctrl).",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "app": {
+                  "type": "string"
+                },
+                "key": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "app",
+                "key"
+              ],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "readOnlyHint": false,
+              "openWorldHint": true
+            }
+          },
+          {
+            "name": "type_text",
+            "description": "Type literal text into the target app.",
+            "inputSchema": {
+              "type": "object",
+              "properties": {
+                "app": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "app",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "annotations": {
+              "readOnlyHint": false,
+              "openWorldHint": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": null,
+      "error": {
+        "code": -32600,
+        "message": "Invalid JSON-RPC request"
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Missing argument: app"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "stderr": ""
+}

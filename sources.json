@@ -1,0 +1,53 @@
+{
+  "researched_on": "2026-09-06",
+  "repositories": [
+    {
+      "name": "OSWorld-V2",
+      "repository": "https://github.com/xlang-ai/OSWorld-V2.git",
+      "commit": "1c81bd34b2cbbb50d8db5b6948a956870e8e707c",
+      "commit_date": "2026-09-03T08:57:41+08:00"
+    },
+    {
+      "name": "hypruse",
+      "repository": "https://github.com/IlyasKhallouki/hypruse.git",
+      "commit": "7dd11acae0a5631825907f0ba8340dd4088998c4",
+      "commit_date": "2026-08-31T19:49:08+01:00"
+    },
+    {
+      "name": "codex",
+      "repository": "https://github.com/openai/codex.git",
+      "commit": "ac192cd7937b0d73edc6dffe009940ae53782dd4",
+      "commit_date": "2026-09-06T07:42:32Z"
+    },
+    {
+      "name": "open-codex-computer-use",
+      "repository": "https://github.com/iFurySt/open-codex-computer-use.git",
+      "commit": "41c5294cfe4735baca03f9c82b4de99d191a0b49",
+      "commit_date": "2026-09-01T14:30:20+08:00"
+    },
+    {
+      "name": "Hypr-Agent-Protal",
+      "repository": "https://github.com/gfhdhytghd/Hypr-Agent-Portal.git",
+      "commit": "bc0b100719dafb8bdf893ace4d3be1d78b1a0876",
+      "commit_date": "2026-08-31T01:17:46-04:00"
+    },
+    {
+      "name": "codex-computer-use-cli",
+      "repository": "https://github.com/paralym/codex-computer-use-cli.git",
+      "commit": "5beb857c04c4887f81f6484f13e8559cf68aacbb",
+      "commit_date": "2026-05-02T18:18:00+08:00"
+    },
+    {
+      "name": "hyprland-codex-background-computer-use",
+      "repository": "https://github.com/Gabriel-Kahen/hyprland-codex-background-computer-use.git",
+      "commit": "cca71f282fe742519046f568143a00a6eb27de36",
+      "commit_date": "2026-07-10T14:24:38-04:00"
+    },
+    {
+      "name": "OSWorld",
+      "repository": "https://github.com/xlang-ai/OSWorld.git",
+      "commit": "fc31a9049664292fcb35d6e501ee1dc839f2cf6d",
+      "commit_date": "2026-08-30T17:41:42+08:00"
+    }
+  ]
+}

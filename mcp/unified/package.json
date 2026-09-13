@@ -1,0 +1,1 @@
+{"name":"hypr-use-unified","version":"0.2.0","private":true,"type":"module","dependencies":{"acorn":"8.15.0"},"scripts":{"test":"node --test test.mjs"}}

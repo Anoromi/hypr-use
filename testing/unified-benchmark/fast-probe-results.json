@@ -1,0 +1,54 @@
+{
+  "ax": {
+    "seconds": [
+      0.3733270530000001,
+      0.28593547999999985,
+      0.32333480399999986,
+      0.216410073,
+      0.6620837170000002
+    ],
+    "median_s": 0.32333480399999986,
+    "max_s": 0.6620837170000002,
+    "p95_nearest_rank_s": 0.6620837170000002
+  },
+  "screenshot": {
+    "seconds": [
+      3.681016842,
+      3.4108487510000005,
+      4.308164959,
+      4.140893841,
+      4.363706633000001
+    ],
+    "median_s": 4.140893841,
+    "max_s": 4.363706633000001,
+    "p95_nearest_rank_s": 4.363706633000001
+  },
+  "set-value": {
+    "seconds": [
+      1.087091169,
+      1.3825004760000001,
+      1.4709434880000003,
+      1.3372224230000003,
+      1.3293230349999994
+    ],
+    "median_s": 1.3372224230000003,
+    "max_s": 1.4709434880000003,
+    "p95_nearest_rank_s": 1.4709434880000003
+  },
+  "key": {
+    "status": "failed",
+    "response": "/home/anoromi/code/experiments/hypr-use/testing/unified-benchmark/validation/fast-probe-key/response.json",
+    "retry": {
+      "seconds": [
+        0.4107325500000001,
+        0.41726477299999987,
+        0.41265122299999984,
+        0.49952466000000006,
+        0.5570546129999998
+      ],
+      "median_s": 0.41726477299999987,
+      "max_s": 0.5570546129999998,
+      "note": "Five successful repetitions after closing verified saved private Calc. Initial seat-grab rejection retained; grab owner not identified."
+    }
+  }
+}

@@ -1,0 +1,6 @@
+# Preserve recordings locally; they can include unrelated desktop window titles.
+runs/
+diagnostics/
+launch-validation/
+general-fix-backup/
+*.log

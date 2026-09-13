@@ -1,0 +1,290 @@
+{
+  "previous": {
+    "phase": "astra-optimized",
+    "tasks": 24,
+    "supported": 20,
+    "wall_s": 2245.68603682518,
+    "tool_s": 1212.957311341,
+    "outside_tools_s": 1032.7287254841801,
+    "js_calls": 117,
+    "images": 24,
+    "text_chars": 2701056,
+    "metadata_chars": 1276435,
+    "task_timeouts": 3,
+    "raw_focus_alarms": 0,
+    "confirmed_agent_refocus": 0,
+    "observer_errors": 0,
+    "stage_self_s": {
+      "call_ctl": 671.3763988850001,
+      "atspi_snapshot_isolated": 273.165670801,
+      "global_menu_for_window": 128.19795818299997,
+      "sleep": 107.120180744,
+      "build_app_snapshot": 0.3803724889999969,
+      "resolve_hypr_window": 0.139565615,
+      "refresh_snapshot_geometry": 0.03985638600000011,
+      "screenshot_for_window": 0.03607413199999814,
+      "build_security_request": 0.027479361000000004,
+      "mcp_snapshot_result": 0.025085009000000002,
+      "snapshot_after_action": 0.023554227000003494,
+      "type_with_keys": 0.016180626999991225,
+      "related_windows_for": 0.012763563999999995,
+      "keyboard": 0.010145846000000432,
+      "attach_active_related_preview": 0.0038292259999999157,
+      "control_overlay": 0.0037054079999999487,
+      "current_snapshot": 0.0020441269999999746,
+      "audit_security_call": 0.0012495979999999998,
+      "type_text": 0.0005649339999966969,
+      "prepare_grid_bulk_paste": 0.0004650409999999887
+    },
+    "stage_counts": {
+      "resolve_hypr_window": 913,
+      "call_ctl": 3881,
+      "build_security_request": 223,
+      "build_app_snapshot": 211,
+      "related_windows_for": 932,
+      "atspi_snapshot_isolated": 211,
+      "global_menu_for_window": 211,
+      "attach_active_related_preview": 211,
+      "mcp_snapshot_result": 209,
+      "audit_security_call": 223,
+      "current_snapshot": 205,
+      "refresh_snapshot_geometry": 244,
+      "control_overlay": 119,
+      "snapshot_after_action": 140,
+      "sleep": 1328,
+      "prepare_grid_bulk_paste": 31,
+      "type_text": 28,
+      "type_with_keys": 28,
+      "keyboard": 636,
+      "screenshot_for_window": 27
+    },
+    "control_context_s": {
+      "handler/session/policy": 318.41977714600006,
+      "keyboard": 118.834519531,
+      "screenshot_for_window": 77.883917786,
+      "related_windows_for": 67.441633662,
+      "resolve_hypr_window": 66.29298732999999,
+      "control_overlay": 22.075360789999998,
+      "snapshot_after_action": 0.42820264
+    }
+  },
+  "latest": {
+    "phase": "astra-fast",
+    "tasks": 24,
+    "supported": 23,
+    "wall_s": 1723.485370874405,
+    "tool_s": 675.5535443819999,
+    "outside_tools_s": 1047.931826492405,
+    "js_calls": 141,
+    "images": 41,
+    "text_chars": 2695239,
+    "metadata_chars": 1943716,
+    "task_timeouts": 0,
+    "raw_focus_alarms": 1,
+    "confirmed_agent_refocus": 0,
+    "observer_errors": 0,
+    "stage_self_s": {
+      "atspi_snapshot_isolated": 302.18916479,
+      "call_ctl": 182.83710241400001,
+      "global_menu_for_window": 76.8166012,
+      "finish_related_action_session": 50.26977539399999,
+      "control_request": 28.56033733399999,
+      "sleep": 12.026219279,
+      "build_app_snapshot": 1.4876522650000048,
+      "resolve_hypr_window": 0.18419964700000005,
+      "mcp_snapshot_result": 0.098123473,
+      "screenshot_for_window": 0.06277313500000171,
+      "refresh_snapshot_geometry": 0.03435987800000001,
+      "build_security_request": 0.03411001500000001,
+      "snapshot_after_action": 0.02427544000000023,
+      "type_with_keys": 0.02275674300000067,
+      "attach_active_related_preview": 0.01958439700000003,
+      "keyboard": 0.011910003999999929,
+      "related_windows_for": 0.005617931999999997,
+      "control_overlay": 0.003971354000000002,
+      "audit_security_call": 0.002736476,
+      "current_snapshot": 0.0015497879999999986,
+      "begin_related_action_session": 0.0014235540000000096,
+      "type_text": 0.0004835920000000442,
+      "prepare_grid_bulk_paste": 0.00017331500000000233
+    },
+    "stage_counts": {
+      "resolve_hypr_window": 1227,
+      "call_ctl": 3659,
+      "control_request": 4793,
+      "build_security_request": 296,
+      "build_app_snapshot": 187,
+      "related_windows_for": 614,
+      "atspi_snapshot_isolated": 150,
+      "global_menu_for_window": 150,
+      "attach_active_related_preview": 187,
+      "mcp_snapshot_result": 284,
+      "audit_security_call": 298,
+      "current_snapshot": 209,
+      "refresh_snapshot_geometry": 259,
+      "begin_related_action_session": 152,
+      "control_overlay": 130,
+      "snapshot_after_action": 152,
+      "finish_related_action_session": 152,
+      "type_text": 22,
+      "type_with_keys": 22,
+      "keyboard": 747,
+      "sleep": 679,
+      "screenshot_for_window": 42,
+      "prepare_grid_bulk_paste": 2
+    },
+    "control_context_s": {
+      "screenshot_for_window": 181.30911538,
+      "handler/session/policy": 19.509840837000002,
+      "keyboard": 4.52937046,
+      "resolve_hypr_window": 1.9186461060000002,
+      "finish_related_action_session": 1.575458096,
+      "begin_related_action_session": 1.4448161290000001,
+      "related_windows_for": 0.8681855849999999,
+      "control_overlay": 0.239972216,
+      "snapshot_after_action": 0.002034939
+    }
+  },
+  "matched_successes": {
+    "tasks": [
+      "01-form-name",
+      "02-form-email",
+      "03-form-country",
+      "04-note-save",
+      "05-note-reopen",
+      "06-text-selection",
+      "07-create-folder",
+      "08-dialog-confirm",
+      "09-google",
+      "10-wikipedia",
+      "11-browser-find",
+      "13-browser-tabs",
+      "14-web-extract",
+      "15-web-scroll",
+      "16-amazon-compare",
+      "17-manufacturer-compare",
+      "18-calc-table",
+      "19-calc-formulas",
+      "20-calc-sum",
+      "21-calc-sort"
+    ],
+    "before_s": 1704.1476707458496,
+    "after_s": 1312.6337864398956,
+    "change_pct": -22.97417594888366
+  },
+  "probes": {
+    "probe-results": {
+      "ax": {
+        "seconds": [
+          1.5618992289999998,
+          1.606074029,
+          1.3915705680000001,
+          1.401394268,
+          1.744619815000001
+        ],
+        "median_s": 1.5618992289999998,
+        "max_s": 1.744619815000001,
+        "p95_nearest_rank_s": 1.744619815000001
+      },
+      "screenshot": {
+        "seconds": [
+          5.698647939000001,
+          5.658561397000001,
+          5.818366514000001,
+          5.805876896000002,
+          5.78704938
+        ],
+        "median_s": 5.78704938,
+        "max_s": 5.818366514000001,
+        "p95_nearest_rank_s": 5.818366514000001
+      },
+      "set-value": {
+        "seconds": [
+          6.553868167000001,
+          6.049364021,
+          5.8053154619999985,
+          5.940955987999998,
+          5.973326939000002
+        ],
+        "median_s": 5.973326939000002,
+        "max_s": 6.553868167000001,
+        "p95_nearest_rank_s": 6.553868167000001
+      },
+      "key": {
+        "seconds": [
+          5.9469235430000005,
+          5.8173152570000015,
+          5.846989179,
+          5.603848869000001,
+          5.908281267000002
+        ],
+        "median_s": 5.846989179,
+        "max_s": 5.9469235430000005,
+        "p95_nearest_rank_s": 5.9469235430000005,
+        "note": "Initial probe blocked by an active seat grab. Retry passed after closing the benchmark-owned Calc process. This does not prove which client owned the grab; fixture geometry also changed after Calc closed."
+      },
+      "scope": "Five sequential warm-worker operations per category, after the model phases. Each category starts with getApp, excluded from timings. Fixture only; screenshots include AX gathering. Five samples cannot estimate a stable tail. No refocus detected."
+    },
+    "fast-probe-results": {
+      "ax": {
+        "seconds": [
+          0.3733270530000001,
+          0.28593547999999985,
+          0.32333480399999986,
+          0.216410073,
+          0.6620837170000002
+        ],
+        "median_s": 0.32333480399999986,
+        "max_s": 0.6620837170000002,
+        "p95_nearest_rank_s": 0.6620837170000002
+      },
+      "screenshot": {
+        "seconds": [
+          3.681016842,
+          3.4108487510000005,
+          4.308164959,
+          4.140893841,
+          4.363706633000001
+        ],
+        "median_s": 4.140893841,
+        "max_s": 4.363706633000001,
+        "p95_nearest_rank_s": 4.363706633000001
+      },
+      "set-value": {
+        "seconds": [
+          1.087091169,
+          1.3825004760000001,
+          1.4709434880000003,
+          1.3372224230000003,
+          1.3293230349999994
+        ],
+        "median_s": 1.3372224230000003,
+        "max_s": 1.4709434880000003,
+        "p95_nearest_rank_s": 1.4709434880000003
+      },
+      "key": {
+        "status": "failed",
+        "response": "/home/anoromi/code/experiments/hypr-use/testing/unified-benchmark/validation/fast-probe-key/response.json",
+        "retry": {
+          "seconds": [
+            0.4107325500000001,
+            0.41726477299999987,
+            0.41265122299999984,
+            0.49952466000000006,
+            0.5570546129999998
+          ],
+          "median_s": 0.41726477299999987,
+          "max_s": 0.5570546129999998,
+          "note": "Five successful repetitions after closing verified saved private Calc. Initial seat-grab rejection retained; grab owner not identified."
+        }
+      }
+    }
+  },
+  "limits": [
+    "Single model attempt per task, dependent Calc state, and retained browser tabs.",
+    "Outside-tool time includes model generation, startup, scheduling and transport.",
+    "call_ctl self time in latest excludes the new control_request child. Sum both for comparable control work.",
+    "Control command screenshot time includes Python rendering and PNG processing, not just IPC.",
+    "Text and timing metadata character counts are serialized output sizes, not confirmed model token costs."
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "hyprland": "0.55.4",
+  "commit": "a0136d8c04687bb36eb8a28eb9d1ff92aea99704",
+  "portal": "0.4.0 + local 0.55 compatibility patch",
+  "isolation": "Separate Hyprland on headless Cage, XWayland disabled",
+  "offlineScriptsPassed": 17,
+  "fixture": {
+    "text": "portal test",
+    "confirmed": true
+  },
+  "focusSamples": 120,
+  "focusTitles": [
+    "hypr-use focus sentinel"
+  ],
+  "cursorPositions": [
+    "{\"x\": 640, \"y\": 400}"
+  ],
+  "workspaceIds": [
+    1
+  ],
+  "finalFocus": "hypr-use focus sentinel",
+  "finalCursor": {
+    "x": 640,
+    "y": 400
+  },
+  "finalWorkspace": 1,
+  "codexClickReport": "Verified:\n\n- Screenshot: 613\u00d7758\n- Button bounds: x30..583, y123..157\n- Clicked center [306,140]\n- Result: \u201cRecorded: portal test\u201d appears\n- Focus sentinel remained foreground",
+  "limitations": [
+    "AT-SPI unavailable in isolated session; screenshot coordinates used.",
+    "Initial model click missed the button. Corrected screenshot coordinates succeeded.",
+    "No plugin loaded into the real desktop; existing host applications and concurrent physical input not tested."
+  ]
+}

@@ -1,0 +1,58 @@
+diff --git a/mcp/hypr-agent-portal-mcp.py b/mcp/hypr-agent-portal-mcp.py
+index 84175d4..7b1b9be 100755
+--- a/mcp/hypr-agent-portal-mcp.py
++++ b/mcp/hypr-agent-portal-mcp.py
+@@ -4100,6 +4100,13 @@ def key_from_args(args: dict[str, Any]) -> tuple[str, str]:
+     if not isinstance(key, str) or not key:
+         raise RuntimeError("key action requires key or keys")
+     modifiers = args.get("modifiers") if isinstance(args.get("modifiers"), str) else ""
++    # The public `key` field documents shortcuts such as ctrl+t, too.
++    if "+" in key:
++        parts = key.split("+")
++        if any(not part for part in parts):
++            raise RuntimeError("empty component in key shortcut")
++        key = parts[-1]
++        modifiers = "+".join([*parts[:-1], *([modifiers] if modifiers else [])])
+     return key, modifiers
+ 
+ 
+diff --git a/scripts/hypr-agent-portalctl b/scripts/hypr-agent-portalctl
+index f9da979..23446b3 100755
+--- a/scripts/hypr-agent-portalctl
++++ b/scripts/hypr-agent-portalctl
+@@ -661,7 +661,10 @@ def dispatch(dispatcher: str, payload: str = "") -> subprocess.CompletedProcess:
+     if is_lua_config_provider():
+         lua_dispatcher = lua_plugin_dispatcher(dispatcher, payload)
+         if lua_dispatcher:
+-            return subprocess.run(["hyprctl", "dispatch", lua_dispatcher], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=hyprctl_environment(), check=False)
++            # Hyprland eval discards return values, including {ok=false}.
++            # Raise at the outer Lua boundary so hyprctl exits nonzero.
++            checked = f"local result = hl.dispatch({lua_dispatcher}); assert(type(result) == 'table', 'missing dispatcher result'); assert(result.ok, result.error or 'plugin dispatch failed')"
++            return subprocess.run(["hyprctl", "eval", checked], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=hyprctl_environment(), check=False)
+         return subprocess.CompletedProcess(
+             ["hyprctl", "dispatch", dispatcher],
+             1,
+diff --git a/tests/hypr_management.py b/tests/hypr_management.py
+index 5cfcf56..1113d88 100644
+--- a/tests/hypr_management.py
++++ b/tests/hypr_management.py
+@@ -507,14 +507,13 @@ class HyprManagementTests(unittest.TestCase):
+         lua_manage_calls = [
+             call
+             for call in lua_calls
+-            if call[:2] == ("hyprctl", "dispatch")
++            if call[:2] == ("hyprctl", "eval")
+             and len(call) >= 3
+-            and call[2].startswith("hl.plugin.hypr_agent_portal.manage(")
++            and "hl.plugin.hypr_agent_portal.manage(" in call[2]
+         ]
+-        self.assertEqual(
+-            lua_manage_calls,
+-            [("hyprctl", "dispatch", 'hl.plugin.hypr_agent_portal.manage("focus,address:0xabc@pid=101@start=1001")')],
+-        )
++        self.assertEqual(len(lua_manage_calls), 1)
++        self.assertIn('hl.dispatch(hl.plugin.hypr_agent_portal.manage("focus,address:0xabc@pid=101@start=1001"))', lua_manage_calls[0][2])
++        self.assertIn("assert(result.ok,", lua_manage_calls[0][2])
+         self.assertEqual(
+             portalctl.lua_plugin_dispatcher("hypr-agent-protal:manage", "workspace_activate,name:dev"),
+             'hl.plugin.hypr_agent_protal.manage("workspace_activate,name:dev")',

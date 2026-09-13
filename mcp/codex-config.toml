@@ -1,0 +1,11 @@
+# Merge this table into your Codex config to enable this server.
+[mcp_servers.computer-use]
+command = "python3"
+args = ["/home/anoromi/code/experiments/hypr-use/mcp/run-local.py"]
+
+[mcp_servers.computer-use.env]
+HYPR_AGENT_PORTAL_PERMISSION_MODE = "full"
+HYPR_AGENT_PORTAL_APPROVAL_POLICY = "never"
+HYPR_USE_COMMAND_MODIFIER = "ctrl"
+# Optional explicit mapping. There are no built-in macOS-to-Linux app guesses.
+HYPR_USE_APP_ALIASES = '{"Zen": "zen", "Firefox": "zen"}'

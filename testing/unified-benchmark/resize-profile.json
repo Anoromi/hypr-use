@@ -1,0 +1,19 @@
+{
+  "python": {
+    "seconds": 2.447570093005197,
+    "bytes": 3686400
+  },
+  "gdk_pixbuf": {
+    "seconds": 0.02156464199651964,
+    "bytes": 3686400
+  },
+  "max_channel_difference": 21,
+  "mean_channel_difference": 0.1607421875,
+  "dimensions": [
+    1920,
+    1080,
+    1280,
+    720
+  ],
+  "scope": "Synthetic offline image; native bilinear uses a different downsampling filter."
+}

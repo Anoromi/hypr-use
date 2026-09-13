@@ -1,0 +1,17 @@
+/vendor/hypr-agent-portal/
+__pycache__/
+node_modules/
+
+/testing/*-result
+/testing/session/
+/testing/*.log
+/testing/*.jsonl
+/testing/*.stderr
+
+/testing/live-session/
+
+/vendor/hypr-agent-portal-0.56.2/
+
+/testing/debug/
+
+/testing/calc-session/

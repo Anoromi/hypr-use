@@ -1,0 +1,228 @@
+diff --git a/README.md b/README.md
+index d32e312..8b36eee 100644
+--- a/README.md
++++ b/README.md
+@@ -315,7 +315,48 @@ pointer work. `HUMAN_TAKEOVER_COOLDOWN` is a server-local policy signal for
+ explicitly recorded takeover activity, not compositor feedback that turns all
+ physical input into a global MCP cooldown.
+ 
+-High-risk actions such as submit/delete/purchase-style clicks, destructive
++### Permission modes
++
++Set the server's `HYPR_AGENT_PORTAL_PERMISSION_MODE` environment variable before
++starting its MCP process. Restart the server after changing it.
++
++| Mode | Application permission default | Confirmation default |
++| --- | --- | --- |
++| `standard` (default) | View-only unless explicitly authorized | External confirmation for high-risk actions |
++| `read-only` | Observation only; mutation tools hidden | Mutations disabled |
++| `full` (alias `unrestricted`) | Full application and clipboard access | No confirmation prompts |
++
++`full` permits launches, input, saves and high-risk actions without a token.
++It also disables server-level global input-grab, layer and takeover gates.
++It supplies defaults; explicitly configured app permissions, confinement,
++clipboard restrictions and read-only settings still apply. Panic, session-lock
++handling, target identity validation and input serialization are runtime controls
++and remain active. This is a server authorization setting, not a native plugin
++ABI or sandbox change.
++
++For partial access without prompts, keep `standard`, authorize the desired apps,
++and set `HYPR_AGENT_PORTAL_APPROVAL_POLICY=never`. The other value, `external`,
++retains physical confirmation. Canonical `SECURITY_PERMISSION_MODE` and
++`SECURITY_APPROVAL_POLICY` names take precedence over short aliases. Invalid
++values reject startup. `security_status` reports the effective permission mode
++and confirmation policy. Tool arguments cannot change these settings.
++
++Example Codex configuration:
++
++```toml
++[mcp_servers.hypr_agent_portal]
++command = "python3"
++args = ["/absolute/path/to/mcp/hypr-agent-portal-mcp.py"]
++default_tools_approval_mode = "approve"
++
++[mcp_servers.hypr_agent_portal.env]
++HYPR_AGENT_PORTAL_PERMISSION_MODE = "full"
++```
++
++Codex's `default_tools_approval_mode` controls the client's prompts. Portal's
++permission mode controls the server's authorization. They are independent.
++
++With the default `external` approval policy, high-risk actions such as submit/delete/purchase-style clicks, destructive
+ shortcuts, and clearing the panic latch return `confirmation_required`. Call
+ `request_confirmation` with the exact tool name and exact arguments. It returns
+ a pending challenge ID, not a self-authorizing token. A person must run the
+diff --git a/mcp/security_policy.py b/mcp/security_policy.py
+index 265b090..d06ec3c 100644
+--- a/mcp/security_policy.py
++++ b/mcp/security_policy.py
+@@ -255,6 +255,9 @@ class ConfinementConfig:
+ 
+ @dataclass(frozen=True)
+ class PolicyConfig:
++    # Server-owner configuration, never a per-call agent argument.
++    permission_mode: str = "standard"
++    approval_policy: str = "external"
+     readonly: bool = False
+     dry_run: bool = False
+     confinement: ConfinementConfig = field(default_factory=ConfinementConfig)
+@@ -290,6 +293,10 @@ class PolicyConfig:
+     )
+ 
+     def __post_init__(self) -> None:
++        if self.permission_mode not in {"standard", "read-only", "full"}:
++            raise ValueError("permission mode must be standard, read-only, or full")
++        if self.approval_policy not in {"external", "never"}:
++            raise ValueError("approval policy must be external or never")
+         if self.mutation_lease_ttl_seconds <= 0:
+             raise ValueError("mutation lease TTL must be positive")
+         if self.confirmation_ttl_seconds <= 0:
+@@ -828,7 +835,8 @@ class SecurityPolicy:
+                 "dryRun": self.config.dry_run,
+                 "defaultAuthorization": self.config.default_authorization.name.lower(),
+                 "confinementEnabled": self.config.confinement.enabled,
+-                "confirmationMode": "external",
++                "permissionMode": self.config.permission_mode,
++                "confirmationMode": self.config.approval_policy,
+                 "launchedWindowCount": len(self._launched_identities),
+                 "mutationLease": (
+                     {"owner": lease.owner, "expiresAt": lease.expires_at} if lease is not None else None
+@@ -1018,7 +1026,7 @@ class SecurityPolicy:
+                 execute=False,
+                 code=DecisionCode.DRY_RUN,
+                 reason="action passed policy checks but dry-run mode suppresses execution",
+-                details={"wouldRequireConfirmation": request.destructive},
++                details={"wouldRequireConfirmation": request.destructive and self.config.approval_policy == "external"},
+             )
+ 
+         if request.mutating and self.config.mutation_lease_required:
+@@ -1033,7 +1041,7 @@ class SecurityPolicy:
+                     {"holder": lease.owner, "expiresAt": lease.expires_at},
+                 )
+ 
+-        if request.destructive:
++        if request.destructive and self.config.approval_policy == "external":
+             if not request.confirmation_token:
+                 return self._deny(DecisionCode.CONFIRMATION_REQUIRED, "destructive action requires confirmation")
+             confirmation_status = self._consume_confirmation(request)
+@@ -1046,7 +1054,8 @@ class SecurityPolicy:
+             if confirmation_status != "approved":
+                 return self._deny(DecisionCode.CONFIRMATION_INVALID, "confirmation token is invalid, expired, used, or does not match the action")
+ 
+-        return PolicyDecision(True, True, DecisionCode.ALLOW, "action is allowed")
++        return PolicyDecision(True, True, DecisionCode.ALLOW, "action is allowed",
++                              details={"approvalPolicy": self.config.approval_policy})
+ 
+     def authorization_for(self, target: WindowIdentity | None) -> AuthorizationLevel:
+         if target is None:
+@@ -1271,6 +1280,8 @@ def policy_config_from_env(env: Mapping[str, str] | None = None) -> PolicyConfig
+     # Public short aliases keep the common configuration approachable while
+     # SECURITY_* remains the unambiguous canonical form. Canonical values win.
+     for short_name, canonical_name in {
++        "HYPR_AGENT_PORTAL_PERMISSION_MODE": prefix + "PERMISSION_MODE",
++        "HYPR_AGENT_PORTAL_APPROVAL_POLICY": prefix + "APPROVAL_POLICY",
+         "HYPR_AGENT_PORTAL_READONLY": prefix + "READONLY",
+         "HYPR_AGENT_PORTAL_DRYRUN": prefix + "DRY_RUN",
+         "HYPR_AGENT_PORTAL_APP_POLICIES": prefix + "APP_AUTHORIZATIONS",
+@@ -1307,6 +1318,24 @@ def policy_config_from_env(env: Mapping[str, str] | None = None) -> PolicyConfig
+         values[prefix + "CLIPBOARD_PERMISSIONS"] = clipboard_aliases.get(
+             clipboard_short, values["HYPR_AGENT_PORTAL_CLIPBOARD"]
+         )
++    mode = values.get(prefix + "PERMISSION_MODE", "standard").strip().casefold()
++    mode = {"readonly": "read-only", "unrestricted": "full"}.get(mode, mode)
++    if mode not in {"standard", "read-only", "full"}:
++        raise ValueError("permission mode must be standard, read-only, or full")
++    # Presets supply defaults; an explicit operator restriction still wins.
++    if mode == "full":
++        values.setdefault(prefix + "DEFAULT_AUTHORIZATION", "full")
++        values.setdefault(prefix + "APPROVAL_POLICY", "never")
++        values.setdefault(prefix + "BLOCK_LAYER_MUTATION", "0")
++        values.setdefault(prefix + "BLOCK_KEYBOARD_GRAB_MUTATION", "0")
++        values.setdefault(prefix + "HUMAN_TAKEOVER", "0")
++        values.setdefault(prefix + "CLIPBOARD_PERMISSIONS", ",".join(item.value for item in ClipboardCapability))
++    elif mode == "read-only":
++        values[prefix + "READONLY"] = "1"
++    approval = values.get(prefix + "APPROVAL_POLICY", "external").strip().casefold()
++    if approval not in {"external", "never"}:
++        raise ValueError("approval policy must be external or never")
++
+     authorizations: dict[str, AuthorizationLevel] = {}
+     for entry in _env_set(values, prefix + "APP_AUTHORIZATIONS"):
+         if "=" not in entry:
+@@ -1329,6 +1358,8 @@ def policy_config_from_env(env: Mapping[str, str] | None = None) -> PolicyConfig
+         match=ScopeMatch(values.get(prefix + "CONFINE_MATCH", ScopeMatch.ANY.value).strip().lower()),
+     )
+     return PolicyConfig(
++        permission_mode=mode,
++        approval_policy=approval,
+         readonly=_env_bool(values, prefix + "READONLY", False),
+         dry_run=_env_bool(values, prefix + "DRY_RUN", False),
+         confinement=confinement,
+diff --git a/tests/mcp_security.py b/tests/mcp_security.py
+index 8e3a7de..c4df29c 100644
+--- a/tests/mcp_security.py
++++ b/tests/mcp_security.py
+@@ -2342,7 +2342,63 @@ def test_mcp_workspace_semantics_match_direct_and_computer_handlers() -> None:
+     ]
+ 
+ 
++def test_permission_modes_and_approval_policy() -> None:
++    mod = policy_module()
++    standard = mod.policy_config_from_env({})
++    assert standard.permission_mode == "standard"
++    assert standard.approval_policy == "external"
++    assert standard.default_authorization == mod.AuthorizationLevel.VIEW
++    default_full_app = make_policy(mod)
++    assert_denied(default_full_app.evaluate(request(mod, destructive=True)), mod.DecisionCode.CONFIRMATION_REQUIRED)
++
++    config = mod.policy_config_from_env({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "full"})
++    assert config.default_authorization == mod.AuthorizationLevel.FULL
++    assert config.clipboard_permissions == frozenset(mod.ClipboardCapability)
++    policy = mod.SecurityPolicy(config)
++    policy.acquire_mutation_lease("test-client")
++    # The token validator must never run when the operator preauthorizes actions.
++    policy._consume_confirmation = lambda _: (_ for _ in ()).throw(AssertionError("unexpected confirmation"))
++    for action in ("click", "launch_app", "press_key", "manage_window"):
++        decision = policy.evaluate(request(mod, action=action, destructive=True))
++        assert decision.allowed and decision.execute
++    preview = policy.evaluate(request(mod, destructive=True), preview_dry_run=True)
++    assert preview.allowed and not preview.execute
++    assert preview.details["wouldRequireConfirmation"] is False
++    assert policy.state()["confirmationMode"] == "never"
++    assert policy.state()["permissionMode"] == "full"
++    assert policy.evaluate(request(mod, destructive=True), mod.GuardInputs(layer_surface_active=True, keyboard_grab_active=True)).execute
++    assert config.human_takeover_enabled is False
++    explicitly_guarded = mod.policy_config_from_env({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "full", "HYPR_AGENT_PORTAL_SECURITY_BLOCK_KEYBOARD_GRAB_MUTATION": "1"})
++    assert_denied(mod.SecurityPolicy(explicitly_guarded).evaluate(request(mod), mod.GuardInputs(keyboard_grab_active=True)), mod.DecisionCode.KEYBOARD_GRAB_ACTIVE)
++    assert_denied(policy.evaluate(request(mod), mod.GuardInputs(panic_active=True)), mod.DecisionCode.PANIC_ACTIVE)
++
++    restricted = mod.policy_config_from_env({
++        "HYPR_AGENT_PORTAL_PERMISSION_MODE": "full",
++        "HYPR_AGENT_PORTAL_CONFINE": "class:org.example.Editor",
++        "HYPR_AGENT_PORTAL_CLIPBOARD": "none",
++        "HYPR_AGENT_PORTAL_SECURITY_MUTATION_LEASE_REQUIRED": "0",
++    })
++    restricted_policy = mod.SecurityPolicy(restricted)
++    assert restricted.clipboard_permissions == frozenset()
++    assert_denied(restricted_policy.evaluate(request(mod, target=window(mod, class_name="other"))), mod.DecisionCode.OUT_OF_SCOPE)
++    assert_denied(restricted_policy.evaluate(request(mod, clipboard_capabilities=frozenset({mod.ClipboardCapability.WRITE}))), mod.DecisionCode.CLIPBOARD_PERMISSION)
++    readonly = mod.policy_config_from_env({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "read-only", "HYPR_AGENT_PORTAL_READONLY": "0"})
++    assert readonly.readonly
++    assert_denied(mod.SecurityPolicy(readonly).evaluate(request(mod)), mod.DecisionCode.READONLY)
++    canonical = mod.policy_config_from_env({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "full", "HYPR_AGENT_PORTAL_SECURITY_PERMISSION_MODE": "standard", "HYPR_AGENT_PORTAL_APPROVAL_POLICY": "never", "HYPR_AGENT_PORTAL_SECURITY_APPROVAL_POLICY": "external"})
++    assert canonical.permission_mode == "standard" and canonical.approval_policy == "external"
++    assert mod.policy_config_from_env({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "unrestricted"}).approval_policy == "never"
++    for env in ({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "ful"}, {"HYPR_AGENT_PORTAL_APPROVAL_POLICY": "nevr"}):
++        try:
++            mod.policy_config_from_env(env)
++        except ValueError:
++            pass
++        else:
++            raise AssertionError("invalid permission setting accepted")
++
++
+ TESTS = [
++    test_permission_modes_and_approval_policy,
+     test_policy_readonly_and_dry_run,
+     test_policy_confinement,
+     test_policy_lock_layer_and_keyboard_grab_guards,

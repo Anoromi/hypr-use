@@ -1,0 +1,52 @@
+{
+  "ax": {
+    "seconds": [
+      1.5618992289999998,
+      1.606074029,
+      1.3915705680000001,
+      1.401394268,
+      1.744619815000001
+    ],
+    "median_s": 1.5618992289999998,
+    "max_s": 1.744619815000001,
+    "p95_nearest_rank_s": 1.744619815000001
+  },
+  "screenshot": {
+    "seconds": [
+      5.698647939000001,
+      5.658561397000001,
+      5.818366514000001,
+      5.805876896000002,
+      5.78704938
+    ],
+    "median_s": 5.78704938,
+    "max_s": 5.818366514000001,
+    "p95_nearest_rank_s": 5.818366514000001
+  },
+  "set-value": {
+    "seconds": [
+      6.553868167000001,
+      6.049364021,
+      5.8053154619999985,
+      5.940955987999998,
+      5.973326939000002
+    ],
+    "median_s": 5.973326939000002,
+    "max_s": 6.553868167000001,
+    "p95_nearest_rank_s": 6.553868167000001
+  },
+  "key": {
+    "seconds": [
+      5.9469235430000005,
+      5.8173152570000015,
+      5.846989179,
+      5.603848869000001,
+      5.908281267000002
+    ],
+    "median_s": 5.846989179,
+    "max_s": 5.9469235430000005,
+    "p95_nearest_rank_s": 5.9469235430000005,
+    "note": "Initial probe blocked by an active seat grab. Retry passed after closing the benchmark-owned Calc process. This does not prove which client owned the grab; fixture geometry also changed after Calc closed."
+  },
+  "scope": "Five sequential warm-worker operations per category, after the model phases. Each category starts with getApp, excluded from timings. Fixture only; screenshots include AX gathering. Five samples cannot estimate a stable tail. No refocus detected."
+}

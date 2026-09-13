@@ -1,0 +1,36 @@
+[
+  {
+    "test": "identity_binding.py",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "test": "semantic_atspi_click.py",
+    "exit": 0,
+    "output": "Semantic click refresh, numeric IDs, off-capture dispatch, and ambiguous-target rejection passed\n"
+  },
+  {
+    "test": "mcp_geometry.py",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "test": "mcp_security.py",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "test": "test-title-recovery.py",
+    "exit": 0,
+    "checks": "Title-only classification, stable identity rejection, unique enabled semantic rematch, one recapture, no repeated dispatch, cleanup"
+  },
+  {
+    "test": "test-key-typing.py",
+    "exit": 0,
+    "checks": "Long paths, multiline and tab-separated keys preserve edit context without Escape"
+  },
+  {
+    "test": "keyboard_routing.py",
+    "exit": 0
+  }
+]

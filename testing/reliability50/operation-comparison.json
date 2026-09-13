@@ -1,0 +1,14 @@
+{
+  "baseline-v2": {
+    "js_calls": 319,
+    "images": 104,
+    "tool_errors": 16,
+    "ax_timeouts": 33
+  },
+  "improved-v1": {
+    "js_calls": 258,
+    "images": 34,
+    "tool_errors": 7,
+    "ax_timeouts": 0
+  }
+}

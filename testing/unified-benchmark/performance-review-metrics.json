@@ -1,0 +1,415 @@
+{
+  "model": "gpt-6-astra",
+  "reasoning": "high",
+  "valid_tasks": 24,
+  "wall_s": 1931.0585877895355,
+  "outer_tool_s": 1067.678938664,
+  "js_calls": 90,
+  "completed_portal_calls": 143,
+  "emitted_images": 23,
+  "timeout_errors": 12,
+  "automatic_passes": 7,
+  "automatic_failures": 2,
+  "reviewed_passes": 2,
+  "stage_self_ms": {
+    "resolve_hypr_window": 81.64344299999998,
+    "call_ctl": 786588.581155,
+    "build_security_request": 18.622548000000002,
+    "build_app_snapshot": 345.8843580000021,
+    "related_windows_for": 6.2464999999999975,
+    "screenshot_for_window": 250.25407500000267,
+    "atspi_snapshot_isolated": 98016.89661099999,
+    "global_menu_for_window": 60776.011049,
+    "attach_active_related_preview": 3.0932310000001126,
+    "mcp_snapshot_result": 25.979274,
+    "audit_security_call": 0.7090319999999998,
+    "current_snapshot": 0.8049339999999248,
+    "refresh_snapshot_geometry": 14.871882000000177,
+    "control_overlay": 1.3289039999998522,
+    "snapshot_after_action": 10.239113999999063,
+    "sleep": 47650.43989899999,
+    "prepare_grid_bulk_paste": 0.17962800000000123,
+    "type_text": 0.23413200000061352,
+    "type_with_keys": 10.419229999991588,
+    "keyboard": 6.465490999999673
+  },
+  "call_ctl_parent_ms": {
+    "resolve_hypr_window": 39627.74116500001,
+    "handler/session/policy": 162149.31177399994,
+    "related_windows_for": 32941.92875,
+    "screenshot_for_window": 473302.978949,
+    "control_overlay": 7289.865826,
+    "keyboard": 70961.57128400002,
+    "snapshot_after_action": 315.183407
+  },
+  "stage_counts": {
+    "resolve_hypr_window": 542,
+    "call_ctl": 2208,
+    "build_security_request": 142,
+    "build_app_snapshot": 155,
+    "related_windows_for": 482,
+    "screenshot_for_window": 156,
+    "get_app_state_screenshots": 76,
+    "atspi_snapshot_isolated": 151,
+    "global_menu_for_window": 151,
+    "attach_active_related_preview": 151,
+    "mcp_snapshot_result": 131,
+    "audit_security_call": 143,
+    "current_snapshot": 80,
+    "refresh_snapshot_geometry": 87,
+    "set_value_screenshots": 8,
+    "control_overlay": 40,
+    "snapshot_after_action": 58,
+    "sleep": 694,
+    "click_screenshots": 35,
+    "select_text_screenshots": 4,
+    "prepare_grid_bulk_paste": 12,
+    "type_text": 11,
+    "type_with_keys": 11,
+    "keyboard": 386,
+    "type_text_screenshots": 11,
+    "press_key_screenshots": 22
+  },
+  "portal_method_times": {
+    "get_app_state": {
+      "count": 73,
+      "total_s": 369.67055616803555,
+      "median_s": 5.201360806000594,
+      "max_s": 8.303213019004033
+    },
+    "set_value": {
+      "count": 7,
+      "total_s": 56.00997963500413,
+      "median_s": 7.633204780002416,
+      "max_s": 10.736875647999113
+    },
+    "click": {
+      "count": 22,
+      "total_s": 200.75788081299834,
+      "median_s": 8.935135623996757,
+      "max_s": 15.854626760999963
+    },
+    "select_text": {
+      "count": 2,
+      "total_s": 22.030733584993868,
+      "median_s": 11.015366792496934,
+      "max_s": 11.295291224996618
+    },
+    "type_text": {
+      "count": 11,
+      "total_s": 162.6244532419878,
+      "median_s": 15.841230883001117,
+      "max_s": 19.725586284999736
+    },
+    "list_apps": {
+      "count": 5,
+      "total_s": 3.1169593559970963,
+      "median_s": 0.5667756959956023,
+      "max_s": 0.8024272920010844
+    },
+    "press_key": {
+      "count": 22,
+      "total_s": 183.17987169702246,
+      "median_s": 8.513418850503513,
+      "max_s": 9.603499051001563
+    },
+    "paste_text": {
+      "count": 1,
+      "total_s": 2.776304557999538,
+      "median_s": 2.776304557999538,
+      "max_s": 2.776304557999538
+    }
+  },
+  "tasks": [
+    {
+      "id": "01-form-name",
+      "phase": "astra-baseline",
+      "duration_s": 47.38364815711975,
+      "tool_s": 19.845645188999995,
+      "js_calls": 2,
+      "portal_calls": 3,
+      "verified": true,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "02-form-email",
+      "phase": "astra-baseline",
+      "duration_s": 71.08318519592285,
+      "tool_s": 34.314010039,
+      "js_calls": 4,
+      "portal_calls": 6,
+      "verified": true,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "03-form-country",
+      "phase": "astra-baseline",
+      "duration_s": 71.81824994087219,
+      "tool_s": 42.570221581999995,
+      "js_calls": 4,
+      "portal_calls": 7,
+      "verified": true,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "04-note-save",
+      "phase": "astra-baseline",
+      "duration_s": 56.85734987258911,
+      "tool_s": 26.313133057000005,
+      "js_calls": 2,
+      "portal_calls": 4,
+      "verified": true,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "05-note-reopen",
+      "phase": "astra-baseline",
+      "duration_s": 63.03372931480408,
+      "tool_s": 32.940362689,
+      "js_calls": 3,
+      "portal_calls": 5,
+      "verified": true,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "06-text-selection",
+      "phase": "astra-baseline",
+      "duration_s": 104.17222213745117,
+      "tool_s": 68.44645381000001,
+      "js_calls": 4,
+      "portal_calls": 8,
+      "verified": false,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "07-create-folder",
+      "phase": "astra-baseline",
+      "duration_s": 44.068164348602295,
+      "tool_s": 25.70124534,
+      "js_calls": 2,
+      "portal_calls": 4,
+      "verified": true,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "08-dialog-confirm",
+      "phase": "astra-baseline",
+      "duration_s": 62.154959201812744,
+      "tool_s": 28.086965823,
+      "js_calls": 4,
+      "portal_calls": 7,
+      "verified": true,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "09-google",
+      "phase": "astra-baseline",
+      "duration_s": 59.41609764099121,
+      "tool_s": 35.255206607999995,
+      "js_calls": 2,
+      "portal_calls": 3,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "10-wikipedia",
+      "phase": "astra-baseline",
+      "duration_s": 81.63175535202026,
+      "tool_s": 51.047092049,
+      "js_calls": 3,
+      "portal_calls": 5,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "11-browser-find",
+      "phase": "astra-baseline",
+      "duration_s": 62.1522912979126,
+      "tool_s": 35.751133443,
+      "js_calls": 2,
+      "portal_calls": 3,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "12-browser-navigation",
+      "phase": "astra-baseline",
+      "duration_s": 169.71430039405823,
+      "tool_s": 112.95222989799998,
+      "js_calls": 7,
+      "portal_calls": 14,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "13-browser-tabs",
+      "phase": "astra-baseline",
+      "duration_s": 68.56712412834167,
+      "tool_s": 35.330062962,
+      "js_calls": 2,
+      "portal_calls": 4,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "14-web-extract",
+      "phase": "astra-baseline",
+      "duration_s": 67.11841988563538,
+      "tool_s": 35.395270065999995,
+      "js_calls": 2,
+      "portal_calls": 3,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "15-web-scroll",
+      "phase": "astra-baseline",
+      "duration_s": 65.4304575920105,
+      "tool_s": 36.97921752799999,
+      "js_calls": 2,
+      "portal_calls": 3,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "16-amazon-compare",
+      "phase": "astra-baseline",
+      "duration_s": 153.20068359375,
+      "tool_s": 86.71040897799999,
+      "js_calls": 6,
+      "portal_calls": 11,
+      "verified": null,
+      "review": {
+        "outcome": "pass",
+        "method": "Independent inspection of recorded screenshots by the parent agent",
+        "evidence": [
+          "capture-1.png",
+          "capture-3.png"
+        ],
+        "notes": "Product names, displayed JPY 2147 and JPY 1533 prices, product IDs in address bars, and separately displayed shipping match the agent report. Recorded actions are navigation and product-link clicks; no cart or purchase actions. AX output did not supply the product details; the agent used screenshots."
+      },
+      "timeout": false
+    },
+    {
+      "id": "17-manufacturer-compare",
+      "phase": "astra-baseline",
+      "duration_s": 180.01647424697876,
+      "tool_s": 115.01080376,
+      "js_calls": 7,
+      "portal_calls": 12,
+      "verified": null,
+      "review": null,
+      "timeout": true
+    },
+    {
+      "id": "18-calc-table",
+      "phase": "astra-baseline-calc",
+      "duration_s": 178.11117935180664,
+      "tool_s": 99.80970379700001,
+      "js_calls": 12,
+      "portal_calls": 17,
+      "verified": null,
+      "review": {
+        "outcome": "pass",
+        "method": "Parent review of final recorded AX snapshot; not yet workbook-file verification",
+        "evidence": "portal.jsonl final get_app_state response",
+        "cells": {
+          "A1": "Product",
+          "B1": "Quantity",
+          "C1": "Price",
+          "A2": "Pens",
+          "B2": "3",
+          "C2": "2",
+          "A3": "Paper",
+          "B3": "5",
+          "C3": "4",
+          "A4": "Clips",
+          "B4": "2",
+          "C4": "1"
+        }
+      },
+      "timeout": false
+    },
+    {
+      "id": "19-calc-formulas",
+      "phase": "astra-baseline-calc",
+      "duration_s": 45.762357234954834,
+      "tool_s": 17.309361591999995,
+      "js_calls": 3,
+      "portal_calls": 3,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "20-calc-sum",
+      "phase": "astra-baseline-calc",
+      "duration_s": 44.50870132446289,
+      "tool_s": 17.075580317,
+      "js_calls": 3,
+      "portal_calls": 3,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "21-calc-sort",
+      "phase": "astra-baseline-calc",
+      "duration_s": 80.52011036872864,
+      "tool_s": 42.246857032,
+      "js_calls": 5,
+      "portal_calls": 7,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "22-calc-format",
+      "phase": "astra-baseline-calc",
+      "duration_s": 48.75244879722595,
+      "tool_s": 19.020311653999997,
+      "js_calls": 3,
+      "portal_calls": 3,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "23-calc-chart",
+      "phase": "astra-baseline-calc",
+      "duration_s": 36.385252237319946,
+      "tool_s": 12.649422898000001,
+      "js_calls": 2,
+      "portal_calls": 2,
+      "verified": null,
+      "review": null,
+      "timeout": false
+    },
+    {
+      "id": "24-calc-save",
+      "phase": "astra-baseline-calc",
+      "duration_s": 69.19942617416382,
+      "tool_s": 36.918238553,
+      "js_calls": 4,
+      "portal_calls": 6,
+      "verified": false,
+      "review": null,
+      "timeout": false
+    }
+  ]
+}

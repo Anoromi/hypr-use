@@ -1,0 +1,1588 @@
+diff --git a/README.md b/README.md
+index d32e312..8b36eee 100644
+--- a/README.md
++++ b/README.md
+@@ -315,7 +315,48 @@ pointer work. `HUMAN_TAKEOVER_COOLDOWN` is a server-local policy signal for
+ explicitly recorded takeover activity, not compositor feedback that turns all
+ physical input into a global MCP cooldown.
+ 
+-High-risk actions such as submit/delete/purchase-style clicks, destructive
++### Permission modes
++
++Set the server's `HYPR_AGENT_PORTAL_PERMISSION_MODE` environment variable before
++starting its MCP process. Restart the server after changing it.
++
++| Mode | Application permission default | Confirmation default |
++| --- | --- | --- |
++| `standard` (default) | View-only unless explicitly authorized | External confirmation for high-risk actions |
++| `read-only` | Observation only; mutation tools hidden | Mutations disabled |
++| `full` (alias `unrestricted`) | Full application and clipboard access | No confirmation prompts |
++
++`full` permits launches, input, saves and high-risk actions without a token.
++It also disables server-level global input-grab, layer and takeover gates.
++It supplies defaults; explicitly configured app permissions, confinement,
++clipboard restrictions and read-only settings still apply. Panic, session-lock
++handling, target identity validation and input serialization are runtime controls
++and remain active. This is a server authorization setting, not a native plugin
++ABI or sandbox change.
++
++For partial access without prompts, keep `standard`, authorize the desired apps,
++and set `HYPR_AGENT_PORTAL_APPROVAL_POLICY=never`. The other value, `external`,
++retains physical confirmation. Canonical `SECURITY_PERMISSION_MODE` and
++`SECURITY_APPROVAL_POLICY` names take precedence over short aliases. Invalid
++values reject startup. `security_status` reports the effective permission mode
++and confirmation policy. Tool arguments cannot change these settings.
++
++Example Codex configuration:
++
++```toml
++[mcp_servers.hypr_agent_portal]
++command = "python3"
++args = ["/absolute/path/to/mcp/hypr-agent-portal-mcp.py"]
++default_tools_approval_mode = "approve"
++
++[mcp_servers.hypr_agent_portal.env]
++HYPR_AGENT_PORTAL_PERMISSION_MODE = "full"
++```
++
++Codex's `default_tools_approval_mode` controls the client's prompts. Portal's
++permission mode controls the server's authorization. They are independent.
++
++With the default `external` approval policy, high-risk actions such as submit/delete/purchase-style clicks, destructive
+ shortcuts, and clearing the panic latch return `confirmation_required`. Call
+ `request_confirmation` with the exact tool name and exact arguments. It returns
+ a pending challenge ID, not a self-authorizing token. A person must run the
+diff --git a/mcp/hypr-agent-portal-mcp.py b/mcp/hypr-agent-portal-mcp.py
+index 84175d4..fafebd9 100755
+--- a/mcp/hypr-agent-portal-mcp.py
++++ b/mcp/hypr-agent-portal-mcp.py
+@@ -452,7 +452,7 @@ def tool_definitions() -> list[dict[str, Any]]:
+             "timeout": timeout_property("Seconds to wait for a Hyprland window to appear. Defaults to 8; capped at 30."),
+         }
+     )
+-    element_index = string_property("Element index from the last get_app_state result.")
++    element_index = {"type": ["string", "integer"], "description": "Element index from the last get_app_state result, as a string or integer."}
+     menu_index = string_property("Global menu item id from get_app_state, for example menu:12.")
+     coordinate = coordinate_schema("(x, y) coordinate in coordinate_space. Defaults to screenshot pixels from get_app_state.")
+     start_coordinate = coordinate_schema("(x, y) starting coordinate for a drag in coordinate_space.")
+@@ -739,6 +739,13 @@ def tool_definitions() -> list[dict[str, Any]]:
+                 ["app"],
+             ),
+         },
++        {
++            "name": "select_text",
++            "description": "Select text or place its caret using AT-SPI Text, without requesting focus.",
++            "annotations": ACTION_ANNOTATIONS,
++            "inputSchema": object_schema({"app": app, "element_index": element_index,
++                **{key: string_property(key) for key in ("text", "prefix", "suffix", "selection")}}, ["app", "text"]),
++        },
+         {
+             "name": "set_value",
+             "description": "Set the value of a settable accessibility element.",
+@@ -1369,6 +1376,8 @@ def attach_active_related_preview(snapshot: dict[str, Any]) -> None:
+         "title": str(active.get("title") or active.get("initialTitle") or ""),
+         "message": "A related popup/dialog is open. Operate this target before continuing with the root window.",
+     }
++    if not globals().get("SNAPSHOT_INCLUDE_IMAGES", True):
++        return
+     try:
+         screenshot, png_base64 = screenshot_for_window(active)
+         snapshot["activeRelatedScreenshot"] = screenshot
+@@ -2843,7 +2852,7 @@ def screenshot_axis_scale(screenshot: dict[str, Any], axis: str) -> float:
+     return scale if scale > 0 else 1.0
+ 
+ 
+-def atspi_bounds_are_global(atspi_window_bounds: dict[str, float] | None, screenshot: dict[str, Any]) -> bool:
++def atspi_bounds_are_global(atspi_window_bounds: dict[str, float] | None, screenshot: dict[str, Any], hypr_window: dict[str, Any] | None = None) -> bool:
+     if atspi_window_bounds is None:
+         return True
+     screenshot_bounds = screenshot.get("logicalBounds") or {}
+@@ -2852,7 +2861,13 @@ def atspi_bounds_are_global(atspi_window_bounds: dict[str, float] | None, screen
+     if float(screenshot_bounds.get("width") or 0.0) <= 0 or float(screenshot_bounds.get("height") or 0.0) <= 0:
+         return True
+     screenshot_rect = {key: float(screenshot_bounds.get(key) or 0.0) for key in ["x", "y", "width", "height"]}
+-    return rects_overlap(atspi_window_bounds, screenshot_rect, margin=8.0)
++    # GTK/Gecko Wayland roots commonly report window-local (0,0). A large
++    # local rectangle can overlap the global window even on another workspace.
++    if hypr_window is not None and not hypr_window.get("xwayland", False):
++        if abs(atspi_window_bounds["x"]) < 0.01 and abs(atspi_window_bounds["y"]) < 0.01:
++            return False
++    origin = window_geometry(hypr_window) if hypr_window is not None else screenshot_rect
++    return all(abs(atspi_window_bounds[axis] - origin[axis]) <= 8.0 for axis in ("x", "y"))
+ 
+ 
+ def atspi_bounds_to_screenshot_frame(
+@@ -2867,7 +2882,7 @@ def atspi_bounds_to_screenshot_frame(
+     sx = screenshot_axis_scale(screenshot, "x")
+     sy = screenshot_axis_scale(screenshot, "y")
+ 
+-    if atspi_bounds_are_global(atspi_window_bounds, screenshot):
++    if atspi_bounds_are_global(atspi_window_bounds, screenshot, hypr_window):
+         logical_x = bounds["x"]
+         logical_y = bounds["y"]
+     else:
+@@ -3021,6 +3036,8 @@ def atspi_resolve_window(hypr_window: dict[str, Any]) -> tuple[Any, int, Any] |
+ 
+ 
+ def atspi_action_names(node: Any) -> list[str]:
++    if not bool(atspi_safe(node.is_action, False)):
++        return []
+     names = []
+     count = int(atspi_safe(node.get_n_actions, 0) or 0)
+     for index in range(count):
+@@ -3046,10 +3063,14 @@ def atspi_text_value(node: Any) -> str:
+     if count <= 0:
+         return ""
+     value = str(atspi_safe(lambda: _ATSPI.Text.get_text(text_iface, 0, min(count, 500)), "") or "")
++    if not value.replace("\ufffc", "").strip():
++        return ""
+     return value + "..." if count > 500 else value
+ 
+ 
+ def atspi_numeric_value(node: Any) -> str:
++    if not bool(atspi_safe(node.is_value, False)):
++        return ""
+     value_iface = atspi_safe(node.get_value_iface)
+     if value_iface is None:
+         return ""
+@@ -3057,6 +3078,27 @@ def atspi_numeric_value(node: Any) -> str:
+     return "" if current is None else str(current)
+ 
+ 
++def atspi_confirmed_empty_text(node: Any) -> bool:
++    if not bool(atspi_safe(node.is_text, False)):
++        return False
++    iface = atspi_safe(node.get_text_iface)
++    return iface is not None and atspi_safe(lambda: _ATSPI.Text.get_character_count(iface), None) == 0
++
++
++def atspi_document_coordinate_scale(bounds: dict[str, float] | None, root: dict[str, float] | None) -> float | None:
++    # Infer only a full-viewport document in local Wayland coordinates. Oversized
++    # scroll content, matching logical coordinates and global origins do not qualify.
++    if not bounds or not root or root["width"] <= 0 or root["height"] <= 0:
++        return None
++    if abs(root["x"]) > .01 or abs(root["y"]) > .01 or abs(bounds["x"]) > 2:
++        return None
++    sx = bounds["width"] / root["width"]
++    sy = (bounds["y"] + bounds["height"]) / root["height"]
++    if not 1.1 <= sx <= 4 or abs(sx - sy) > .01 * max(sx, sy):
++        return None
++    return (sx + sy) / 2
++
++
+ def atspi_image_frame(
+     node: Any,
+     bounds: dict[str, float] | None,
+@@ -3071,6 +3113,60 @@ def atspi_image_frame(
+     return atspi_bounds_to_screenshot_frame(bounds, atspi_window_bounds, screenshot, hypr_window)
+ 
+ 
++def atspi_grid_translation(table_node: Any) -> tuple[float, float] | None:
++    """Measure the VCL/GTK coordinate translation from both grid scrollbars.
++
++    Calc may report VCL cell bounds above their native GTK position. Matching
++    scrollbar/wrapper rectangles expose the translation without a pixel guess.
++    Require independent horizontal and vertical agreement; otherwise abstain.
++    """
++    parent = atspi_safe(table_node.get_parent)
++    container = atspi_safe(parent.get_parent) if parent is not None else None
++    offsets: dict[str, list[tuple[float, float]]] = {"horizontal": [], "vertical": []}
++    budget = [200]
++
++    def scan(node: Any, depth: int = 0) -> None:
++        if node is None or depth > 10 or budget[0] <= 0:
++            return
++        budget[0] -= 1
++        role = normalize(atspi_role(node))
++        if role in {"table", "document spreadsheet"}:
++            return
++        if role == "scroll bar":
++            bounds = atspi_extents(node)
++            if bounds is None:
++                return
++            axis = "horizontal" if bounds["width"] > 3 * bounds["height"] else "vertical" if bounds["height"] > 3 * bounds["width"] else None
++            if axis is None:
++                return
++            ancestor = node
++            candidates = set()
++            matching_wrappers = 0
++            for _ in range(8):
++                ancestor = atspi_safe(ancestor.get_parent) if ancestor is not None else None
++                other = atspi_extents(ancestor) if ancestor is not None else None
++                if other and abs(other["width"] - bounds["width"]) <= 1 and abs(other["height"] - bounds["height"]) <= 1:
++                    matching_wrappers += 1
++                    delta = (bounds["x"] - other["x"], bounds["y"] - other["y"])
++                    if delta != (0, 0) and max(abs(v) for v in delta) < 256:
++                        candidates.add(delta)
++            if len(candidates) == 1:
++                offsets[axis].append(candidates.pop())
++            elif not candidates and matching_wrappers >= 4:
++                # Once GTK/VCL have synchronized, their bounds already agree.
++                # Zero is a measured correction, not a missing measurement.
++                offsets[axis].append((0.0, 0.0))
++            return
++        for index in range(min(atspi_child_count(node), 64)):
++            scan(atspi_child_at(node, index), depth + 1)
++
++    scan(container)
++    horizontal, vertical = offsets["horizontal"], offsets["vertical"]
++    if len(horizontal) == len(vertical) == 1 and all(abs(a-b) <= 1 for a, b in zip(horizontal[0], vertical[0])):
++        return horizontal[0]
++    return None
++
++
+ def corrected_large_grid_cell_bounds(
+     cell_bounds: dict[str, float],
+     table_bounds: dict[str, float],
+@@ -3090,6 +3186,17 @@ def corrected_large_grid_cell_bounds(
+     return cell_bounds, header_y_offset
+ 
+ 
++def atspi_selection_value(node: Any) -> str:
++    iface = atspi_safe(node.get_selection_iface) if hasattr(node, "get_selection_iface") else None
++    if iface is None:
++        return ""
++    count = atspi_safe(lambda: _ATSPI.Selection.get_n_selected_children(iface), 0)
++    if count != 1:
++        return ""
++    selected = atspi_safe(lambda: _ATSPI.Selection.get_selected_child(iface, 0))
++    return atspi_name(selected) if selected is not None else ""
++
++
+ def atspi_record_for(
+     node: Any,
+     index: int,
+@@ -3100,6 +3207,13 @@ def atspi_record_for(
+     hypr_window: dict[str, Any],
+ ) -> dict[str, Any]:
+     role = atspi_role(node)
++    state_set = atspi_safe(node.get_state_set)
++    states = []
++    for name in ("FOCUSED", "CHECKED", "SELECTED", "EXPANDED", "ENABLED", "SHOWING", "VISIBLE", "ACTIVE"):
++        state = getattr(_ATSPI.StateType, name, None)
++        if state is not None and state_set is not None and atspi_safe(lambda: state_set.contains(state), False):
++            states.append(name.lower())
++    selection_value = atspi_selection_value(node) if normalize(role) in {"combo box", "list box"} else ""
+     return {
+         "index": index,
+         "runtimeId": path[:],
+@@ -3108,12 +3222,16 @@ def atspi_record_for(
+         "controlType": role,
+         "localizedControlType": role,
+         "className": str(atspi_safe(node.get_toolkit_name, "") or ""),
+-        "value": atspi_text_value(node) or atspi_numeric_value(node),
++        "value": selection_value or atspi_text_value(node) or atspi_numeric_value(node),
+         "nativeWindowHandle": 0,
+         "frame": atspi_image_frame(node, bounds, atspi_window_bounds, screenshot, hypr_window),
+         "actions": atspi_action_names(node),
+-        "focused": atspi_state_contains(node, _ATSPI.StateType.FOCUSED),
+-        "editable": bool(atspi_safe(node.is_editable_text, False)) and bool(atspi_safe(node.is_text, False)),
++        "focused": "focused" in states,
++        "states": states,
++        **({"checked": "checked" in states} if normalize(role) in {"check box", "check menu item", "toggle button", "radio button"} else {}),
++        "editable": atspi_node_is_editable(node),
++        "supportsEditableText": bool(atspi_safe(node.is_editable_text, False)) and bool(atspi_safe(node.is_text, False)),
++        "supportsValue": bool(atspi_safe(node.is_value, False)),
+         "source": "atspi",
+     }
+ 
+@@ -3124,6 +3242,8 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+     atspi_window_bounds = atspi_extents(root)
+     deadline = time.monotonic() + 4.5
+     truncated_reason = ""
++    omitted_empty_cells = 0
++    omitted_grid_ranges = []
+ 
+     def mark_truncated(reason: str) -> None:
+         nonlocal truncated_reason
+@@ -3139,7 +3259,7 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+             return True
+         return False
+ 
+-    def visit(node: Any, depth: int, path: list[int], bounds_hint: dict[str, float] | None = None) -> None:
++    def visit(node: Any, depth: int, path: list[int], bounds_hint: dict[str, float] | None = None, document_allowed: bool = False, coordinate_scale: float | None = None) -> None:
+         if node is None or len(records) >= 500 or depth > 64:
+             if len(records) >= 500:
+                 mark_truncated("record-limit")
+@@ -3147,6 +3267,23 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+         if budget_exhausted():
+             return
+         bounds = bounds_hint if bounds_hint is not None else atspi_extents(node)
++        is_document = atspi_role(node) in {"document web", "document frame"}
++        if is_document and coordinate_scale is None and not hypr_window.get("xwayland", False):
++            coordinate_scale = atspi_document_coordinate_scale(bounds, atspi_window_bounds)
++        if coordinate_scale is not None and bounds is not None:
++            bounds = {key: value / coordinate_scale for key, value in bounds.items()}
++        if is_document and not document_allowed and not atspi_state_contains(node, _ATSPI.StateType.SHOWING):
++            # On a hidden workspace even the active document may lack SHOWING.
++            # Retain the document matching this exact window's current title.
++            doc_title = " ".join(normalize(atspi_name(node)).split())
++            window_title = " ".join(normalize(hypr_window.get("title")).split())
++            if not doc_title or doc_title not in window_title:
++                return
++        if depth > 0 and bounds is not None and atspi_window_bounds is not None and not rects_overlap(bounds, atspi_window_bounds):
++            # Never let thousands of offviewport browser tabs consume the AX
++            # budget before the document. Preserve selected/focused controls.
++            if not atspi_state_contains(node, _ATSPI.StateType.SELECTED) and not atspi_state_contains(node, _ATSPI.StateType.FOCUSED):
++                return
+         if depth > 0 and not atspi_node_is_currently_visible(node, bounds):
+             return
+         index = len(records)
+@@ -3159,7 +3296,14 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+         if record["value"] and record["value"] != title:
+             safe_value = str(record["value"]).replace("\r", "\\r").replace("\n", "\\n")
+             value_segment = " Value: " + safe_value
++        if normalize(role) in {"entry", "text", "password text", "spin button"}:
++            value_segment += " SetValue: " + ("supported" if record.get("supportsEditableText") or record.get("supportsValue") else "unsupported")
+         actions_segment = " Secondary Actions: " + ", ".join(record["actions"]) if record["actions"] else ""
++        if "checked" in record:
++            value_segment += " Checked: " + str(record["checked"]).lower()
++        informative_states = [v for v in record.get("states", []) if v in {"focused", "selected", "expanded"}]
++        if informative_states:
++            value_segment += " States: " + ", ".join(informative_states)
+         frame_segment = ""
+         if isinstance(record["frame"], dict):
+             frame = record["frame"]
+@@ -3168,16 +3312,19 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+             )
+         lines.append(("\t" * (depth + 1)) + f"{index} {role} {title}{value_segment}{actions_segment}{frame_segment}".rstrip())
+ 
+-        if visit_table_cells(node, depth, path, bounds):
++        if coordinate_scale is None and visit_table_cells(node, depth, path, bounds):
+             return
+ 
+         child_count = min(atspi_child_count(node), 512)
+         for child_index in range(child_count):
+             if budget_exhausted():
+                 return
+-            visit(atspi_child_at(node, child_index), depth + 1, path + [child_index])
++            visit(atspi_child_at(node, child_index), depth + 1, path + [child_index], document_allowed=document_allowed or is_document, coordinate_scale=coordinate_scale)
+ 
+     def visit_table_cells(node: Any, depth: int, path: list[int], table_bounds: dict[str, float] | None) -> bool:
++        nonlocal omitted_empty_cells
++        empty_retained = 0
++        table_record_index = records[-1]["index"]
+         if table_bounds is None or not bool(atspi_safe(node.is_table, False)):
+             return False
+         table_iface = atspi_safe(node.get_table_iface)
+@@ -3189,7 +3336,8 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+         max_rows = min(total_rows, 200)
+         max_cols = min(total_cols, 200)
+         large_grid = total_rows > 1000 or total_cols > 100
+-        header_y_offset: float | None = None
++        translation = atspi_grid_translation(node) if large_grid and normalize(hypr_window.get("class")) == "libreoffice-calc" else None
++        header_y_offset: float | None = translation[1] if translation is not None else None
+         empty_rows = 0
+         for row in range(max_rows):
+             if budget_exhausted():
+@@ -3219,8 +3367,23 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+                     large_grid=large_grid,
+                     header_y_offset=header_y_offset,
+                 )
++                if translation is not None and translation[0]:
++                    cell_bounds = {**cell_bounds, "x": cell_bounds["x"] + translation[0]}
+                 row_visible = True
+                 empty_cols = 0
++                confirmed_empty = atspi_confirmed_empty_text(cell)
++                numeric_value = atspi_numeric_value(cell) if confirmed_empty else None
++                sampleable = confirmed_empty and numeric_value in {"", "0", "0.0"}
++                important = atspi_state_contains(cell, _ATSPI.StateType.SELECTED) or atspi_state_contains(cell, _ATSPI.StateType.FOCUSED)
++                if sampleable and not important and empty_retained >= 12:
++                    omitted_empty_cells += 1
++                    if omitted_grid_ranges and omitted_grid_ranges[-1][:2] == [table_record_index, row] and omitted_grid_ranges[-1][3] == col - 1 and omitted_grid_ranges[-1][4] == numeric_value:
++                        omitted_grid_ranges[-1][3] = col
++                    else:
++                        omitted_grid_ranges.append([table_record_index, row, col, col, numeric_value])
++                    continue
++                if sampleable:
++                    empty_retained += 1
+                 child_index = atspi_safe(lambda r=row, c=col: _ATSPI.Table.get_index_at(table_iface, r, c))
+                 if isinstance(child_index, int) and child_index >= 0:
+                     child_path = path + [child_index]
+@@ -3236,6 +3399,11 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+         return True
+ 
+     visit(root, 0, root_path)
++    if omitted_empty_cells:
++        lines.append(f"Blank-text grid cells summarized: {omitted_empty_cells}; selected/focused cells and an empty-text sample retain individual indices.")
++        for table_index, row, first, last, numeric in omitted_grid_ranges:
++            reported = numeric or "not exposed"
++            lines.append(f"Table {table_index}, row {row + 1}, columns {first + 1}-{last + 1}: accessible text empty; reported AX numeric value {reported}.")
+     return records, lines, atspi_window_bounds, truncated_reason
+ 
+ 
+@@ -3335,6 +3503,8 @@ def atspi_insert_text(snapshot: dict[str, Any], text: str, *, focused_only: bool
+ def atspi_node_is_editable(node: Any, *, focused_only: bool = False) -> bool:
+     if node is None or not bool(atspi_safe(node.is_editable_text, False)) or not bool(atspi_safe(node.is_text, False)):
+         return False
++    if not atspi_state_contains(node, _ATSPI.StateType.EDITABLE):
++        return False
+     return not focused_only or atspi_state_contains(node, _ATSPI.StateType.FOCUSED)
+ 
+ 
+@@ -3372,16 +3542,32 @@ def atspi_insert_text_in_window(
+ def atspi_set_node_value(node: Any, value: str) -> bool:
+     if node is None:
+         return False
++    # Spin controls can expose both interfaces. Editing their displayed text
++    # alone need not commit the numeric value used when a dialog is accepted.
++    if bool(atspi_safe(node.is_value, False)):
++        value_iface = atspi_safe(node.get_value_iface)
++        if value_iface is None:
++            return False
++        try:
++            requested = float(value)
++            if not math.isfinite(requested) or not _ATSPI.Value.set_current_value(value_iface, requested):
++                return False
++            # Some providers acknowledge a setter without applying it. Read
++            # the numeric property back; do not report an unchanged value as set.
++            deadline = time.monotonic() + 0.15
++            while True:
++                current = atspi_safe(lambda: _ATSPI.Value.get_current_value(value_iface))
++                if current is not None and math.isclose(float(current), requested, rel_tol=1e-9, abs_tol=1e-9):
++                    return True
++                if time.monotonic() >= deadline:
++                    return False
++                time.sleep(0.01)
++        except Exception:
++            return False
+     if bool(atspi_safe(node.is_editable_text, False)):
+         editable_iface = atspi_safe(node.get_editable_text_iface)
+         if editable_iface is not None and bool(atspi_safe(lambda: _ATSPI.EditableText.set_text_contents(editable_iface, value), False)):
+             return True
+-    value_iface = atspi_safe(node.get_value_iface)
+-    if value_iface is not None:
+-        try:
+-            return bool(_ATSPI.Value.set_current_value(value_iface, float(value)))
+-        except Exception:
+-            return False
+     return False
+ 
+ 
+@@ -3492,6 +3678,39 @@ def atspi_child_probe() -> dict[str, Any]:
+     return {"available": False, "mode": "isolated-child", "status": result.get("status", "error"), "error": str(result.get("error") or "AT-SPI child probe failed")}
+ 
+ 
++class AtspiTitleDrift(RuntimeError):
++    """A mutable title mismatch detected before any input was dispatched."""
++
++
++def prepare_auto_atspi_click(snapshot: dict[str, Any], element: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any] | None]:
++    try:
++        require_atspi_mutation_identity(snapshot)
++        return snapshot, element, None
++    except AtspiTitleDrift:
++        # Recapture only the same qualified window. Never retry a mutator.
++        fresh = build_app_snapshot(snapshot_window_query(snapshot, str(snapshot["target"])))
++        fields = ("address", "pid", "processStartTime", "class", "initialClass", "initialTitle")
++        if fresh.get("target") != snapshot.get("target") or any(
++            fresh.get("window", {}).get(k) != snapshot.get("window", {}).get(k) for k in fields
++        ):
++            raise RuntimeError("AT-SPI title recovery denied: stable identity changed")
++        name = normalize(element.get("name"))
++        role = element_role(element)
++        actions = {normalize(a) for a in element.get("actions") or []}
++        candidates = [
++            candidate for candidate in fresh.get("elements") or []
++            if name and role and candidate.get("source") == "atspi"
++            and normalize(candidate.get("name")) == name
++            and element_role(candidate) == role
++            and "enabled" in candidate.get("states", [])
++            and actions & {normalize(a) for a in candidate.get("actions") or []}
++            and (not element.get("automationId") or candidate.get("automationId") == element.get("automationId"))
++        ]
++        if len(candidates) != 1:
++            raise RuntimeError("AT-SPI title recovery requires a unique enabled role/name/action match; observe again")
++        require_atspi_mutation_identity(fresh)
++        return fresh, candidates[0], {"identityRefresh": "title-only", "oldIndex": element.get("index"), "newIndex": candidates[0].get("index")}
++
+ def require_atspi_mutation_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
+     """Revalidate the full Hypr/AT-SPI binding before launching a mutator."""
+     window = snapshot.get("window")
+@@ -3532,11 +3751,14 @@ def require_atspi_mutation_identity(snapshot: dict[str, Any]) -> dict[str, Any]:
+         "initialTitle": normalize(live.get("initialTitle")),
+     }
+     if actual_fields != expected_fields:
+-        raise RuntimeError("AT-SPI mutation denied: captured Hyprland window identity changed")
++        changed = sorted(k for k in expected_fields if actual_fields[k] != expected_fields[k])
++        if changed == ["title"]:
++            raise AtspiTitleDrift("AT-SPI mutation deferred: window title changed before dispatch")
++        raise RuntimeError(f"AT-SPI mutation denied: captured Hyprland window identity changed ({', '.join(changed)})")
+     if not atspi_rect_identity_matches(window_geometry(live), window_geometry(window), tolerance=1.0):
+         raise RuntimeError("AT-SPI mutation denied: captured Hyprland window geometry changed")
+     if normalize(root_identity.get("title")) != expected_fields["title"]:
+-        raise RuntimeError("AT-SPI mutation denied: captured AT-SPI root does not match Hyprland title")
++        raise AtspiTitleDrift("AT-SPI mutation deferred: captured AT-SPI root does not match Hyprland title")
+     return window
+ 
+ 
+@@ -3807,6 +4029,11 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
+             "status": "ok",
+         }
+ 
++    if operation == "select_text" and payload.get("runtimeId") is None:
++        from text_selection import select_node
++        node = atspi_find_first(window_node, lambda candidate: atspi_node_is_editable(candidate, focused_only=True))
++        return select_node(_ATSPI, node, json.loads(payload["value"]))
++
+     runtime_id = payload.get("runtimeId")
+     if not isinstance(runtime_id, list):
+         return {"ok": False, "status": "error", "error": "AT-SPI action requires runtimeId"}
+@@ -3814,6 +4041,9 @@ def atspi_child_action_payload(payload: dict[str, Any]) -> dict[str, Any]:
+     if node is None:
+         return {"ok": False, "status": "not-found", "error": "AT-SPI runtimeId no longer resolves."}
+ 
++    if operation == "select_text":
++        from text_selection import select_node
++        return select_node(_ATSPI, node, json.loads(payload["value"]))
+     if operation == "do_action":
+         action = payload.get("action")
+         return {"ok": atspi_do_action(node, action if isinstance(action, str) and action else None), "status": "ok"}
+@@ -4063,16 +4293,25 @@ def can_type_with_keys(text: str) -> bool:
+ 
+ 
+ def type_with_keys(target: str, text: str, *, delay: float = 0.015) -> dict[str, Any]:
+-    sent: list[dict[str, Any]] = []
++    events: list[tuple[str, str]] = []
+     for ch in text:
+         key = key_for_char(ch)
+         if key is None:
+             raise RuntimeError(f"character cannot be typed as key events: U+{ord(ch):04X}")
+-        key_name, modifiers = key
+-        sent.append(keyboard(target, key_name, modifiers))
+-        if delay > 0:
+-            time.sleep(delay)
+-    return {"ok": True, "target": target, "method": "keys", "characters": len(text), "keys": len(sent)}
++        events.append(key)
++    if events:
++        keyboard_sequence(target, events)
++    return {"ok": True, "target": target, "method": "keys", "characters": len(text), "keys": len(events), "keyboardTransactions": int(bool(events))}
++
++
++def keyboard_sequence(target: str, events: list[tuple[str, str]]) -> dict[str, Any]:
++    if not events or len(events) > 4096:
++        raise RuntimeError("Keyboard sequence must contain 1–4096 keys; use paste for longer text")
++    for key, modifiers in events:
++        if not re.fullmatch(r"[A-Za-z0-9_-]+", key) or not re.fullmatch(r"[A-Za-z0-9_+]*", modifiers):
++            raise RuntimeError("Invalid key or modifier in keyboard sequence")
++    encoded = ";".join(key + ":" + modifiers for key, modifiers in events)
++    return call_ctl(["keyboard", "--json", target, "sequence", encoded, ""])
+ 
+ 
+ def prefer_related_target(target: str, enabled: bool = False) -> tuple[str, dict[str, Any] | None]:
+@@ -4100,6 +4339,13 @@ def key_from_args(args: dict[str, Any]) -> tuple[str, str]:
+     if not isinstance(key, str) or not key:
+         raise RuntimeError("key action requires key or keys")
+     modifiers = args.get("modifiers") if isinstance(args.get("modifiers"), str) else ""
++    # The public `key` field documents shortcuts such as ctrl+t, too.
++    if "+" in key:
++        parts = key.split("+")
++        if any(not part for part in parts):
++            raise RuntimeError("empty component in key shortcut")
++        key = parts[-1]
++        modifiers = "+".join([*parts[:-1], *([modifiers] if modifiers else [])])
+     return key, modifiers
+ 
+ 
+@@ -4217,7 +4463,14 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
+         related_error = str(exc)
+     else:
+         related_error = ""
+-    screenshot, png_base64 = screenshot_for_window(window)
++    if globals().get("SNAPSHOT_INCLUDE_IMAGES", True):
++        screenshot, png_base64 = screenshot_for_window(window)
++    else:
++        # AX observations use logical window coordinates without rendering pixels.
++        geom = window_geometry(window)
++        screenshot = {"width": geom["width"], "height": geom["height"], "scale": 1.0,
++                      "logicalBounds": dict(geom), "captureKind": "geometry-only"}
++        png_base64 = ""
+     png_bytes = base64.b64decode(png_base64, validate=True)
+     captured_at = time.time()
+     screenshot_id = f"snap_{secrets.token_urlsafe(18)}"
+@@ -4225,16 +4478,17 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
+     screenshot.update(
+         {
+             "id": screenshot_id,
+-            "sha256": hashlib.sha256(png_bytes).hexdigest(),
++            "sha256": hashlib.sha256(png_bytes).hexdigest() if png_bytes else None,
+         }
+     )
+-    atspi = atspi_snapshot_isolated(window, screenshot)
++    include_ax = globals().get("SNAPSHOT_INCLUDE_AX", True)
++    atspi = atspi_snapshot_isolated(window, screenshot) if include_ax else atspi_empty_snapshot("not-requested", "Screenshot-only observation")
+     root_identity = atspi.get("rootIdentity")
+     if atspi.get("status") == "ok" and isinstance(root_identity, dict):
+         # This exact capture-time root is mandatory for every AT-SPI mutation.
+         # Observation may still use the documented compatible resolver.
+         window["atspiRootIdentity"] = dict(root_identity)
+-    global_menu = global_menu_for_window(window)
++    global_menu = global_menu_for_window(window) if include_ax else {"status": "not-requested", "items": []}
+     elements = atspi["elements"] if atspi["status"] == "ok" and atspi["elements"] else []
+     tree_lines = atspi["treeLines"] if atspi["status"] == "ok" and atspi["treeLines"] else []
+     if not elements:
+@@ -4816,12 +5070,45 @@ def tool_get_cursor_position(args: dict[str, Any]) -> dict[str, Any]:
+     return mcp_text(json.dumps(result, ensure_ascii=False), structured=result)
+ 
+ 
++def semantic_atspi_click(app: str, element_index: str) -> dict[str, Any]:
++    # Semantic activation does not need a screenshot coordinate or pointer focus.
++    # Refresh and rebind before dispatch so compositor movement cannot leave us
++    # using capture-time geometry. The child still validates exact root identity.
++    previous = SNAPSHOTS.get(normalize(app))
++    if previous is None:
++        raise RuntimeError("AT-SPI click requires a previous app snapshot; call get_app_state first")
++    old_element = lookup_element(previous, element_index)
++    fresh = build_app_snapshot(snapshot_window_query(previous, app))
++    element, rematch = refind_element_in_snapshot(fresh, old_element, int(element_index))
++    if not element_has_primary_atspi_action(element):
++        raise RuntimeError("element has no AT-SPI action; inspect its available actions")
++    # Semantic actions can map new dialogs too. Arm the compositor's early
++    # window-map guard before dispatch, even though no pointer is involved.
++    session = begin_related_action_session(str(fresh["target"]))
++    if not session.get("begin", {}).get("ok"):
++        raise RuntimeError("AT-SPI action stopped: background workspace guard could not start")
++    try:
++        if not atspi_do_action_isolated(fresh, element):
++            raise RuntimeError("AT-SPI action was not accepted; inspect current state before retrying")
++    finally:
++        finish_related_action_session(str(fresh["target"]), session)
++    action = {"method": "atspi", "target": fresh["target"], "session": session,
++              "elementIndex": element.get("index"), "elementName": element.get("name"),
++              "elementRematch": rematch, "dispatchAccepted": True,
++              "verification": "Dispatch accepted; inspect returned state to verify the intended effect."}
++    return mcp_snapshot_result(snapshot_after_action(app, fresh, action))
++
++
+ def semantic_click(args: dict[str, Any]) -> dict[str, Any]:
+     app = str(args.get("app") or "")
+     button = str(args.get("mouse_button") or "left")
+     click_count = int(args.get("click_count") or 1)
+ 
+     element_index = args.get("element_index")
++    if isinstance(element_index, int) and not isinstance(element_index, bool):
++        element_index = str(element_index)
++    if isinstance(element_index, str) and element_index and button == "left" and click_count == 1 and element_click_mode(args) == "atspi":
++        return semantic_atspi_click(app, element_index)
+     element = None
+     refresh_info = None
+     if isinstance(element_index, str) and element_index:
+@@ -4836,58 +5123,75 @@ def semantic_click(args: dict[str, Any]) -> dict[str, Any]:
+ 
+     target = str(snapshot["target"])
+     session_info = begin_related_action_session(target)
++    session_finished = False
+ 
+-    if element is not None and button == "left" and click_count == 1:
+-        mode = element_click_mode(args)
+-        if mode == "pointer" and element_is_menu_item(element) and element_has_primary_atspi_action(element):
+-            mode = "atspi"
+-        if mode in {"auto", "atspi"}:
+-            if not element_has_primary_atspi_action(element):
+-                if mode == "atspi":
+-                    raise RuntimeError("element has no AT-SPI action; use element_click_mode=pointer for native pointer click")
+-            else:
+-                control_overlay(snapshot, float(x), float(y), coordinate_space=coordinate_space, action="click")
+-                if atspi_do_action_isolated(snapshot, element):
+-                    action_result = {"method": "atspi", "clickedElement": compact_element_info(element, float(x), float(y), coordinate_space), "session": session_info}
+-                    if refresh_info:
+-                        action_result.update(refresh_info)
+-                    finish_related_action_session(target, session_info)
+-                    return mcp_snapshot_result(
+-                        snapshot_after_action(
+-                            app,
+-                            snapshot,
+-                            action_result,
++    def finish_once() -> None:
++        nonlocal session_finished
++        if not session_finished:
++            session_finished = True
++            finish_related_action_session(target, session_info)
++
++    try:
++        if not session_info.get("begin", {}).get("ok"):
++            raise RuntimeError("Click stopped: background workspace guard could not start")
++        if element is not None and button == "left" and click_count == 1:
++            mode = element_click_mode(args)
++            # Preserve background routing separately from accurate editability:
++            # Gecko suggestions expose EditableText; their AT-SPI action can
++            # activate the root window despite the related-popup guard.
++            if mode == "auto" and (element.get("editable") or element.get("supportsEditableText") or normalize(element.get("controlType")) in {"text", "entry", "password text", "table cell"}):
++                mode = "pointer"
++            if mode in {"auto", "atspi"}:
++                if not element_has_primary_atspi_action(element):
++                    if mode == "atspi":
++                        raise RuntimeError("element has no AT-SPI action; use element_click_mode=pointer for native pointer click")
++                else:
++                    snapshot, element, identity_info = prepare_auto_atspi_click(snapshot, element)
++                    if identity_info:
++                        refresh_info = {**(refresh_info or {}), **identity_info}
++                        x, y = visible_element_center(snapshot, element)
++                    control_overlay(snapshot, float(x), float(y), coordinate_space=coordinate_space, action="click")
++                    if atspi_do_action_isolated(snapshot, element):
++                        action_result = {"method": "atspi", "clickedElement": compact_element_info(element, float(x), float(y), coordinate_space), "session": session_info}
++                        if refresh_info:
++                            action_result.update(refresh_info)
++                        finish_once()
++                        return mcp_snapshot_result(
++                            snapshot_after_action(
++                                app,
++                                snapshot,
++                                action_result,
++                            )
+                         )
+-                    )
+-                if mode == "atspi":
+-                    finish_related_action_session(target, session_info)
+-                    raise RuntimeError("AT-SPI element action failed; use element_click_mode=pointer for native pointer click")
++                    raise RuntimeError("AT-SPI dispatch was not accepted; inspect current state before retrying. No pointer fallback after dispatch.")
+ 
+-    action = "doubleclick" if click_count > 1 and button == "left" else "click"
+-    ctl_args, pointer_info = pointer_ctl_args(snapshot, float(x), float(y), coordinate_space, action, button)
+-    info: dict[str, Any] = {
+-        "method": "pointer",
+-        "target": target,
+-        "button": button,
+-        "clickCount": click_count,
+-        "coordinate": {"x": float(x), "y": float(y), "coordinateSpace": coordinate_space},
+-        **pointer_info,
+-    }
+-    if refresh_info:
+-        info.update(refresh_info)
+-    if element is not None:
+-        info["clickedElement"] = compact_element_info(element, float(x), float(y), coordinate_space)
+-    for index in range(max(1, click_count)):
++        action = "doubleclick" if click_count > 1 and button == "left" else "click"
++        ctl_args, pointer_info = pointer_ctl_args(snapshot, float(x), float(y), coordinate_space, action, button)
++        info: dict[str, Any] = {
++            "method": "pointer",
++            "target": target,
++            "button": button,
++            "clickCount": click_count,
++            "coordinate": {"x": float(x), "y": float(y), "coordinateSpace": coordinate_space},
++            **pointer_info,
++        }
++        if refresh_info:
++            info.update(refresh_info)
++        if element is not None:
++            info["clickedElement"] = compact_element_info(element, float(x), float(y), coordinate_space)
++        for index in range(max(1, click_count)):
++            if action == "doubleclick":
++                break
++            call_ctl(ctl_args)
++            if index + 1 < click_count:
++                time.sleep(0.12)
+         if action == "doubleclick":
+-            break
+-        call_ctl(ctl_args)
+-        if index + 1 < click_count:
+-            time.sleep(0.12)
+-    if action == "doubleclick":
+-        call_ctl(ctl_args)
+-    finish_related_action_session(target, session_info)
+-    info["session"] = session_info
+-    return mcp_snapshot_result(snapshot_after_action(app, snapshot, info))
++            call_ctl(ctl_args)
++        finish_once()
++        info["session"] = session_info
++        return mcp_snapshot_result(snapshot_after_action(app, snapshot, info))
++    finally:
++        finish_once()
+ 
+ 
+ def semantic_perform_secondary_action(args: dict[str, Any]) -> dict[str, Any]:
+@@ -5085,7 +5389,10 @@ def semantic_type_text(args: dict[str, Any]) -> dict[str, Any]:
+             return mcp_snapshot_result(snapshot_after_action(app, snapshot, {"method": "atspi", "targeting": "editable"}))
+         raise RuntimeError("explicit AT-SPI text insertion failed; no keyboard or clipboard fallback was attempted")
+     type_args = dict(args)
+-    prepare_grid_bulk_paste(snapshot, text)
++    # Key-event typing must preserve the current edit context. A file chooser
++    # also contains a table; the bulk-paste Escape would close that dialog.
++    if method != "keys":
++        prepare_grid_bulk_paste(snapshot, text)
+     info = type_text(str(snapshot["target"]), text, type_args)
+     return mcp_snapshot_result(snapshot_after_action(app, snapshot, info))
+ 
+@@ -5113,29 +5420,54 @@ def semantic_paste_text(args: dict[str, Any]) -> dict[str, Any]:
+ def semantic_press_key(args: dict[str, Any]) -> dict[str, Any]:
+     app = str(args.get("app") or "")
+     snapshot = current_snapshot(app)
+-    key, modifiers = key_from_args(args)
++    raw = args.get("key")
++    combinations = raw.split() if isinstance(raw, str) else []
++    events = [key_from_args({**args, "key": key}) for key in combinations] if len(combinations) > 1 else [key_from_args(args)]
+     repeat = args.get("repeat", 1)
+     if not isinstance(repeat, int) or repeat < 1:
+         repeat = 1
+-    try:
+-        element = best_scroll_element(snapshot, "down") or best_scroll_element(snapshot, "up")
+-        if element is not None:
+-            x, y = visible_element_center(snapshot, element)
+-            control_overlay(snapshot, x, y, action="key")
+-        else:
+-            x = y = None
+-            control_overlay(snapshot, action="key")
+-    except Exception:
+-        x = y = None
+-        control_overlay(snapshot, action="key")
++    # Keyboard input belongs to the explicitly bound window, not a hit-tested
++    # scroll surface. Scroll centers are screenshot-relative, while the native
++    # keyboard coordinate option expects global coordinates.
++    control_overlay(snapshot, action="key")
+     info: dict[str, Any] = {}
+-    for _ in range(min(repeat, 100)):
+-        info = keyboard(str(snapshot["target"]), key, modifiers, x, y)
++    events *= min(repeat, 100)
++    if len(events) > 1:
++        info = keyboard_sequence(str(snapshot["target"]), events)
++    else:
++        info = keyboard(str(snapshot["target"]), *events[0])
+     if info:
+         info["repeat"] = min(repeat, 100)
+     return mcp_snapshot_result(snapshot_after_action(app, snapshot, info if info else None))
+ 
+ 
++def semantic_select_text(args: dict[str, Any]) -> dict[str, Any]:
++    app = str(args.get("app") or "")
++    previous = current_snapshot(app)
++    fresh = build_app_snapshot(snapshot_window_query(previous, app))
++    element = None
++    if args.get("element_index") is not None:
++        old_element = lookup_element(previous, str(args["element_index"]))
++        element, rematch = refind_element_in_snapshot(fresh, old_element, int(args["element_index"]))
++        if not element.get("focused"):
++            semantic_click({"app": fresh["target"], "element_index": str(element["index"]), "element_click_mode": "pointer"})
++            fresh = current_snapshot(fresh["target"])
++            element, rematch = refind_element_in_snapshot(fresh, old_element, int(args["element_index"]))
++    window = require_atspi_mutation_identity(fresh)
++    options = {key: args[key] for key in ("text", "prefix", "suffix", "selection") if key in args}
++    session = begin_related_action_session(fresh["target"])
++    if not session["begin"].get("ok"):
++        raise RuntimeError("Cannot establish background workspace guard")
++    try:
++        result = atspi_child_action("select_text", window,
++            runtime_id=element.get("runtimeId") if element else None, value=json.dumps(options))
++        if not result.get("ok"):
++            raise RuntimeError(result.get("error") or "AT-SPI text selection failed")
++    finally:
++        finish_related_action_session(fresh["target"], session)
++    return mcp_snapshot_result(snapshot_after_action(app, fresh, result))
++
++
+ def semantic_set_value(args: dict[str, Any]) -> dict[str, Any]:
+     app = str(args.get("app") or "")
+     value = args.get("value")
+@@ -5150,7 +5482,7 @@ def semantic_set_value(args: dict[str, Any]) -> dict[str, Any]:
+     except Exception:
+         control_overlay(snapshot, action="set_value")
+     if not atspi_set_element_value_isolated(snapshot, element, value):
+-        raise RuntimeError("Cannot set a value for an element that is not settable")
++        raise RuntimeError("The provider did not confirm the requested value. Refresh AX state before trying another input method.")
+     action_result = {"method": "atspi", "action": "set_value"}
+     if element_point is not None:
+         action_result["element"] = compact_element_info(element, element_point[0], element_point[1], "screenshot")
+@@ -6071,6 +6403,7 @@ SEMANTIC_TOOLS = {
+     "paste_text": semantic_paste_text,
+     "press_key": semantic_press_key,
+     "key": semantic_press_key,
++    "select_text": semantic_select_text,
+     "set_value": semantic_set_value,
+     "wait": semantic_wait,
+     "wait_for_window": semantic_wait_for_window,
+@@ -6438,6 +6771,7 @@ FULL_LEVEL_ACTIONS = {
+     "paste_image",
+     "session",
+     "set_value",
++    "select_text",
+     "perform_secondary_action",
+     "activate_menu_item",
+     "panic",
+diff --git a/mcp/security_policy.py b/mcp/security_policy.py
+index 265b090..d06ec3c 100644
+--- a/mcp/security_policy.py
++++ b/mcp/security_policy.py
+@@ -255,6 +255,9 @@ class ConfinementConfig:
+ 
+ @dataclass(frozen=True)
+ class PolicyConfig:
++    # Server-owner configuration, never a per-call agent argument.
++    permission_mode: str = "standard"
++    approval_policy: str = "external"
+     readonly: bool = False
+     dry_run: bool = False
+     confinement: ConfinementConfig = field(default_factory=ConfinementConfig)
+@@ -290,6 +293,10 @@ class PolicyConfig:
+     )
+ 
+     def __post_init__(self) -> None:
++        if self.permission_mode not in {"standard", "read-only", "full"}:
++            raise ValueError("permission mode must be standard, read-only, or full")
++        if self.approval_policy not in {"external", "never"}:
++            raise ValueError("approval policy must be external or never")
+         if self.mutation_lease_ttl_seconds <= 0:
+             raise ValueError("mutation lease TTL must be positive")
+         if self.confirmation_ttl_seconds <= 0:
+@@ -828,7 +835,8 @@ class SecurityPolicy:
+                 "dryRun": self.config.dry_run,
+                 "defaultAuthorization": self.config.default_authorization.name.lower(),
+                 "confinementEnabled": self.config.confinement.enabled,
+-                "confirmationMode": "external",
++                "permissionMode": self.config.permission_mode,
++                "confirmationMode": self.config.approval_policy,
+                 "launchedWindowCount": len(self._launched_identities),
+                 "mutationLease": (
+                     {"owner": lease.owner, "expiresAt": lease.expires_at} if lease is not None else None
+@@ -1018,7 +1026,7 @@ class SecurityPolicy:
+                 execute=False,
+                 code=DecisionCode.DRY_RUN,
+                 reason="action passed policy checks but dry-run mode suppresses execution",
+-                details={"wouldRequireConfirmation": request.destructive},
++                details={"wouldRequireConfirmation": request.destructive and self.config.approval_policy == "external"},
+             )
+ 
+         if request.mutating and self.config.mutation_lease_required:
+@@ -1033,7 +1041,7 @@ class SecurityPolicy:
+                     {"holder": lease.owner, "expiresAt": lease.expires_at},
+                 )
+ 
+-        if request.destructive:
++        if request.destructive and self.config.approval_policy == "external":
+             if not request.confirmation_token:
+                 return self._deny(DecisionCode.CONFIRMATION_REQUIRED, "destructive action requires confirmation")
+             confirmation_status = self._consume_confirmation(request)
+@@ -1046,7 +1054,8 @@ class SecurityPolicy:
+             if confirmation_status != "approved":
+                 return self._deny(DecisionCode.CONFIRMATION_INVALID, "confirmation token is invalid, expired, used, or does not match the action")
+ 
+-        return PolicyDecision(True, True, DecisionCode.ALLOW, "action is allowed")
++        return PolicyDecision(True, True, DecisionCode.ALLOW, "action is allowed",
++                              details={"approvalPolicy": self.config.approval_policy})
+ 
+     def authorization_for(self, target: WindowIdentity | None) -> AuthorizationLevel:
+         if target is None:
+@@ -1271,6 +1280,8 @@ def policy_config_from_env(env: Mapping[str, str] | None = None) -> PolicyConfig
+     # Public short aliases keep the common configuration approachable while
+     # SECURITY_* remains the unambiguous canonical form. Canonical values win.
+     for short_name, canonical_name in {
++        "HYPR_AGENT_PORTAL_PERMISSION_MODE": prefix + "PERMISSION_MODE",
++        "HYPR_AGENT_PORTAL_APPROVAL_POLICY": prefix + "APPROVAL_POLICY",
+         "HYPR_AGENT_PORTAL_READONLY": prefix + "READONLY",
+         "HYPR_AGENT_PORTAL_DRYRUN": prefix + "DRY_RUN",
+         "HYPR_AGENT_PORTAL_APP_POLICIES": prefix + "APP_AUTHORIZATIONS",
+@@ -1307,6 +1318,24 @@ def policy_config_from_env(env: Mapping[str, str] | None = None) -> PolicyConfig
+         values[prefix + "CLIPBOARD_PERMISSIONS"] = clipboard_aliases.get(
+             clipboard_short, values["HYPR_AGENT_PORTAL_CLIPBOARD"]
+         )
++    mode = values.get(prefix + "PERMISSION_MODE", "standard").strip().casefold()
++    mode = {"readonly": "read-only", "unrestricted": "full"}.get(mode, mode)
++    if mode not in {"standard", "read-only", "full"}:
++        raise ValueError("permission mode must be standard, read-only, or full")
++    # Presets supply defaults; an explicit operator restriction still wins.
++    if mode == "full":
++        values.setdefault(prefix + "DEFAULT_AUTHORIZATION", "full")
++        values.setdefault(prefix + "APPROVAL_POLICY", "never")
++        values.setdefault(prefix + "BLOCK_LAYER_MUTATION", "0")
++        values.setdefault(prefix + "BLOCK_KEYBOARD_GRAB_MUTATION", "0")
++        values.setdefault(prefix + "HUMAN_TAKEOVER", "0")
++        values.setdefault(prefix + "CLIPBOARD_PERMISSIONS", ",".join(item.value for item in ClipboardCapability))
++    elif mode == "read-only":
++        values[prefix + "READONLY"] = "1"
++    approval = values.get(prefix + "APPROVAL_POLICY", "external").strip().casefold()
++    if approval not in {"external", "never"}:
++        raise ValueError("approval policy must be external or never")
++
+     authorizations: dict[str, AuthorizationLevel] = {}
+     for entry in _env_set(values, prefix + "APP_AUTHORIZATIONS"):
+         if "=" not in entry:
+@@ -1329,6 +1358,8 @@ def policy_config_from_env(env: Mapping[str, str] | None = None) -> PolicyConfig
+         match=ScopeMatch(values.get(prefix + "CONFINE_MATCH", ScopeMatch.ANY.value).strip().lower()),
+     )
+     return PolicyConfig(
++        permission_mode=mode,
++        approval_policy=approval,
+         readonly=_env_bool(values, prefix + "READONLY", False),
+         dry_run=_env_bool(values, prefix + "DRY_RUN", False),
+         confinement=confinement,
+diff --git a/mcp/text_selection.py b/mcp/text_selection.py
+new file mode 100644
+index 0000000..b40f7c8
+--- /dev/null
++++ b/mcp/text_selection.py
+@@ -0,0 +1,49 @@
++"""AT-SPI text selection without pointer motion or focus requests."""
++
++def selection_range(content, text, prefix='', suffix=''):
++    if not isinstance(text, str) or not text:
++        raise ValueError('select_text requires non-empty text')
++    candidates = []
++    start = 0
++    while True:
++        start = content.find(text, start)
++        if start < 0:
++            break
++        end = start + len(text)
++        if content[:start].endswith(prefix) and content[end:].startswith(suffix):
++            candidates.append((start, end))
++        start += 1
++    if len(candidates) != 1:
++        raise ValueError('Text match is missing or ambiguous; supply prefix/suffix or another element')
++    return candidates[0]
++
++
++def select_node(atspi, node, options):
++    if node is None:
++        raise ValueError('No focused text element; supply element_index')
++    iface = node.get_text_iface()
++    if iface is None:
++        raise ValueError('Element does not expose AT-SPI Text')
++    content = atspi.Text.get_text(iface, 0, -1)
++    start, end = selection_range(content, options['text'], options.get('prefix', ''), options.get('suffix', ''))
++    mode = options.get('selection', 'text')
++    if mode == 'text':
++        if atspi.Text.get_n_selections(iface):
++            accepted = atspi.Text.set_selection(iface, 0, start, end)
++        else:
++            accepted = atspi.Text.add_selection(iface, start, end)
++        if not accepted:
++            raise ValueError('Application refused text selection')
++        observed = atspi.Text.get_selection(iface, 0)
++        if (observed.start_offset, observed.end_offset) != (start, end):
++            raise ValueError('Application did not retain the requested selection')
++    elif mode in ('cursor_before', 'cursor_after'):
++        for index in reversed(range(atspi.Text.get_n_selections(iface))):
++            if not atspi.Text.remove_selection(iface, index):
++                raise ValueError('Application refused to clear selection')
++        offset = start if mode == 'cursor_before' else end
++        if not atspi.Text.set_caret_offset(iface, offset) or atspi.Text.get_caret_offset(iface) != offset:
++            raise ValueError('Application did not retain the requested caret position')
++    else:
++        raise ValueError('Invalid selection mode')
++    return {'ok': True, 'method': 'atspi', 'selection': mode, 'start': start, 'end': end}
+diff --git a/scripts/hypr-agent-portalctl b/scripts/hypr-agent-portalctl
+index f9da979..b1e39ae 100755
+--- a/scripts/hypr-agent-portalctl
++++ b/scripts/hypr-agent-portalctl
+@@ -661,7 +661,10 @@ def dispatch(dispatcher: str, payload: str = "") -> subprocess.CompletedProcess:
+     if is_lua_config_provider():
+         lua_dispatcher = lua_plugin_dispatcher(dispatcher, payload)
+         if lua_dispatcher:
+-            return subprocess.run(["hyprctl", "dispatch", lua_dispatcher], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=hyprctl_environment(), check=False)
++            # Hyprland eval discards return values, including {ok=false}.
++            # Raise at the outer Lua boundary so hyprctl exits nonzero.
++            checked = f"local result = hl.dispatch({lua_dispatcher}); assert(type(result) == 'table', 'missing dispatcher result'); assert(result.ok, result.error or 'plugin dispatch failed')"
++            return subprocess.run(["hyprctl", "eval", checked], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=hyprctl_environment(), check=False)
+         return subprocess.CompletedProcess(
+             ["hyprctl", "dispatch", dispatcher],
+             1,
+@@ -679,6 +682,17 @@ def hyprctl(*args: str) -> subprocess.CompletedProcess:
+     return subprocess.run(["hyprctl", *args], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=hyprctl_environment(), check=False)
+ 
+ 
++def prepare_frame(args: argparse.Namespace) -> int:
++    # The native prepare branch wakes only the selected client's surfaces and
++    # returns before creating any capture files. Native lock/privacy guards apply.
++    result = dispatch("hypr-agent-portal:screenshot", f"/unused-ax-prepare,{args.target},prepare")
++    if result.returncode != 0:
++        print(result.stderr or result.stdout, file=sys.stderr, end="")
++        return result.returncode or 1
++    print(json.dumps({"prepared": True}))
++    return 0
++
++
+ def screenshot(args: argparse.Namespace) -> int:
+     root = state_root(args.output_dir)
+     session_path = root / f"session-{secrets.token_hex(16)}.json"
+@@ -686,6 +700,12 @@ def screenshot(args: argparse.Namespace) -> int:
+     payload = str(session_path)
+     if args.target:
+         payload = ",".join([payload, args.target])
++        # Let an off-workspace client commit a fresh buffer before readback.
++        prepared = dispatch(args.dispatcher, payload + ",prepare")
++        if prepared.returncode != 0:
++            print(prepared.stderr or prepared.stdout, file=sys.stderr, end="")
++            return prepared.returncode or 1
++        time.sleep(0.12)
+     result = dispatch(args.dispatcher, payload)
+     if result.returncode != 0:
+         print(result.stderr or result.stdout, file=sys.stderr, end="")
+@@ -1029,6 +1049,10 @@ def build_parser() -> argparse.ArgumentParser:
+     parser = argparse.ArgumentParser(description="hypr-agent-portal command line bridge")
+     sub = parser.add_subparsers(dest="cmd", required=True)
+ 
++    prepare = sub.add_parser("prepare-frame", help="wake a target's background frames without capturing pixels")
++    prepare.add_argument("--target", required=True)
++    prepare.set_defaults(func=prepare_frame)
++
+     shot = sub.add_parser("screenshot", help="capture a compositor screenshot session")
+     shot.add_argument("--dispatcher", default="hypr-agent-portal:screenshot")
+     shot.add_argument("--output-dir")
+@@ -1071,7 +1095,7 @@ def build_parser() -> argparse.ArgumentParser:
+ 
+     key = sub.add_parser("keyboard", help="send keyboard input to a target window")
+     key.add_argument("target", help="Hyprland window regex, for example address:0x1234")
+-    key.add_argument("action", choices=["tap", "press-release", "press", "down", "release", "up"])
++    key.add_argument("action", choices=["tap", "press-release", "press", "down", "release", "up", "sequence"])
+     key.add_argument("key", help="key name or raw evdev keycode, for example enter, v, f5, 28")
+     key.add_argument("modifiers", nargs="?", default="", help="optional modifiers, for example ctrl+shift")
+     key.add_argument("--x", type=float, help="optional global logical x coordinate to resolve a subsurface")
+diff --git a/src/plugin/keymap_resolver.hpp b/src/plugin/keymap_resolver.hpp
+new file mode 100644
+index 0000000..5b8f6cb
+--- /dev/null
++++ b/src/plugin/keymap_resolver.hpp
+@@ -0,0 +1,35 @@
++#pragma once
++#include <xkbcommon/xkbcommon.h>
++#include <memory>
++#include <optional>
++
++struct ResolvedPortalKey { uint32_t key; xkb_layout_index_t group; };
++
++// Translate the API's US key names to symbols, then resolve those symbols in
++// the client's real keymap. Only the target resource sees the chosen group.
++inline std::optional<ResolvedPortalKey> resolvePortalKey(xkb_keymap* map, uint32_t usKey, uint32_t modifiers, xkb_layout_index_t preferred) {
++    using Context = std::unique_ptr<xkb_context, decltype(&xkb_context_unref)>;
++    using Keymap = std::unique_ptr<xkb_keymap, decltype(&xkb_keymap_unref)>;
++    using State = std::unique_ptr<xkb_state, decltype(&xkb_state_unref)>;
++    Context ctx(xkb_context_new(XKB_CONTEXT_NO_FLAGS), xkb_context_unref);
++    if (!ctx || !map) return std::nullopt;
++    xkb_rule_names names{}; names.layout = "us";
++    Keymap us(xkb_keymap_new_from_names(ctx.get(), &names, XKB_KEYMAP_COMPILE_NO_FLAGS), xkb_keymap_unref);
++    if (!map || !us) return std::nullopt;
++    State reference(xkb_state_new(us.get()), xkb_state_unref);
++    State actual(xkb_state_new(map), xkb_state_unref);
++    if (!reference || !actual) return std::nullopt;
++    xkb_state_update_mask(reference.get(), modifiers, 0, 0, 0, 0, 0);
++    const auto symbol = xkb_state_key_get_one_sym(reference.get(), usKey + 8);
++    if (symbol == XKB_KEY_NoSymbol) return std::nullopt;
++    const auto groups = xkb_keymap_num_layouts(map);
++    for (xkb_layout_index_t offset = 0; offset < groups; ++offset) {
++        const auto group = (preferred + offset) % groups;
++        xkb_state_update_mask(actual.get(), modifiers, 0, 0, 0, 0, group);
++        for (auto code = xkb_keymap_min_keycode(map); code <= xkb_keymap_max_keycode(map); ++code) {
++            if (code >= 8 && xkb_state_key_get_one_sym(actual.get(), code) == symbol)
++                return ResolvedPortalKey{code - 8, group};
++        }
++    }
++    return std::nullopt;
++}
+diff --git a/src/plugin/main.cpp b/src/plugin/main.cpp
+index 2881342..7caf46f 100644
+--- a/src/plugin/main.cpp
++++ b/src/plugin/main.cpp
+@@ -1,4 +1,5 @@
+ #include "plugin/screenshot_capture.hpp"
++#include "plugin/keymap_resolver.hpp"
+ 
+ #include <hyprland/src/config/ConfigManager.hpp>
+ #include <hyprland/src/config/lua/bindings/LuaBindingsInternal.hpp>
+@@ -1178,8 +1179,13 @@ std::optional<uint32_t> keyboardKey(std::string raw) {
+     if (raw.size() > 1 && raw.front() == 'f') {
+         uint32_t n = 0;
+         const auto [ptr, ec] = std::from_chars(raw.data() + 1, raw.data() + raw.size(), n);
+-        if (ec == std::errc{} && ptr == raw.data() + raw.size() && n >= 1 && n <= 12)
+-            return KEY_F1 + n - 1;
++        // Linux evdev codes have a gap between F10 and F11.
++        static constexpr std::array<uint32_t, 12> functionKeys = {
++            KEY_F1, KEY_F2, KEY_F3, KEY_F4, KEY_F5, KEY_F6,
++            KEY_F7, KEY_F8, KEY_F9, KEY_F10, KEY_F11, KEY_F12,
++        };
++        if (ec == std::errc{} && ptr == raw.data() + raw.size() && n >= 1 && n <= functionKeys.size())
++            return functionKeys[n - 1];
+     }
+ 
+     if (const auto it = keys.find(raw); it != keys.end())
+@@ -1650,6 +1656,42 @@ std::optional<TargetSurface> resolveTargetMainSurface(const std::string& targetR
+     return TargetSurface{.window = window, .surface = window->wlSurface()->resource(), .local = mainBox.middle()};
+ }
+ 
++SP<CEventLoopTimer> g_backgroundFrameTimer;
++WP<CWLSurfaceResource> g_backgroundFrameSurface;
++Time::steady_tp g_backgroundFrameDeadline;
++
++void stopBackgroundFrames() {
++    if (g_backgroundFrameTimer && g_pEventLoopManager)
++        g_pEventLoopManager->removeTimer(g_backgroundFrameTimer);
++    g_backgroundFrameTimer.reset();
++    g_backgroundFrameSurface.reset();
++}
++
++void wakeBackgroundSurface(const SP<CWLSurfaceResource>& surface) {
++    if (!surface || !g_pEventLoopManager) return;
++    g_backgroundFrameSurface = surface;
++    g_backgroundFrameDeadline = Time::steadyNow() + std::chrono::seconds(2);
++    const auto frame = [] {
++        if (const auto target = g_backgroundFrameSurface.lock()) {
++            target->breadthfirst([](SP<CWLSurfaceResource> child, const Vector2D&, void*) {
++                child->frame(Time::steadyNow());
++            }, nullptr);
++            wl_client_flush(target->client());
++        }
++    };
++    frame();
++    if (g_backgroundFrameTimer) return;
++    g_backgroundFrameTimer = makeShared<CEventLoopTimer>(std::chrono::milliseconds(16),
++        [frame](SP<CEventLoopTimer> self, void*) {
++            if (g_agentPanicActive || compositorSessionLocked() || !g_backgroundFrameSurface.lock() || Time::steadyNow() >= g_backgroundFrameDeadline) {
++                stopBackgroundFrames(); return;
++            }
++            frame();
++            self->updateTimeout(std::chrono::milliseconds(16));
++        }, nullptr);
++    g_pEventLoopManager->addTimer(g_backgroundFrameTimer);
++}
++
+ struct PointerFocusRestore {
+     SP<CWLSurfaceResource> previousSurface;
+     Vector2D               previousLocal;
+@@ -2031,6 +2073,7 @@ void cancelWorkspaceSessionTimers() {
+ 
+ void cancelAgentActivity(bool cancelSessions) {
+     cancelAsyncPointerOperation();
++    stopBackgroundFrames();
+     restoreXWaylandKeyboardFocus();
+ 
+     if (cancelSessions) {
+@@ -2156,6 +2199,16 @@ SDispatchResult dispatchPointerWithMode(const std::string& args, bool windowRela
+     if ((action == "drag" || action == "doubleclick" || action == "double-click") && g_asyncPointerOperation)
+         cancelAsyncPointerOperation();
+ 
++    wakeBackgroundSurface(target->surface);
++    // Deliver focus to this client's keyboard resource before its pointer
++    // activation. Otherwise a later key enter can restore an older widget and
++    // discard the focus selected by the background click. Global seat keyboard
++    // focus and resources belonging to other clients remain untouched.
++    std::unique_ptr<KeyboardResourceTransaction> clickKeyboard;
++    if (!target->window->m_isX11 &&
++        (action == "click" || action == "doubleclick" || action == "double-click" || action == "press" || action == "down")) {
++        clickKeyboard = std::make_unique<KeyboardResourceTransaction>(target->window->wlSurface()->resource());
++    }
+     PointerFocusRestore restore;
+     activateXWaylandTarget(*target);
+     g_pSeatManager->setPointerFocus(target->surface, target->local);
+@@ -2465,7 +2518,81 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+         return {.success = false, .error = *error};
+ 
+     const auto action = lower(parts[1]);
+-    const auto key = keyboardKey(parts[2]);
++    if (action == "sequence") {
++        // One enter/leave pair for the entire sequence. Segmented inputs reset
++        // their edit buffer on blur, so separate transactions lose prior digits.
++        struct Stroke {
++            uint32_t key, logical, mask, group;
++            std::vector<KeyboardModifier> modifiers;
++        };
++        std::vector<Stroke> strokes;
++        std::unordered_map<std::string, Stroke> resolvedCache;
++        const auto physical = physicalKeyboardState();
++        const auto keyboard = g_pSeatManager->m_keyboard.lock();
++        std::istringstream encoded(parts[2]);
++        std::string token;
++        while (std::getline(encoded, token, ';')) {
++            if (strokes.size() >= 4096)
++                return {.success = false, .error = "keyboard sequence exceeds 4096 keys; use paste for longer text"};
++            if (const auto found = resolvedCache.find(token); found != resolvedCache.end()) {
++                strokes.push_back(found->second);
++                continue;
++            }
++            const auto separator = token.find(':');
++            if (separator == std::string::npos)
++                return {.success = false, .error = "keyboard sequence expects key:modifiers entries"};
++            const auto name = token.substr(0, separator);
++            const auto logical = keyboardKey(name);
++            if (!logical)
++                return {.success = false, .error = "unknown key in keyboard sequence"};
++            Stroke stroke{.key = *logical, .logical = *logical, .mask = 0, .group = physical.group, .modifiers = {}};
++            for (const auto& modifier : splitCombo(token.substr(separator + 1))) {
++                const auto mod = keyboardModifier(modifier);
++                if (!mod)
++                    return {.success = false, .error = "unknown modifier in keyboard sequence"};
++                stroke.mask |= mod->mask;
++                stroke.modifiers.push_back(*mod);
++            }
++            const bool raw = name.size() > 1 && std::ranges::all_of(name, [](unsigned char ch) { return std::isdigit(ch); });
++            if (!raw) {
++                const auto resolved = resolvePortalKey(keyboard ? keyboard->m_xkbKeymap : nullptr, stroke.key, stroke.mask, stroke.group);
++                if (!resolved)
++                    return {.success = false, .error = "sequence key cannot be represented in the active keymap"};
++                stroke.key = resolved->key;
++                stroke.group = resolved->group;
++            }
++            resolvedCache.emplace(token, stroke);
++            strokes.push_back(std::move(stroke));
++        }
++        if (strokes.empty())
++            return {.success = false, .error = "keyboard sequence is empty"};
++        // Resolve and validate every key before sending the first event.
++        const bool xwaylandLease = activateXWaylandKeyboardTarget(*target);
++        wakeBackgroundSurface(target->surface);
++        KeyboardResourceTransaction transaction(target->surface);
++        if (!transaction.ready() || std::ranges::any_of(strokes, [&](const auto& stroke) { return transaction.targetKeyConflictsWithPhysicalInput(stroke.key); })) {
++            if (xwaylandLease) restoreXWaylandKeyboardFocus();
++            return {.success = false, .error = "keyboard sequence has no target resource or conflicts with physical input"};
++        }
++        showAgentIndicator(target->window, windowMainSurfaceGoalBox(target->window).middle(), "key");
++        for (const auto& stroke : strokes) {
++            if (stroke.logical == KEY_V && (stroke.mask & (1U << 2)) != 0)
++                sendClipboardSelectionToNativeTarget(*target);
++            for (const auto& mod : stroke.modifiers)
++                transaction.sendModifierKey(mod.key, WL_KEYBOARD_KEY_STATE_PRESSED);
++            transaction.sendMods(stroke.mask, 0, 0, stroke.group);
++            transaction.sendKey(stroke.key, WL_KEYBOARD_KEY_STATE_PRESSED);
++            transaction.sendKey(stroke.key, WL_KEYBOARD_KEY_STATE_RELEASED);
++            transaction.sendMods(0, 0, 0, stroke.group);
++            for (auto it = stroke.modifiers.rbegin(); it != stroke.modifiers.rend(); ++it)
++                transaction.sendModifierKey(it->key, WL_KEYBOARD_KEY_STATE_RELEASED);
++        }
++        transaction.flushTargetClient();
++        if (xwaylandLease)
++            restoreXWaylandKeyboardFocusLater(std::chrono::milliseconds(xwaylandKeyboardRestoreDelayMs()));
++        return {.success = true};
++    }
++    auto key = keyboardKey(parts[2]);
+     if (!key)
+         return {.success = false, .error = "unknown keyboard key"};
+ 
+@@ -2481,9 +2608,24 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+         }
+     }
+ 
++    const auto physical = physicalKeyboardState();
++    auto inputGroup = physical.group;
++    const auto logicalKey = *key;
++    // Multi-digit numeric keys retain the explicit evdev API semantics.
++    const bool rawCode = parts[2].size() > 1 && std::ranges::all_of(parts[2], [](unsigned char ch) { return std::isdigit(ch); });
++    if (!rawCode) {
++        const auto keyboard = g_pSeatManager->m_keyboard.lock();
++        const auto resolved = resolvePortalKey(keyboard ? keyboard->m_xkbKeymap : nullptr, *key, modifierMask, inputGroup);
++        if (!resolved)
++            return {.success = false, .error = "requested key cannot be represented in the active keyboard keymap"};
++        key = resolved->key;
++        inputGroup = resolved->group;
++    }
++
+     const bool xwaylandLease = activateXWaylandKeyboardTarget(*target);
+     showAgentIndicator(target->window, indicatorGlobal.value_or(windowMainSurfaceGoalBox(target->window).middle()), "key");
+ 
++    wakeBackgroundSurface(target->surface);
+     KeyboardResourceTransaction transaction(target->surface);
+     if (!transaction.ready()) {
+         if (xwaylandLease)
+@@ -2496,17 +2638,17 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+         return {.success = false, .error = "target key is currently held by the physical keyboard"};
+     }
+ 
+-    if (*key == KEY_V && (modifierMask & (1U << 2)) != 0)
++    if (logicalKey == KEY_V && (modifierMask & (1U << 2)) != 0)
+         sendClipboardSelectionToNativeTarget(*target);
+ 
+     const auto pressModifiers = [&] {
+         for (const auto& mod : modifiers)
+             transaction.sendModifierKey(mod.key, WL_KEYBOARD_KEY_STATE_PRESSED);
+-        transaction.sendMods(modifierMask, 0, 0, 0);
++        transaction.sendMods(modifierMask, 0, 0, inputGroup);
+     };
+ 
+     const auto releaseModifiers = [&] {
+-        transaction.sendMods(0, 0, 0, 0);
++        transaction.sendMods(0, 0, 0, inputGroup);
+         for (auto it = modifiers.rbegin(); it != modifiers.rend(); ++it)
+             transaction.sendModifierKey(it->key, WL_KEYBOARD_KEY_STATE_RELEASED);
+     };
+@@ -2565,6 +2707,9 @@ SDispatchResult dispatchScreenshot(const std::string& args) {
+         if (screenshotPrivacyDenied(window))
+             return {.success = false, .error = "target window class is excluded by privacy_class_denylist"};
+         targetWindow = window;
++        wakeBackgroundSurface(window->wlSurface()->resource());
++        if (parts.size() >= 3 && trim(parts[2]) == "prepare")
++            return {.success = true};
+     } else {
+         // Full capture serializes metadata for every mapped window, including
+         // hidden windows and windows on inactive workspaces. Apply privacy to
+diff --git a/src/plugin/screenshot_capture.cpp b/src/plugin/screenshot_capture.cpp
+index 48157d9..37a4328 100644
+--- a/src/plugin/screenshot_capture.cpp
++++ b/src/plugin/screenshot_capture.cpp
+@@ -480,7 +480,9 @@ bool renderWindowArtifact(const PHLWINDOW& window,
+         FullSurfaceVisibleRegionOverride fullVisibleRegion(window);
+         glClearColor(0.F, 0.F, 0.F, 0.F);
+         glClear(GL_COLOR_BUFFER_BIT);
+-        g_pHyprRenderer->renderWindow(window, monitor, frozenTime, false, Render::RENDER_PASS_ALL, false, false);
++        // Standalone capture must ignore workspace fade alpha: hidden workspaces
++        // can have alpha zero even while their clients have valid buffers.
++        g_pHyprRenderer->renderWindow(window, monitor, frozenTime, false, Render::RENDER_PASS_ALL, false, true);
+     }
+     g_pHyprRenderer->m_bRenderingSnapshot = previousRenderingSnapshot;
+ 
+diff --git a/tests/hypr_management.py b/tests/hypr_management.py
+index 5cfcf56..1113d88 100644
+--- a/tests/hypr_management.py
++++ b/tests/hypr_management.py
+@@ -507,14 +507,13 @@ class HyprManagementTests(unittest.TestCase):
+         lua_manage_calls = [
+             call
+             for call in lua_calls
+-            if call[:2] == ("hyprctl", "dispatch")
++            if call[:2] == ("hyprctl", "eval")
+             and len(call) >= 3
+-            and call[2].startswith("hl.plugin.hypr_agent_portal.manage(")
++            and "hl.plugin.hypr_agent_portal.manage(" in call[2]
+         ]
+-        self.assertEqual(
+-            lua_manage_calls,
+-            [("hyprctl", "dispatch", 'hl.plugin.hypr_agent_portal.manage("focus,address:0xabc@pid=101@start=1001")')],
+-        )
++        self.assertEqual(len(lua_manage_calls), 1)
++        self.assertIn('hl.dispatch(hl.plugin.hypr_agent_portal.manage("focus,address:0xabc@pid=101@start=1001"))', lua_manage_calls[0][2])
++        self.assertIn("assert(result.ok,", lua_manage_calls[0][2])
+         self.assertEqual(
+             portalctl.lua_plugin_dispatcher("hypr-agent-protal:manage", "workspace_activate,name:dev"),
+             'hl.plugin.hypr_agent_protal.manage("workspace_activate,name:dev")',
+diff --git a/tests/mcp_geometry.py b/tests/mcp_geometry.py
+index e87e7da..34af31e 100644
+--- a/tests/mcp_geometry.py
++++ b/tests/mcp_geometry.py
+@@ -69,6 +69,20 @@ def main() -> int:
+     global_frame = mcp.atspi_bounds_to_screenshot_frame(file_menu_global, root_global, screenshot, window)
+     assert global_frame == frame
+ 
++    # Recorded failure: local AX roots overlap a hidden window at -840,3.
++    # Also cover a window near the screen origin and actual global coordinates.
++    for origin in [(-840.0, 3.0), (40.0, 3.0), (0.0, 3.0)]:
++        client = {"at": list(origin), "size": [1316, 1119], "xwayland": False}
++        shot = {"width": 1316, "height": 1119, "logicalBounds": {"x": origin[0], "y": origin[1], "width": 1316, "height": 1119}}
++        local_root = {"x": 0.0, "y": 0.0, "width": 1316, "height": 1119}
++        control = {"x": 10.0, "y": 154.0, "width": 120, "height": 30}
++        actual = mcp.atspi_bounds_to_screenshot_frame(control, local_root, shot, client)
++        near(actual["x"], 10.0); near(actual["y"], 154.0)
++        global_root = {**local_root, "x": origin[0], "y": origin[1]}
++        global_control = {**control, "x": origin[0]+10, "y": origin[1]+154}
++        actual = mcp.atspi_bounds_to_screenshot_frame(global_control, global_root, shot, {**client, "xwayland": True})
++        near(actual["x"], 10.0); near(actual["y"], 154.0)
++
+     corrected, offset = mcp.corrected_large_grid_cell_bounds(
+         {"x": 40.5, "y": 146.5, "width": 149.0, "height": 30.0},
+         {"x": 40.5, "y": 146.5, "width": 1308.0, "height": 596.0},
+diff --git a/tests/mcp_security.py b/tests/mcp_security.py
+index 8e3a7de..c4df29c 100644
+--- a/tests/mcp_security.py
++++ b/tests/mcp_security.py
+@@ -2342,7 +2342,63 @@ def test_mcp_workspace_semantics_match_direct_and_computer_handlers() -> None:
+     ]
+ 
+ 
++def test_permission_modes_and_approval_policy() -> None:
++    mod = policy_module()
++    standard = mod.policy_config_from_env({})
++    assert standard.permission_mode == "standard"
++    assert standard.approval_policy == "external"
++    assert standard.default_authorization == mod.AuthorizationLevel.VIEW
++    default_full_app = make_policy(mod)
++    assert_denied(default_full_app.evaluate(request(mod, destructive=True)), mod.DecisionCode.CONFIRMATION_REQUIRED)
++
++    config = mod.policy_config_from_env({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "full"})
++    assert config.default_authorization == mod.AuthorizationLevel.FULL
++    assert config.clipboard_permissions == frozenset(mod.ClipboardCapability)
++    policy = mod.SecurityPolicy(config)
++    policy.acquire_mutation_lease("test-client")
++    # The token validator must never run when the operator preauthorizes actions.
++    policy._consume_confirmation = lambda _: (_ for _ in ()).throw(AssertionError("unexpected confirmation"))
++    for action in ("click", "launch_app", "press_key", "manage_window"):
++        decision = policy.evaluate(request(mod, action=action, destructive=True))
++        assert decision.allowed and decision.execute
++    preview = policy.evaluate(request(mod, destructive=True), preview_dry_run=True)
++    assert preview.allowed and not preview.execute
++    assert preview.details["wouldRequireConfirmation"] is False
++    assert policy.state()["confirmationMode"] == "never"
++    assert policy.state()["permissionMode"] == "full"
++    assert policy.evaluate(request(mod, destructive=True), mod.GuardInputs(layer_surface_active=True, keyboard_grab_active=True)).execute
++    assert config.human_takeover_enabled is False
++    explicitly_guarded = mod.policy_config_from_env({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "full", "HYPR_AGENT_PORTAL_SECURITY_BLOCK_KEYBOARD_GRAB_MUTATION": "1"})
++    assert_denied(mod.SecurityPolicy(explicitly_guarded).evaluate(request(mod), mod.GuardInputs(keyboard_grab_active=True)), mod.DecisionCode.KEYBOARD_GRAB_ACTIVE)
++    assert_denied(policy.evaluate(request(mod), mod.GuardInputs(panic_active=True)), mod.DecisionCode.PANIC_ACTIVE)
++
++    restricted = mod.policy_config_from_env({
++        "HYPR_AGENT_PORTAL_PERMISSION_MODE": "full",
++        "HYPR_AGENT_PORTAL_CONFINE": "class:org.example.Editor",
++        "HYPR_AGENT_PORTAL_CLIPBOARD": "none",
++        "HYPR_AGENT_PORTAL_SECURITY_MUTATION_LEASE_REQUIRED": "0",
++    })
++    restricted_policy = mod.SecurityPolicy(restricted)
++    assert restricted.clipboard_permissions == frozenset()
++    assert_denied(restricted_policy.evaluate(request(mod, target=window(mod, class_name="other"))), mod.DecisionCode.OUT_OF_SCOPE)
++    assert_denied(restricted_policy.evaluate(request(mod, clipboard_capabilities=frozenset({mod.ClipboardCapability.WRITE}))), mod.DecisionCode.CLIPBOARD_PERMISSION)
++    readonly = mod.policy_config_from_env({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "read-only", "HYPR_AGENT_PORTAL_READONLY": "0"})
++    assert readonly.readonly
++    assert_denied(mod.SecurityPolicy(readonly).evaluate(request(mod)), mod.DecisionCode.READONLY)
++    canonical = mod.policy_config_from_env({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "full", "HYPR_AGENT_PORTAL_SECURITY_PERMISSION_MODE": "standard", "HYPR_AGENT_PORTAL_APPROVAL_POLICY": "never", "HYPR_AGENT_PORTAL_SECURITY_APPROVAL_POLICY": "external"})
++    assert canonical.permission_mode == "standard" and canonical.approval_policy == "external"
++    assert mod.policy_config_from_env({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "unrestricted"}).approval_policy == "never"
++    for env in ({"HYPR_AGENT_PORTAL_PERMISSION_MODE": "ful"}, {"HYPR_AGENT_PORTAL_APPROVAL_POLICY": "nevr"}):
++        try:
++            mod.policy_config_from_env(env)
++        except ValueError:
++            pass
++        else:
++            raise AssertionError("invalid permission setting accepted")
++
++
+ TESTS = [
++    test_permission_modes_and_approval_policy,
+     test_policy_readonly_and_dry_run,
+     test_policy_confinement,
+     test_policy_lock_layer_and_keyboard_grab_guards,
+diff --git a/tests/mcp_smoke.py b/tests/mcp_smoke.py
+index 8f1a779..ab3bbbe 100644
+--- a/tests/mcp_smoke.py
++++ b/tests/mcp_smoke.py
+@@ -86,6 +86,7 @@ def main() -> int:
+         "press_key",
+         "key",
+         "set_value",
++        "select_text",
+         "wait",
+         "wait_for_window",
+         "wait_for_close",
+@@ -138,7 +139,7 @@ def main() -> int:
+ 
+     assert tools_by_name["get_app_state"]["inputSchema"]["required"] == ["app"]
+     assert tools_by_name["get_cursor_position"]["inputSchema"]["properties"]["include_global"]["default"] is False
+-    assert tools_by_name["click"]["inputSchema"]["properties"]["element_index"]["type"] == "string"
++    assert tools_by_name["click"]["inputSchema"]["properties"]["element_index"]["type"] == ["string", "integer"]
+     assert tools_by_name["click"]["inputSchema"]["properties"]["name"]["type"] == "string"
+     assert tools_by_name["click"]["inputSchema"]["properties"]["coordinate"]["minItems"] == 2
+     assert "window" in tools_by_name["click"]["inputSchema"]["properties"]["coordinate_space"]["enum"]
+diff --git a/tests/semantic_atspi_click.py b/tests/semantic_atspi_click.py
+new file mode 100644
+index 0000000..40deffa
+--- /dev/null
++++ b/tests/semantic_atspi_click.py
+@@ -0,0 +1,28 @@
++"""Semantic activation must not depend on pointer visibility or stale geometry."""
++import importlib.util
++from pathlib import Path
++from unittest.mock import patch
++p=Path(__file__).resolve().parents[1]/'mcp/hypr-agent-portal-mcp.py'
++spec=importlib.util.spec_from_file_location('portal_click_test',p);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
++old={'target':'bound','elements':[{'index':3,'name':'ODF','runtimeId':[0,1]}]}
++fresh={'target':'bound','elements':[]}
++el={'index':9,'name':'ODF','source':'atspi','actions':['click'],'runtimeId':[0,2],'frame':{'x':-200,'y':-200,'width':10,'height':10}}
++m.SNAPSHOTS['app']=old
++with patch.object(m,'begin_related_action_session',return_value={'begin':{'ok':True}}) as begin,patch.object(m,'finish_related_action_session') as finish,patch.object(m,'build_app_snapshot',return_value=fresh),patch.object(m,'refind_element_in_snapshot',return_value=(el,{})) as rematch,patch.object(m,'atspi_do_action_isolated',return_value=True) as action,patch.object(m,'visible_element_center',side_effect=AssertionError('No pointer geometry in semantic action')),patch.object(m,'snapshot_after_action',return_value={'verified':'fixture'}),patch.object(m,'mcp_snapshot_result',side_effect=lambda x:x):
++ assert m.semantic_click({'app':'app','element_index':3,'element_click_mode':'atspi'})=={'verified':'fixture'}
++ action.assert_called_once_with(fresh,el)
++ begin.assert_called_once_with('bound')
++ finish.assert_called_once()
++ rematch.assert_called_once_with(fresh,old['elements'][0],3)
++with patch.object(m,'build_app_snapshot',return_value=fresh),patch.object(m,'refind_element_in_snapshot',side_effect=RuntimeError('ambiguous target')),patch.object(m,'atspi_do_action_isolated') as action:
++ try:m.semantic_atspi_click('app','3')
++ except RuntimeError as e:assert str(e)=='ambiguous target'
++ else:raise AssertionError('Ambiguous target accepted')
++ action.assert_not_called()
++print('Semantic click refresh, numeric IDs, off-capture dispatch, and ambiguous-target rejection passed')
++
++with patch.object(m,'build_app_snapshot',return_value=fresh),patch.object(m,'refind_element_in_snapshot',return_value=(el,{})),patch.object(m,'begin_related_action_session',return_value={'begin':{'ok':False}}),patch.object(m,'atspi_do_action_isolated') as action:
++ try:m.semantic_atspi_click('app','3')
++ except RuntimeError as e:assert 'guard could not start' in str(e)
++ else:raise AssertionError('Input allowed without guard')
++ action.assert_not_called()

@@ -1,0 +1,466 @@
+{
+  "baseline": "baseline-v2",
+  "improved": "improved-v1",
+  "complete": true,
+  "baseline_completed": 50,
+  "improved_completed": 50,
+  "note": "Only these two phases enter the comparison. Development retries and the aborted setup run remain separate.",
+  "verification": {
+    "same_tasks": true,
+    "same_model_and_effort": true,
+    "same_benchmark_harness": true,
+    "runtime_frozen_within_each_phase": true,
+    "initial_states_failed_grading": true,
+    "stronger_output_checks_agree_with_scored_passes": true
+  },
+  "fixed": [
+    "12-example",
+    "27-web-filter",
+    "13-wikipedia",
+    "35-calc-sort",
+    "38-calc-sheet-name",
+    "25-web-date",
+    "47-writer-table"
+  ],
+  "regressions": [],
+  "still_failed": [],
+  "groups": {
+    "native": {
+      "baseline": {
+        "passed": 10,
+        "failed": 0,
+        "agent_s": 357.1391496658325
+      },
+      "improved": {
+        "passed": 10,
+        "failed": 0,
+        "agent_s": 357.97019505500793
+      }
+    },
+    "navigation": {
+      "baseline": {
+        "passed": 8,
+        "failed": 2,
+        "agent_s": 532.216995716095
+      },
+      "improved": {
+        "passed": 10,
+        "failed": 0,
+        "agent_s": 353.26219844818115
+      }
+    },
+    "web": {
+      "baseline": {
+        "passed": 8,
+        "failed": 2,
+        "agent_s": 652.906578540802
+      },
+      "improved": {
+        "passed": 10,
+        "failed": 0,
+        "agent_s": 466.62324571609497
+      }
+    },
+    "calc": {
+      "baseline": {
+        "passed": 8,
+        "failed": 2,
+        "agent_s": 1018.9895873069763
+      },
+      "improved": {
+        "passed": 10,
+        "failed": 0,
+        "agent_s": 868.6395032405853
+      }
+    },
+    "writer": {
+      "baseline": {
+        "passed": 9,
+        "failed": 1,
+        "agent_s": 929.5676941871643
+      },
+      "improved": {
+        "passed": 10,
+        "failed": 0,
+        "agent_s": 673.0822923183441
+      }
+    }
+  },
+  "totals": {
+    "baseline": {
+      "passed": 43,
+      "failed": 7,
+      "failure_percent": 14,
+      "agent_s": 3490.82000541687,
+      "median_task_s": 64.12674736976624,
+      "provider_failures": 0,
+      "refocuses": 0
+    },
+    "improved": {
+      "passed": 50,
+      "failed": 0,
+      "failure_percent": 0,
+      "agent_s": 2719.5774347782135,
+      "median_task_s": 46.759979605674744,
+      "provider_failures": 0,
+      "refocuses": 0
+    }
+  },
+  "passed_in_both": {
+    "tasks": 43,
+    "baseline_s": 2765.6207435131073,
+    "improved_s": 2194.669846057892
+  },
+  "task_pairs": [
+    {
+      "id": "01-profile-name",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 25.449328184127808,
+      "improved_s": 29.412441730499268
+    },
+    {
+      "id": "02-contact-options",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 24.854268789291382,
+      "improved_s": 24.73587465286255
+    },
+    {
+      "id": "03-country",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 29.320778608322144,
+      "improved_s": 42.22985625267029
+    },
+    {
+      "id": "04-save-note",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 31.716752767562866,
+      "improved_s": 24.936787843704224
+    },
+    {
+      "id": "05-reopen-note",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 30.452650785446167,
+      "improved_s": 33.4133198261261
+    },
+    {
+      "id": "06-replace-word",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 36.72670221328735,
+      "improved_s": 34.39155173301697
+    },
+    {
+      "id": "07-create-folder",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 25.248165130615234,
+      "improved_s": 26.387298583984375
+    },
+    {
+      "id": "08-confirm-dialog",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 46.933772563934326,
+      "improved_s": 42.25721096992493
+    },
+    {
+      "id": "09-cancel-dialog",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 49.930232524871826,
+      "improved_s": 36.107863903045654
+    },
+    {
+      "id": "10-delayed-dialog",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 56.50649809837341,
+      "improved_s": 64.09798955917358
+    },
+    {
+      "id": "11-google",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 29.11515784263611,
+      "improved_s": 28.102874994277954
+    },
+    {
+      "id": "12-example",
+      "baseline": "fail",
+      "improved": "pass",
+      "baseline_s": 72.14719462394714,
+      "improved_s": 29.510717391967773
+    },
+    {
+      "id": "13-wikipedia",
+      "baseline": "fail",
+      "improved": "pass",
+      "baseline_s": 62.01961302757263,
+      "improved_s": 39.52093863487244
+    },
+    {
+      "id": "14-iana",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 90.46291160583496,
+      "improved_s": 29.963409423828125
+    },
+    {
+      "id": "15-python",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 79.0680022239685,
+      "improved_s": 34.962854623794556
+    },
+    {
+      "id": "16-restore-tab",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 32.178165674209595,
+      "improved_s": 21.261966705322266
+    },
+    {
+      "id": "17-back",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 32.757840156555176,
+      "improved_s": 30.081554412841797
+    },
+    {
+      "id": "18-forward",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 38.69353628158569,
+      "improved_s": 35.56818985939026
+    },
+    {
+      "id": "19-two-tabs",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 38.78759956359863,
+      "improved_s": 55.95305919647217
+    },
+    {
+      "id": "20-scroll-target",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 56.98697471618652,
+      "improved_s": 48.33663320541382
+    },
+    {
+      "id": "21-web-profile",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 64.27732872962952,
+      "improved_s": 34.576751470565796
+    },
+    {
+      "id": "22-web-select",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 38.84196996688843,
+      "improved_s": 33.38866329193115
+    },
+    {
+      "id": "23-web-checks",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 60.982619762420654,
+      "improved_s": 23.99198341369629
+    },
+    {
+      "id": "24-web-radio",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 44.80696487426758,
+      "improved_s": 27.0824031829834
+    },
+    {
+      "id": "25-web-date",
+      "baseline": "fail",
+      "improved": "pass",
+      "baseline_s": 157.72607159614563,
+      "improved_s": 134.15704369544983
+    },
+    {
+      "id": "26-web-modal",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 30.027644872665405,
+      "improved_s": 31.26405167579651
+    },
+    {
+      "id": "27-web-filter",
+      "baseline": "fail",
+      "improved": "pass",
+      "baseline_s": 73.16404986381531,
+      "improved_s": 42.45250964164734
+    },
+    {
+      "id": "28-web-cart",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 49.13807153701782,
+      "improved_s": 45.18332600593567
+    },
+    {
+      "id": "29-web-compare",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 63.976166009902954,
+      "improved_s": 22.692741632461548
+    },
+    {
+      "id": "30-web-edit",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 69.9656913280487,
+      "improved_s": 71.83377170562744
+    },
+    {
+      "id": "31-calc-table",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 120.44017004966736,
+      "improved_s": 103.25173759460449
+    },
+    {
+      "id": "32-calc-formula",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 106.3792610168457,
+      "improved_s": 134.91072535514832
+    },
+    {
+      "id": "33-calc-sum",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 74.79141736030579,
+      "improved_s": 66.81565070152283
+    },
+    {
+      "id": "34-calc-average",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 90.36701512336731,
+      "improved_s": 66.543936252594
+    },
+    {
+      "id": "35-calc-sort",
+      "baseline": "fail",
+      "improved": "pass",
+      "baseline_s": 118.65771126747131,
+      "improved_s": 103.54276084899902
+    },
+    {
+      "id": "36-calc-bold",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 60.2732937335968,
+      "improved_s": 63.80050849914551
+    },
+    {
+      "id": "37-calc-replace",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 92.1432592868805,
+      "improved_s": 62.94085884094238
+    },
+    {
+      "id": "38-calc-sheet-name",
+      "baseline": "fail",
+      "improved": "pass",
+      "baseline_s": 116.6892237663269,
+      "improved_s": 95.70491909980774
+    },
+    {
+      "id": "39-calc-chart",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 139.4089639186859,
+      "improved_s": 96.63024640083313
+    },
+    {
+      "id": "40-calc-copy-range",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 99.83927178382874,
+      "improved_s": 74.49815964698792
+    },
+    {
+      "id": "41-writer-text",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 94.84768605232239,
+      "improved_s": 65.71054697036743
+    },
+    {
+      "id": "42-writer-append",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 126.61064887046814,
+      "improved_s": 56.99472379684448
+    },
+    {
+      "id": "43-writer-replace",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 163.46573877334595,
+      "improved_s": 89.84141778945923
+    },
+    {
+      "id": "44-writer-bold",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 61.510764598846436,
+      "improved_s": 55.56516456604004
+    },
+    {
+      "id": "45-writer-heading",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 74.93746495246887,
+      "improved_s": 75.72877383232117
+    },
+    {
+      "id": "46-writer-bullets",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 64.49756050109863,
+      "improved_s": 58.96061396598816
+    },
+    {
+      "id": "47-writer-table",
+      "baseline": "fail",
+      "improved": "pass",
+      "baseline_s": 124.79539775848389,
+      "improved_s": 80.01869940757751
+    },
+    {
+      "id": "48-writer-undo",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 72.56861615180969,
+      "improved_s": 68.2328269481659
+    },
+    {
+      "id": "49-writer-unicode",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 69.94631266593933,
+      "improved_s": 58.753480672836304
+    },
+    {
+      "id": "50-writer-delete",
+      "baseline": "pass",
+      "improved": "pass",
+      "baseline_s": 76.38750386238098,
+      "improved_s": 63.2760443687439
+    }
+  ]
+}

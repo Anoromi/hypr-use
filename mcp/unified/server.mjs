@@ -1,0 +1,32 @@
+import {fork} from 'node:child_process';
+import readline from 'node:readline';
+import fs from 'node:fs';
+import {fileURLToPath} from 'node:url';
+const root=new URL('../../research/2026-09-12/',import.meta.url);
+const tools=JSON.parse(fs.readFileSync(new URL('unified-mcp-tools.json',root),'utf8'));
+tools.find(t=>t.name==='js').description='Execute persistent JavaScript with top-level await and cua desktop methods. Bindings persist and may be redeclared. nodeRepl.write(value) emits text; nodeRepl.emitImage(bytes) emits images. Imports and host filesystem/network APIs are not exposed. Default timeout is 30000 ms; increase timeout_ms for longer batches. A timeout resets JavaScript state but cannot undo completed desktop actions.';
+const instructions=`Hypr-use: background desktop control on Hyprland through persistent JavaScript. Only the computer surface is supported; browser websites can be controlled as native Zen windows. cua.listApps(), cua.getState(), cua.getApp(app) (running Linux app class or inventory id). getApp emits initial accessibility text. App methods: getAXState({emit?,disableDiffing?}?), getScreenshot({emit?}?), getAXStateAndScreenshot({emit?,disableDiffing?}?), click(numberIndex|[x,y],{mouseButton?,clickCount?}?), drag([x,y],[x,y]), scroll(numberIndex|[x,y],direction,pages?), pressKey(key), typeText(text), paste(text,{format:'text'}?), setValue(index,value), selectText(index,text,{prefix?,suffix?,selectionType?}?), performSecondaryAction(index,action). Numeric indices come from the latest AX state. Observations emit themselves; don't duplicate output. Use screenshots when AX is missing or insufficient. Mac super/cmd maps to Ctrl by default. App launch, browser provider APIs and rich paste are unsupported. Bindings persist and may be redeclared. Use top-level await. nodeRepl.write(value) emits text; nodeRepl.emitImage(bytes) emits images. Imports, filesystem/network and arbitrary host APIs are unavailable. Batch deterministic actions, then getAXState before deciding. Full owner permissions are configured outside tool arguments. Never assume an accepted action completed the task.`;
+let worker=null,active=null,queue=Promise.resolve();const ended=new Set();
+function stop(reason='JavaScript state reset'){if(worker){try{process.kill(-worker.pid,'SIGKILL');}catch{}worker=null;}if(active){const a=active;active=null;clearTimeout(a.timer);a.reject(Object.assign(Error(reason),{timings:a.operations,content:a.content}));}}
+function start(){if(worker)return;worker=fork(fileURLToPath(new URL('./worker.mjs',import.meta.url)),[],{detached:true,stdio:['ignore','ignore','inherit','ipc']});const current=worker;worker.on('message',r=>{if(worker===current&&active){if(r.event==='operation'){active.operations.push(r.timing);return;}if(r.event==='output'){active.content.push(r.block);return;}clearTimeout(active.timer);const a=active;active=null;a.resolve(r);}});worker.on('exit',()=>{if(worker!==current)return;worker=null;if(active){const a=active;active=null;clearTimeout(a.timer);a.reject(Error('JavaScript worker exited'));}});}
+function execute(payload,timeout,requestId){start();return new Promise((resolve,reject)=>{active={resolve,reject,requestId,operations:[],content:[],timer:setTimeout(()=>{stop(`Execution timed out after ${timeout} ms. Completed actions may already be applied. Inspect state and increase timeout_ms before retrying. JavaScript state reset.`);},timeout)};worker.send({...payload,timeout});});}
+const result=(id,result)=>({jsonrpc:'2.0',id,result});const error=(id,code,message)=>({jsonrpc:'2.0',id,error:{code,message}});
+async function handle(m){if(!m||Array.isArray(m)||m.jsonrpc!=='2.0'||typeof m.method!=='string')return error(m?.id??null,-32600,'Invalid request');if(m.id===undefined)return;
+ if(m.method==='initialize')return result(m.id,{protocolVersion:'2025-06-18',serverInfo:{name:'hypr-use-unified',version:'0.2.0'},capabilities:{tools:{listChanged:false}},instructions});
+ if(m.method==='tools/list')return result(m.id,{tools});if(m.method==='ping')return result(m.id,{});
+ if(m.method!=='tools/call')return error(m.id,-32601,'Method not found');
+ const startMs=performance.now();let r;try{const {name,arguments:a={}}=m.params??{};if(!a||Array.isArray(a)||typeof a!=='object')throw Error('arguments must be an object');
+ if(name==='js'){if(typeof a.code!=='string'||Object.keys(a).some(k=>!['code','timeout_ms','title'].includes(k)))throw Error('Invalid js arguments');if(a.title!==undefined&&(typeof a.title!=='string'||!a.title.length||a.title.length>80))throw Error('Invalid title');const timeout=a.timeout_ms??30000;if(!Number.isInteger(timeout)||timeout<1||timeout>300000)throw Error('timeout_ms must be 1–300000');r=await execute({kind:'js',code:a.code},timeout,m.id);}
+ else if(name==='js_reset'){if(Object.keys(a).length)throw Error('js_reset takes no arguments');stop();r={ok:true,content:[{type:'text',text:'JavaScript state reset.'}]};}
+ else if(name==='turn_ended'){if(Object.keys(a).some(k=>!['hook_event_name','session_id','turn_id'].includes(k))||!['hook_event_name','session_id','turn_id'].every(k=>typeof a[k]==='string'&&a[k].length))throw Error('Invalid turn_ended arguments');const key=JSON.stringify([a.session_id,a.turn_id]);if(!ended.has(key)){ended.add(key);if(worker)await execute({kind:'cleanup'},10000);}r={ok:true,content:[]};}
+ else throw Error('Unknown tool');
+ }catch(e){r={ok:false,content:[...(e.content??[]),{type:'text',text:e.message}],timings:e.timings??[]};}
+ const out=result(m.id,{content:r.content??[],isError:!r.ok,_meta:{'hypr-use/timing':{total_ms:performance.now()-startMs,operations:r.timings??[]}}});
+ if(process.env.HYPR_USE_WIRE_LOG)fs.appendFileSync(process.env.HYPR_USE_WIRE_LOG,JSON.stringify({time:Date.now()/1000,request:m,response:out})+'\n');return out;
+}
+const emit=r=>{if(r)process.stdout.write(JSON.stringify(r)+'\n');};
+readline.createInterface({input:process.stdin}).on('line',line=>{let m;try{m=JSON.parse(line);}catch{emit(error(null,-32700,'Invalid JSON'));return;}
+ if(m?.method==='notifications/cancelled'){if(active&&m.params?.requestId===active.requestId)stop('Execution cancelled by client; JavaScript state reset');return;}
+ queue=queue.then(()=>handle(m)).then(emit).catch(e=>emit(error(m?.id??null,-32603,e.message)));
+}).on('close',()=>{queue.finally(()=>{stop();process.stdout.end(()=>process.exit(0));});});
+process.on('SIGTERM',()=>{stop();process.exit(0);});

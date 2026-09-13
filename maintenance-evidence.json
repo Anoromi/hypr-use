@@ -1,0 +1,184 @@
+{
+  "checked_on": "2026-09-06",
+  "results": [
+    {
+      "repo": "gfhdhytghd/Hypr-Agent-Portal",
+      "repo_metadata": {
+        "pushed_at": "2026-08-31T05:20:10Z",
+        "archived": false,
+        "open_issues_count": 0,
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0",
+          "url": "https://api.github.com/licenses/gpl-3.0",
+          "node_id": "MDc6TGljZW5zZTk="
+        }
+      },
+      "runs": [
+        {
+          "name": "CI",
+          "head_sha": "bc0b100719dafb8bdf893ace4d3be1d78b1a0876",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/gfhdhytghd/Hypr-Agent-Portal/actions/runs/33360181250",
+          "created_at": "2026-08-31T05:20:12Z"
+        },
+        {
+          "name": "CI",
+          "head_sha": "bc0b100719dafb8bdf893ace4d3be1d78b1a0876",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/gfhdhytghd/Hypr-Agent-Portal/actions/runs/33360034164",
+          "created_at": "2026-08-31T05:17:50Z"
+        },
+        {
+          "name": "CI",
+          "head_sha": "f45bb5f2296f1d2e914915e5619ffb73eb910aa5",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/gfhdhytghd/Hypr-Agent-Portal/actions/runs/33359931394",
+          "created_at": "2026-08-31T05:16:11Z"
+        }
+      ],
+      "releases": [
+        {
+          "tag_name": "v0.4.0-0.56",
+          "published_at": "2026-08-31T05:21:20Z",
+          "html_url": "https://github.com/gfhdhytghd/Hypr-Agent-Portal/releases/tag/v0.4.0-0.56"
+        },
+        {
+          "tag_name": "v0.3.47-0.56",
+          "published_at": "2026-08-05T05:26:36Z",
+          "html_url": "https://github.com/gfhdhytghd/Hypr-Agent-Portal/releases/tag/v0.3.47-0.56"
+        }
+      ],
+      "recent_default_branch_commits": [
+        "bc0b100719dafb8bdf893ace4d3be1d78b1a0876 2026-08-31 Make identity fixture process-safe",
+        "f45bb5f2296f1d2e914915e5619ffb73eb910aa5 2026-08-31 Make sandbox dry runs dependency-independent",
+        "7a8e8acbc85d4034bb93934ea59885d8f5a28074 2026-08-31 Harden headless CI and artifact cleanup",
+        "0dab5ab37d6b0db2fefedee07f5135ac1cf6dbe7 2026-08-31 Release hypr-agent-portal 0.4.0",
+        "3621d808f71cad7633b41d39f960757631726361 2026-08-05 Bump version to 0.3.47",
+        "fac3219121e9b7260d72454d9b3677fffc209b8a 2026-08-04 Avoid global keyboard focus takeover",
+        "69bfb2239787cd226042256f87583a8037edd542 2026-07-29 Fix MCP request stalls and app-state latency",
+        "d6099a15b5ce66e4e155b29dd303dacf54d21bab 2026-07-23 chore: pin Hyprland 0.56 plugin build",
+        "7e894dac96f3802ff43073ccc2c306a95e03bf53 2026-07-23 fix: complete Hyprland 0.56 adaptation",
+        "14c1bf7f8a0282bdbbb36553f00f56ead07340e5 2026-07-20 Adapt plugin to Hyprland 0.56",
+        "4e1afe0553ba1ec741333fb2a74244ae7eb61344 2026-05-16 Fix Lua provider dispatcher calls",
+        "8a8cb4bab3861838e71f5447fbe420d12dd68024 2026-05-09 Bump version for 0.55 release"
+      ]
+    },
+    {
+      "repo": "Gabriel-Kahen/hyprland-codex-background-computer-use",
+      "repo_metadata": {
+        "pushed_at": "2026-07-22T20:21:13Z",
+        "archived": false,
+        "open_issues_count": 0,
+        "license": null
+      },
+      "runs": [
+        {
+          "name": "CI",
+          "head_sha": "cca71f282fe742519046f568143a00a6eb27de36",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/Gabriel-Kahen/hyprland-codex-background-computer-use/actions/runs/29114441279",
+          "created_at": "2026-07-10T18:24:45Z"
+        },
+        {
+          "name": "CI",
+          "head_sha": "86196b2352f22844e66a28a9207f2cf6634c78bd",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/Gabriel-Kahen/hyprland-codex-background-computer-use/actions/runs/29114401876",
+          "created_at": "2026-07-10T18:24:08Z"
+        },
+        {
+          "name": "CI",
+          "head_sha": "34c6330543fe8fe4eb81cb604e3fecb5061b1c83",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/Gabriel-Kahen/hyprland-codex-background-computer-use/actions/runs/29114250689",
+          "created_at": "2026-07-10T18:21:33Z"
+        }
+      ],
+      "releases": [],
+      "recent_default_branch_commits": [
+        "cca71f282fe742519046f568143a00a6eb27de36 2026-07-10 Expose capture coordinate transforms (#3)",
+        "34c6330543fe8fe4eb81cb604e3fecb5061b1c83 2026-07-10 Make saved captures atomic (#2)",
+        "acebbf44c2bf0884f9a92fdb37ddc1c88cfde247 2026-07-10 Resolve XWayland display from Hyprland session (#1)",
+        "268b5ca6ff7654446d6a33cc8de32bdc109791c7 2026-07-10 Add dependency-free Python and MCP CI (#4)",
+        "3efce20179bd97cc02d6625eb6524bfcb2eaf4b0 2026-07-09 Rename project branding",
+        "242ca61874c07d52478038ae2bde4f71253d4005 2026-07-09 Discover the active desktop session",
+        "ed601936271798fc44d498274d9f1f62d7446040 2026-07-09 Add same-session Linux computer use patch"
+      ]
+    },
+    {
+      "repo": "IlyasKhallouki/hypruse",
+      "repo_metadata": {
+        "pushed_at": "2026-08-31T18:49:12Z",
+        "archived": false,
+        "open_issues_count": 3,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "node_id": "MDc6TGljZW5zZTEz"
+        }
+      },
+      "runs": [
+        {
+          "name": "ci",
+          "head_sha": "8c11fd4df46c034851ee7c18e8f932f8ecf5b184",
+          "status": "completed",
+          "conclusion": "action_required",
+          "html_url": "https://github.com/IlyasKhallouki/hypruse/actions/runs/33786885441",
+          "created_at": "2026-09-03T17:50:02Z"
+        },
+        {
+          "name": "ci",
+          "head_sha": "7dd11acae0a5631825907f0ba8340dd4088998c4",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/IlyasKhallouki/hypruse/actions/runs/33427133009",
+          "created_at": "2026-08-31T18:49:15Z"
+        },
+        {
+          "name": "ci",
+          "head_sha": "603d4ed778599a7e9d212bb4226980ac24e1b78a",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/IlyasKhallouki/hypruse/actions/runs/33426973739",
+          "created_at": "2026-08-31T18:47:30Z"
+        }
+      ],
+      "releases": [
+        {
+          "tag_name": "v0.10.0",
+          "published_at": "2026-08-31T18:46:24Z",
+          "html_url": "https://github.com/IlyasKhallouki/hypruse/releases/tag/v0.10.0"
+        },
+        {
+          "tag_name": "v0.9.4",
+          "published_at": "2026-07-26T10:32:30Z",
+          "html_url": "https://github.com/IlyasKhallouki/hypruse/releases/tag/v0.9.4"
+        }
+      ],
+      "recent_default_branch_commits": [
+        "7dd11acae0a5631825907f0ba8340dd4088998c4 2026-08-31 release: sync uv.lock to 0.10.0",
+        "603d4ed778599a7e9d212bb4226980ac24e1b78a 2026-08-31 packaging: aur 0.10.0",
+        "c89a68143c0f2ee0a39f6db16c2f17851e4b3a09 2026-08-31 release: 0.10.0",
+        "ab9db4904b4e8d5e831de16ee1e37a5e78f6f60d 2026-08-31 fix: speak the dialect of Hyprland's Lua config manager",
+        "8551694099a60c99f6bcc4628e45eb630d9531d7 2026-08-31 chore: restore a green main after the named-seat work",
+        "b1a5dd99087756c66abd5d4046d3e25618214ec9 2026-08-14 input: send keystrokes on the agent's seat, not the human's",
+        "777af5dd1af850d2aa3e96b7985837b59c31c2e2 2026-08-14 input: position the agent's cursor over the wire, not through hyprctl",
+        "3390215acc6b2dfd56dba8fd2e48d79a68a1a4e3 2026-08-14 wire: warn and fall back when the named seat does not exist",
+        "5aacda057765973ef0bfe83fd0651cba337901bf 2026-08-14 wire: let the agent bind a named wl_seat",
+        "9c687a0bb45dd7087bdf2603a502c8f9cf315865 2026-08-02 fix(journal): close the round-6 adversarial review findings",
+        "3d9117646587d5148ccda39ce9039dbf3f7e405c 2026-08-02 feat(journal): record every action, rehearse it, replay it",
+        "2a1f7c15638f359339ead5553e305d75fca97e64 2026-08-02 packaging: AUR recipes to 0.9.4"
+      ]
+    }
+  ]
+}

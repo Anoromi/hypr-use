@@ -1,0 +1,246 @@
+diff --git a/mcp/hypr-agent-portal-mcp.py b/mcp/hypr-agent-portal-mcp.py
+index 84175d4..7b1b9be 100755
+--- a/mcp/hypr-agent-portal-mcp.py
++++ b/mcp/hypr-agent-portal-mcp.py
+@@ -4100,6 +4100,13 @@ def key_from_args(args: dict[str, Any]) -> tuple[str, str]:
+     if not isinstance(key, str) or not key:
+         raise RuntimeError("key action requires key or keys")
+     modifiers = args.get("modifiers") if isinstance(args.get("modifiers"), str) else ""
++    # The public `key` field documents shortcuts such as ctrl+t, too.
++    if "+" in key:
++        parts = key.split("+")
++        if any(not part for part in parts):
++            raise RuntimeError("empty component in key shortcut")
++        key = parts[-1]
++        modifiers = "+".join([*parts[:-1], *([modifiers] if modifiers else [])])
+     return key, modifiers
+ 
+ 
+diff --git a/scripts/hypr-agent-portalctl b/scripts/hypr-agent-portalctl
+index f9da979..4894ae8 100755
+--- a/scripts/hypr-agent-portalctl
++++ b/scripts/hypr-agent-portalctl
+@@ -661,7 +661,10 @@ def dispatch(dispatcher: str, payload: str = "") -> subprocess.CompletedProcess:
+     if is_lua_config_provider():
+         lua_dispatcher = lua_plugin_dispatcher(dispatcher, payload)
+         if lua_dispatcher:
+-            return subprocess.run(["hyprctl", "dispatch", lua_dispatcher], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=hyprctl_environment(), check=False)
++            # Hyprland eval discards return values, including {ok=false}.
++            # Raise at the outer Lua boundary so hyprctl exits nonzero.
++            checked = f"local result = hl.dispatch({lua_dispatcher}); assert(type(result) == 'table', 'missing dispatcher result'); assert(result.ok, result.error or 'plugin dispatch failed')"
++            return subprocess.run(["hyprctl", "eval", checked], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=hyprctl_environment(), check=False)
+         return subprocess.CompletedProcess(
+             ["hyprctl", "dispatch", dispatcher],
+             1,
+@@ -686,6 +689,12 @@ def screenshot(args: argparse.Namespace) -> int:
+     payload = str(session_path)
+     if args.target:
+         payload = ",".join([payload, args.target])
++        # Let an off-workspace client commit a fresh buffer before readback.
++        prepared = dispatch(args.dispatcher, payload + ",prepare")
++        if prepared.returncode != 0:
++            print(prepared.stderr or prepared.stdout, file=sys.stderr, end="")
++            return prepared.returncode or 1
++        time.sleep(0.12)
+     result = dispatch(args.dispatcher, payload)
+     if result.returncode != 0:
+         print(result.stderr or result.stdout, file=sys.stderr, end="")
+diff --git a/src/plugin/main.cpp b/src/plugin/main.cpp
+index 2881342..9ffb701 100644
+--- a/src/plugin/main.cpp
++++ b/src/plugin/main.cpp
+@@ -1,4 +1,5 @@
+ #include "plugin/screenshot_capture.hpp"
++#include "plugin/keymap_resolver.hpp"
+ 
+ #include <hyprland/src/config/ConfigManager.hpp>
+ #include <hyprland/src/config/lua/bindings/LuaBindingsInternal.hpp>
+@@ -1650,6 +1651,42 @@ std::optional<TargetSurface> resolveTargetMainSurface(const std::string& targetR
+     return TargetSurface{.window = window, .surface = window->wlSurface()->resource(), .local = mainBox.middle()};
+ }
+ 
++SP<CEventLoopTimer> g_backgroundFrameTimer;
++WP<CWLSurfaceResource> g_backgroundFrameSurface;
++Time::steady_tp g_backgroundFrameDeadline;
++
++void stopBackgroundFrames() {
++    if (g_backgroundFrameTimer && g_pEventLoopManager)
++        g_pEventLoopManager->removeTimer(g_backgroundFrameTimer);
++    g_backgroundFrameTimer.reset();
++    g_backgroundFrameSurface.reset();
++}
++
++void wakeBackgroundSurface(const SP<CWLSurfaceResource>& surface) {
++    if (!surface || !g_pEventLoopManager) return;
++    g_backgroundFrameSurface = surface;
++    g_backgroundFrameDeadline = Time::steadyNow() + std::chrono::seconds(2);
++    const auto frame = [] {
++        if (const auto target = g_backgroundFrameSurface.lock()) {
++            target->breadthfirst([](SP<CWLSurfaceResource> child, const Vector2D&, void*) {
++                child->frame(Time::steadyNow());
++            }, nullptr);
++            wl_client_flush(target->client());
++        }
++    };
++    frame();
++    if (g_backgroundFrameTimer) return;
++    g_backgroundFrameTimer = makeShared<CEventLoopTimer>(std::chrono::milliseconds(16),
++        [frame](SP<CEventLoopTimer> self, void*) {
++            if (g_agentPanicActive || compositorSessionLocked() || !g_backgroundFrameSurface.lock() || Time::steadyNow() >= g_backgroundFrameDeadline) {
++                stopBackgroundFrames(); return;
++            }
++            frame();
++            self->updateTimeout(std::chrono::milliseconds(16));
++        }, nullptr);
++    g_pEventLoopManager->addTimer(g_backgroundFrameTimer);
++}
++
+ struct PointerFocusRestore {
+     SP<CWLSurfaceResource> previousSurface;
+     Vector2D               previousLocal;
+@@ -2031,6 +2068,7 @@ void cancelWorkspaceSessionTimers() {
+ 
+ void cancelAgentActivity(bool cancelSessions) {
+     cancelAsyncPointerOperation();
++    stopBackgroundFrames();
+     restoreXWaylandKeyboardFocus();
+ 
+     if (cancelSessions) {
+@@ -2156,6 +2194,7 @@ SDispatchResult dispatchPointerWithMode(const std::string& args, bool windowRela
+     if ((action == "drag" || action == "doubleclick" || action == "double-click") && g_asyncPointerOperation)
+         cancelAsyncPointerOperation();
+ 
++    wakeBackgroundSurface(target->surface);
+     PointerFocusRestore restore;
+     activateXWaylandTarget(*target);
+     g_pSeatManager->setPointerFocus(target->surface, target->local);
+@@ -2465,7 +2504,7 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+         return {.success = false, .error = *error};
+ 
+     const auto action = lower(parts[1]);
+-    const auto key = keyboardKey(parts[2]);
++    auto key = keyboardKey(parts[2]);
+     if (!key)
+         return {.success = false, .error = "unknown keyboard key"};
+ 
+@@ -2481,9 +2520,24 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+         }
+     }
+ 
++    const auto physical = physicalKeyboardState();
++    auto inputGroup = physical.group;
++    const auto logicalKey = *key;
++    // Multi-digit numeric keys retain the explicit evdev API semantics.
++    const bool rawCode = parts[2].size() > 1 && std::ranges::all_of(parts[2], [](unsigned char ch) { return std::isdigit(ch); });
++    if (!rawCode) {
++        const auto keyboard = g_pSeatManager->m_keyboard.lock();
++        const auto resolved = resolvePortalKey(keyboard ? keyboard->m_xkbKeymap : nullptr, *key, modifierMask, inputGroup);
++        if (!resolved)
++            return {.success = false, .error = "requested key cannot be represented in the active keyboard keymap"};
++        key = resolved->key;
++        inputGroup = resolved->group;
++    }
++
+     const bool xwaylandLease = activateXWaylandKeyboardTarget(*target);
+     showAgentIndicator(target->window, indicatorGlobal.value_or(windowMainSurfaceGoalBox(target->window).middle()), "key");
+ 
++    wakeBackgroundSurface(target->surface);
+     KeyboardResourceTransaction transaction(target->surface);
+     if (!transaction.ready()) {
+         if (xwaylandLease)
+@@ -2496,17 +2550,17 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+         return {.success = false, .error = "target key is currently held by the physical keyboard"};
+     }
+ 
+-    if (*key == KEY_V && (modifierMask & (1U << 2)) != 0)
++    if (logicalKey == KEY_V && (modifierMask & (1U << 2)) != 0)
+         sendClipboardSelectionToNativeTarget(*target);
+ 
+     const auto pressModifiers = [&] {
+         for (const auto& mod : modifiers)
+             transaction.sendModifierKey(mod.key, WL_KEYBOARD_KEY_STATE_PRESSED);
+-        transaction.sendMods(modifierMask, 0, 0, 0);
++        transaction.sendMods(modifierMask, 0, 0, inputGroup);
+     };
+ 
+     const auto releaseModifiers = [&] {
+-        transaction.sendMods(0, 0, 0, 0);
++        transaction.sendMods(0, 0, 0, inputGroup);
+         for (auto it = modifiers.rbegin(); it != modifiers.rend(); ++it)
+             transaction.sendModifierKey(it->key, WL_KEYBOARD_KEY_STATE_RELEASED);
+     };
+@@ -2565,6 +2619,9 @@ SDispatchResult dispatchScreenshot(const std::string& args) {
+         if (screenshotPrivacyDenied(window))
+             return {.success = false, .error = "target window class is excluded by privacy_class_denylist"};
+         targetWindow = window;
++        wakeBackgroundSurface(window->wlSurface()->resource());
++        if (parts.size() >= 3 && trim(parts[2]) == "prepare")
++            return {.success = true};
+     } else {
+         // Full capture serializes metadata for every mapped window, including
+         // hidden windows and windows on inactive workspaces. Apply privacy to
+diff --git a/tests/hypr_management.py b/tests/hypr_management.py
+index 5cfcf56..1113d88 100644
+--- a/tests/hypr_management.py
++++ b/tests/hypr_management.py
+@@ -507,14 +507,13 @@ class HyprManagementTests(unittest.TestCase):
+         lua_manage_calls = [
+             call
+             for call in lua_calls
+-            if call[:2] == ("hyprctl", "dispatch")
++            if call[:2] == ("hyprctl", "eval")
+             and len(call) >= 3
+-            and call[2].startswith("hl.plugin.hypr_agent_portal.manage(")
++            and "hl.plugin.hypr_agent_portal.manage(" in call[2]
+         ]
+-        self.assertEqual(
+-            lua_manage_calls,
+-            [("hyprctl", "dispatch", 'hl.plugin.hypr_agent_portal.manage("focus,address:0xabc@pid=101@start=1001")')],
+-        )
++        self.assertEqual(len(lua_manage_calls), 1)
++        self.assertIn('hl.dispatch(hl.plugin.hypr_agent_portal.manage("focus,address:0xabc@pid=101@start=1001"))', lua_manage_calls[0][2])
++        self.assertIn("assert(result.ok,", lua_manage_calls[0][2])
+         self.assertEqual(
+             portalctl.lua_plugin_dispatcher("hypr-agent-protal:manage", "workspace_activate,name:dev"),
+             'hl.plugin.hypr_agent_protal.manage("workspace_activate,name:dev")',
+diff --git a/src/plugin/keymap_resolver.hpp b/src/plugin/keymap_resolver.hpp
+new file mode 100644
+index 0000000..5b8f6cb
+--- /dev/null
++++ b/src/plugin/keymap_resolver.hpp
+@@ -0,0 +1,35 @@
++#pragma once
++#include <xkbcommon/xkbcommon.h>
++#include <memory>
++#include <optional>
++
++struct ResolvedPortalKey { uint32_t key; xkb_layout_index_t group; };
++
++// Translate the API's US key names to symbols, then resolve those symbols in
++// the client's real keymap. Only the target resource sees the chosen group.
++inline std::optional<ResolvedPortalKey> resolvePortalKey(xkb_keymap* map, uint32_t usKey, uint32_t modifiers, xkb_layout_index_t preferred) {
++    using Context = std::unique_ptr<xkb_context, decltype(&xkb_context_unref)>;
++    using Keymap = std::unique_ptr<xkb_keymap, decltype(&xkb_keymap_unref)>;
++    using State = std::unique_ptr<xkb_state, decltype(&xkb_state_unref)>;
++    Context ctx(xkb_context_new(XKB_CONTEXT_NO_FLAGS), xkb_context_unref);
++    if (!ctx || !map) return std::nullopt;
++    xkb_rule_names names{}; names.layout = "us";
++    Keymap us(xkb_keymap_new_from_names(ctx.get(), &names, XKB_KEYMAP_COMPILE_NO_FLAGS), xkb_keymap_unref);
++    if (!map || !us) return std::nullopt;
++    State reference(xkb_state_new(us.get()), xkb_state_unref);
++    State actual(xkb_state_new(map), xkb_state_unref);
++    if (!reference || !actual) return std::nullopt;
++    xkb_state_update_mask(reference.get(), modifiers, 0, 0, 0, 0, 0);
++    const auto symbol = xkb_state_key_get_one_sym(reference.get(), usKey + 8);
++    if (symbol == XKB_KEY_NoSymbol) return std::nullopt;
++    const auto groups = xkb_keymap_num_layouts(map);
++    for (xkb_layout_index_t offset = 0; offset < groups; ++offset) {
++        const auto group = (preferred + offset) % groups;
++        xkb_state_update_mask(actual.get(), modifiers, 0, 0, 0, 0, group);
++        for (auto code = xkb_keymap_min_keycode(map); code <= xkb_keymap_max_keycode(map); ++code) {
++            if (code >= 8 && xkb_state_key_get_one_sym(actual.get(), code) == symbol)
++                return ResolvedPortalKey{code - 8, group};
++        }
++    }
++    return std::nullopt;
++}

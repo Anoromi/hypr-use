@@ -1,0 +1,150 @@
+{
+  "method": "Gap indices are zero-based: gap i precedes JS call i; the final gap follows the last call. These reviewed intervals cover planning for failed actions and subsequent diagnosis/recovery. Explicit tool errors also mark their preceding and following gaps. Unreviewed silent failures remain in the other/uncertain bucket.",
+  "phases": {
+    "baseline-v2": {
+      "12-example": {
+        "gaps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "reason": "Initial navigation and Ctrl+L failed; the rest of the run diagnosed or retried navigation."
+      },
+      "13-wikipedia": {
+        "gaps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "reason": "Initial navigation and Ctrl+L failed; the rest of the run diagnosed or retried navigation."
+      },
+      "14-iana": {
+        "gaps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "reason": "Ignored navigation and unsupported setter before successful coordinate-based entry."
+      },
+      "15-python": {
+        "gaps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "reason": "Ignored navigation and unsupported setter before successful coordinate-based entry."
+      },
+      "21-web-profile": {
+        "gaps": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "reason": "Unsupported setter and ineffective indexed field input before coordinate recovery."
+      },
+      "23-web-checks": {
+        "gaps": [
+          1,
+          2,
+          3
+        ],
+        "reason": "Indexed checkbox input did not reach the desired state; coordinate recovery followed."
+      },
+      "25-web-date": {
+        "gaps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "reason": "Initial digit entry failed; subsequent calls diagnosed or retried the date input, then cleared it."
+      },
+      "27-web-filter": {
+        "gaps": [
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "reason": "Dropdown input had no effect; subsequent calls investigated or retried it."
+      },
+      "30-web-edit": {
+        "gaps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "reason": "Unsupported value setting, ineffective indexed input and failed text selection required coordinate/keyboard recovery."
+      },
+      "38-calc-sheet-name": {
+        "gaps": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "reason": "Failed menu interaction followed by attempts to diagnose and recover the unresponsive app."
+      },
+      "47-writer-table": {
+        "gaps": [
+          3,
+          4,
+          5,
+          6,
+          7,
+          10,
+          11,
+          12
+        ],
+        "reason": "Broken F12/menu attempts, then the wrong table size despite accepted numeric editing."
+      }
+    },
+    "improved-v1": {
+      "25-web-date": {
+        "gaps": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "reason": "Wrong setter argument type, provider no-op setter, then separate per-digit key calls failed before whole-string typing recovered."
+      },
+      "30-web-edit": {
+        "gaps": [
+          2,
+          3,
+          4
+        ],
+        "reason": "AT-SPI text selection failed; the next keyboard selection replaced the wrong span, producing alphaDELTAa gamma, before explicit cursor positioning recovered."
+      }
+    }
+  }
+}

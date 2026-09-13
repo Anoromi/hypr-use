@@ -1,0 +1,22 @@
+[
+  {
+    "build": "plugin-unified-result",
+    "path": "/nix/store/klkyjd0ymh6k8l4ni011nda53mwha1vl-hypr-agent-portal-0.4.0-local-0.56.2/lib/libhypr-agent-portal.so",
+    "sha256": "a3435a9c57df751f9e501cb7dd05be0ddfc502cdb050009b524b628a83d3c046"
+  },
+  {
+    "build": "plugin-reliability-result",
+    "path": "/nix/store/hs2dajw4d9llmzkc64cpvpfmrb4gd70r-hypr-agent-portal-0.4.0-local-0.56.2/lib/libhypr-agent-portal.so",
+    "sha256": "39b1db19fd2d06fe0e082000693f79c670c8cb2d3809216b024abd5b15965735"
+  },
+  {
+    "build": "plugin-reliability-pointer-result",
+    "path": "/nix/store/ajpq7vby9c6wn1j915l5rq1kx52z92hg-hypr-agent-portal-0.4.0-local-0.56.2/lib/libhypr-agent-portal.so",
+    "sha256": "c7a59734ac00040bd360aa1792802410dbe34136ef33b94b9a0b0bb38ce937cd"
+  },
+  {
+    "build": "plugin-reliability-sequence-result",
+    "path": "/nix/store/f0nlcmw5cr7vmx35zcqdmixqsd074wz2-hypr-agent-portal-0.4.0-local-0.56.2/lib/libhypr-agent-portal.so",
+    "sha256": "310486ec65481a6d5e62780f152e45deca84c3cfb2ef38734cef5e6a1ee6b873"
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-07",
+  "hyprland": "0.56.2",
+  "result": "Google opened in a new tab of existing native Zen through Codex MCP",
+  "focus_samples": 100,
+  "observed_focus_states": [
+    {
+      "class": "t3-code-alpha",
+      "workspace": 1
+    }
+  ],
+  "target_workspace": 3,
+  "clipboard": "disabled",
+  "patch": "portal-background-fixes.patch",
+  "loaded_build": "plugin-fixed-result",
+  "limitations": [
+    "single target frame pump",
+    "best-effort 120 ms screenshot preparation",
+    "AT-SPI unavailable"
+  ]
+}
