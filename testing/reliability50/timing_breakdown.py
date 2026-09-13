@@ -1,6 +1,7 @@
 """Non-overlapping wall-time buckets; agent gaps are not pure inference timings."""
 import collections,json,sys
 from pathlib import Path
+from timing_alignment import aligned_calls
 here=Path(__file__).resolve().parent;phase=sys.argv[1];directory=here/'runs'/phase
 review=json.loads((here/'failure-gap-review.json').read_text());manual=review['phases'].get(phase,{})
 rows=[]
@@ -15,8 +16,8 @@ for file in sorted(directory.glob('*/summary.json')):
   if item.get('type')!='mcp_tool_call':continue
   if e['type']=='item.started':pending[item['id']]=(event['time'],item)
   elif e['type']=='item.completed' and item['id'] in pending:
-   start,initial=pending.pop(item['id']);calls.append({'start':start,'end':event['time'],'code':initial.get('arguments',{}).get('code'),'tool':initial.get('tool')})
- aligned=len(calls)==len(wire) and all(c['code']==w.get('request',{}).get('params',{}).get('arguments',{}).get('code') for c,w in zip(calls,wire))
+   start,initial=pending.pop(item['id']);calls.append({'start':start,'end':event['time'],'code':initial.get('arguments',{}).get('code'),'arguments':initial.get('arguments',{}),'tool':initial.get('tool')})
+ aligned=aligned_calls(calls,wire)
  if not aligned or pending:
   rows.append({'id':r['id'],'duration_s':r['duration_s'],'status':'unresolved event/wire alignment'});continue
  failed_gaps=set(manual.get(r['id'],{}).get('gaps',[]));explicit=[]
@@ -36,5 +37,5 @@ for file in sorted(directory.glob('*/summary.json')):
  rows.append({'id':r['id'],'duration_s':r['duration_s'],'status':'aligned','buckets_s':buckets,'explicit_error_calls':explicit,'failure_gap_indices':sorted(failed_gaps),'gaps_s':gaps,'review':manual.get(r['id'])})
 total=collections.Counter()
 for r in rows:total.update(r.get('buckets_s',{}))
-seconds=sum(total.values());result={'phase':phase,'tasks':len(rows),'aligned':sum(r['status']=='aligned' for r in rows),'method':review['method'],'limitation':'Agent gaps combine inference, provider waiting and CLI orchestration. This is a reviewed lower-bound classification of failure-associated gaps, not direct inference telemetry. Tool and overhead time remain separate even for failed actions. Setup time is outside the agent-run duration.','total_s':seconds,'buckets_s':dict(total),'buckets_percent':{k:v/seconds*100 for k,v in total.items()} if seconds else {},'rows':rows}
+seconds=sum(total.values());result={'phase':phase,'tasks':len(rows),'aligned':sum(r['status']=='aligned' for r in rows),'method':review['method'].replace('JS call','MCP call'),'limitation':'Agent gaps combine inference, provider waiting and CLI orchestration. This is a reviewed lower-bound classification of failure-associated gaps, not direct inference telemetry. Tool and overhead time remain separate even for failed actions. Setup time is outside the agent-run duration.','total_s':seconds,'buckets_s':dict(total),'buckets_percent':{k:v/seconds*100 for k,v in total.items()} if seconds else {},'rows':rows}
 (directory/'timing-breakdown.json').write_text(json.dumps(result,indent=2));print(json.dumps({k:v for k,v in result.items() if k!='rows'},indent=2))

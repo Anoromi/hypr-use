@@ -69,3 +69,7 @@ Fresh Astra dropdown-selection and product-comparison tasks both passed (35.35 s
 Direct MCP workflow calls now reuse their just-read binding snapshot for preflight (within the existing 100 ms freshness bound) and emit the final observation without first repeating the entire initial tree. Public JS getApp behavior is unchanged. Indexed actions still perform identity rematching.
 
 Two controlled direct-form probes passed. AX reads fell from six to five including initial test binding; returned text fell from 17502/17487 to 2594/2599 characters. Whole helper medians were 6.159 → 5.978 s; sample noise is too large for a reliable latency claim. Fresh Astra navigation and form tasks passed at 30.69/26.43 s with no errors/refocuses (`loop-direct-binding-astra`). All 26 JS/protocol tests pass.
+
+## Timing alignment for direct tools
+
+Timing attribution now matches tool names and complete argument objects, rather than comparing only JS code (which is absent on every direct workflow call). Mismatched direct tools or arguments now stop attribution instead of silently aligning. Three deterministic cases pass; existing unchanged-form and direct-binding phases align completely with the stricter check. The 59.57 s prefilled run had 53.74 s of non-failure agent gaps (90.2%), not MCP execution. Those gaps combine model/provider/CLI time; they are not direct inference telemetry.
