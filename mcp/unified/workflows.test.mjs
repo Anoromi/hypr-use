@@ -127,3 +127,17 @@ test('a later selection cannot invalidate an earlier selection and still submit'
  f.app.performSecondaryAction=async(i,a)=>{await act(i,a);if(i===7)f.elements.find(e=>e.index===5).states=[];};
  await assert.rejects(f.workflow.selectOptions({choices:[{name:'Country',option:'Japan'},{name:'Other',option:'Japan'}],submit:{name:'Save'}}),/changed after/);assert.ok(!f.calls.some(c=>c[0]==='click'));
 });
+
+test('native closed combo opens once and verifies its value after the popup closes',async()=>{
+ const calls=[];let elements=[{index:1,name:'Country',controlType:'combo box',runtimeId:[0],value:'Germany'}];
+ const app={click:async i=>{calls.push(['open',i]);elements.push({index:2,name:'Japan',controlType:'menu item',runtimeId:[0,1],className:'gtk',actions:['click'],states:[]});},performSecondaryAction:async(i,a)=>{calls.push(['action',i,a]);elements[0].value='Japan';elements.pop();},getAXState:async()=>calls.push(['observe'])};
+ const w=createWorkflows(app,async()=>({elements}),()=>{});
+ await w.selectOptions({choices:[{name:'Country',option:'Japan'}]});
+ assert.deepEqual(calls,[['open',1],['action',2,'click'],['observe']]);calls.length=0;
+ await w.selectOptions({choices:[{name:'Country',option:'Japan'}]});assert.deepEqual(calls,[['observe']]);
+});
+test('unexposed missing option stops after opening and reports partial progress',async()=>{
+ const out=[],calls=[];const app={click:async()=>calls.push('open')};
+ const w=createWorkflows(app,async()=>({elements:[{index:1,name:'Country',controlType:'combo box',runtimeId:[0],value:'Germany'}]}),v=>out.push(v));
+ await assert.rejects(w.selectOptions({choices:[{name:'Country',option:'Missing'}]}),/exposed option/);assert.deepEqual(calls,['open']);assert.equal(JSON.parse(out[0].text).steps[0].step,'open Country');
+});

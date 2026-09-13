@@ -49,21 +49,25 @@ try:
    r=json.loads(server.stdout.readline());steps.append({'code':code,'seconds':time.monotonic()-start,'error':r['result'].get('isError')});(d/f'response-{len(steps)}.json').write_text(json.dumps(r));return r
   def state():return json.loads((d/'portal.jsonl').read_text().splitlines()[-1])['response']['result']['structuredContent']
   js("var app=await cua.getApp('hypr-use-bench');")
-  country=next(e for e in state()['elements'] if e['name']=='Country' and e['controlType']=='combo box')
-  js(f"await app.click({country['index']}); await app.getAXState();")
-  if '-image-' in case:
-   captured=js('await app.getAXStateAndScreenshot();')
-   for block in captured['result']['content']:
-    if block.get('type')=='image':(d/'popup.png').write_bytes(base64.b64decode(block['data']))
-  germany=next(e for e in state()['elements'] if e['name']=='Germany' and e['controlType']=='menu item')
-  if 'inspect' in case:
-   frame=germany['frame'];payload=f"{state()['target']},{frame['x']+frame['width']/2},{frame['y']+frame['height']/2},inspect"
-   inspected=subprocess.run(['hyprctl','eval','local result=hl.dispatch(hl.plugin.hypr_agent_portal.pointer_relative('+json.dumps(payload)+')); error(result.error or "missing inspection")'],capture_output=True,text=True)
-   (d/'surface-inspect.txt').write_text(inspected.stdout+inspected.stderr)
-  if case.startswith('semantic'):code=f"await app.performSecondaryAction({germany['index']},'click');"
-  elif case.startswith('keyboard'):code="await app.pressKey('End Return');"
-  else:code=f"await app.click({germany['index']});"
-  js(code+'await app.getAXState();');time.sleep(.15)
+  if case.startswith('workflow'):
+   js("await app.selectOptions({choices:[{name:'Country',option:'Germany'}]});")
+   js("await app.selectOptions({choices:[{name:'Country',option:'Germany'}]});")
+  else:
+   country=next(e for e in state()['elements'] if e['name']=='Country' and e['controlType']=='combo box')
+   js(f"await app.click({country['index']}); await app.getAXState();")
+   if '-image-' in case:
+    captured=js('await app.getAXStateAndScreenshot();')
+    for block in captured['result']['content']:
+     if block.get('type')=='image':(d/'popup.png').write_bytes(base64.b64decode(block['data']))
+   germany=next(e for e in state()['elements'] if e['name']=='Germany' and e['controlType']=='menu item')
+   if 'inspect' in case:
+    frame=germany['frame'];payload=f"{state()['target']},{frame['x']+frame['width']/2},{frame['y']+frame['height']/2},inspect"
+    inspected=subprocess.run(['hyprctl','eval','local result=hl.dispatch(hl.plugin.hypr_agent_portal.pointer_relative('+json.dumps(payload)+')); error(result.error or "missing inspection")'],capture_output=True,text=True)
+    (d/'surface-inspect.txt').write_text(inspected.stdout+inspected.stderr)
+   if case.startswith('semantic'):code=f"await app.performSecondaryAction({germany['index']},'click');"
+   elif case.startswith('keyboard'):code="await app.pressKey('End Return');"
+   else:code=f"await app.click({germany['index']});"
+   js(code+'await app.getAXState();');time.sleep(.15)
   actual=json.loads((f/'state.json').read_text());row={'case':case,'passed':actual.get('Country')=='Germany' and not any(s['error'] for s in steps),'state':actual,'steps':steps,'refocus':bool(m.violations)};rows.append(row);print(json.dumps(row),flush=True)
   server.stdin.close();server.wait(timeout=10);server=None;stop();owned=None
   for _ in range(100):

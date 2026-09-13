@@ -11,7 +11,7 @@ const schemas={
 };
 const required={select_options:['choices'],fill_form:['fields'],replace_text:['target','text'],navigate:['url'],wait_for:[]};
 const descriptions={
- select_options:'Select options in named single-choice combo boxes, in order, and optionally click submit. choices contains {name,role?,option}, using exact accessible names. Options must already be exposed beneath each control in AX and offer a select action; does not open hidden menus. Skips selected options, verifies each selection and the final set, stops on failure without retry or rollback. Final AX included.',
+ select_options:'Select options in named single-choice combo boxes, in order, and optionally click submit. choices contains {name,role?,option}, using exact accessible names. Opens a combo box when its options are not yet exposed in AX. Uses an exposed select action or GTK menu click action; verifies the selected option or combo-box value. Skips selected options, verifies each selection and the final set, stops on failure without retry or rollback. Final AX included.',
  fill_form:'Fill named text fields and checkboxes in order and optionally click a named submit button. Exact accessible names; labels are excluded from field matches, and multiple editable matches fail. String values use a supported setter or native keys; already matching visible text is skipped unless an explicit method requests re-entry. Boolean values set checkbox state, clicking only when it differs. Verifies changes; mixed checkbox states fail before input. Stops on first failure and reports completed steps; no rollback or retries. Final AX included.',
  replace_text:'Replace the entire contents of one named field, optionally press Enter. Default native keys: click, Ctrl+A, type; method=setValue or paste is explicit. This is not document-wide find/replace. Final AX included.',
  navigate:'Navigate a running browser via native background address-bar input, optionally opening a new tab. Uses http(s) URLs and an unambiguous known address-bar name, or an explicit address selector. Returns AX after submission; does not claim the page finished loading. Use wait_for for expected page content.',
@@ -48,14 +48,18 @@ function select(state,target,purpose){
  if(found.length!==1)throw Error(`Expected one element named ${JSON.stringify(target.name)}, found ${found.length}; inspect AX and supply a role if needed`);
  return found[0];
 }
-function choiceOption(state,choice){
+function choiceOption(state,choice,allowUnexposed=false){
  const control=select(state,choice,'choice'),path=control.runtimeId;
+ if(control.value===choice.option)return {control,option:null,selected:true};
  if(!Array.isArray(path)||!path.length)throw Error('Combo box has no AX ancestry; inspect its options');
- const matches=(state.elements??[]).filter(e=>e.name===choice.option&&Array.isArray(e.runtimeId)&&e.runtimeId.length>path.length&&path.every((v,i)=>e.runtimeId[i]===v)&&['menu item','list item','radio button'].includes(e.controlType));
+ const options=(state.elements??[]).filter(e=>Array.isArray(e.runtimeId)&&e.runtimeId.length>path.length&&path.every((v,i)=>e.runtimeId[i]===v)&&['menu item','list item','radio button'].includes(e.controlType));
+ const matches=options.filter(e=>e.name===choice.option);
+ if(!options.length&&allowUnexposed)return {control,option:null,selected:false,unexposed:true};
  if(matches.length!==1)throw Error(`Expected one exposed option ${JSON.stringify(choice.option)} under ${JSON.stringify(choice.name)}, found ${matches.length}; open the control and inspect AX if necessary`);
  const option=matches[0],selected=(option.states??[]).includes('selected');
- if(!selected&&!(option.actions??[]).includes('select'))throw Error('Option has no select action; inspect available actions');
- return {control,option,selected};
+ const action=(option.actions??[]).includes('select')?'select':String(option.className??'').toLowerCase()==='gtk'&&(option.actions??[]).includes('click')?'click':null;
+ if(!selected&&!action)throw Error('Option has no supported selection action; inspect available actions');
+ return {control,option,selected,action};
 }
 export function createWorkflows(app,read,emit,showState){
  async function run(name,args){
@@ -85,15 +89,20 @@ export function createWorkflows(app,read,emit,showState){
    let result={status:'completed'};
    if(name==='select_options'){
     await refresh();const controls=new Set();
-    for(const c of args.choices){const {control}=choiceOption(state,c);if(controls.has(control.index))throw Error('Each combo box must appear only once');controls.add(control.index);}
+    for(const c of args.choices){const {control}=choiceOption(state,c,true);if(controls.has(control.index))throw Error('Each combo box must appear only once');controls.add(control.index);}
     if(args.submit)select(state,args.submit);
     for(const c of args.choices){
-     const {option,selected}=choiceOption(state,c);
+     let found=choiceOption(state,c,true);
+     if(found.unexposed){
+      await step(`open ${c.name}`,()=>app.click(found.control.index));
+      await step(`inspect ${c.name} options`,refresh);found=choiceOption(state,c);
+     }
+     const {option,selected,action}=found;
      if(selected){steps.push({step:`keep ${c.name}`,status:'unchanged',ms:0});continue;}
-     await step(`select ${c.option} in ${c.name}`,()=>app.performSecondaryAction(option.index,'select'));
-     await step(`verify ${c.name}`,async()=>{if(!choiceOption(await refresh(),c).selected)throw Error('Option selection does not match the request');});
+     await step(`select ${c.option} in ${c.name}`,()=>app.performSecondaryAction(option.index,action));
+     await step(`verify ${c.name}`,async()=>{if(!choiceOption(await refresh(),c,true).selected)throw Error('Option selection does not match the request');});
     }
-    await step('verify final choices',async()=>{for(const c of args.choices)if(!choiceOption(state,c).selected)throw Error(`Selection in ${JSON.stringify(c.name)} changed after a later input`);});
+    await step('verify final choices',async()=>{for(const c of args.choices)if(!choiceOption(state,c,true).selected)throw Error(`Selection in ${JSON.stringify(c.name)} changed after a later input`);});
     if(args.submit){const e=select(state,args.submit);await step('submit choices',()=>app.click(e.index));}
    }else if(name==='fill_form'){
     // Validate selectors before the first mutation, then resolve afresh per field.

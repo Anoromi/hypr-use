@@ -113,3 +113,9 @@ A separate native popup hit-test candidate reproduced/fixed the problem in a dis
 New desktop phases validate the explicit active-plugin load record against current plugin metadata and the binary SHA-256, then include the native binary and load declaration in source hashes. Plugin switches record old/new builds and restore the old build on a load failure. Metadata/hash checks are not direct process-map attestation; compositor mappings remain unreadable. The mismatch regression passes.
 
 The disposable compositor harness uses a short private runtime path, its own session and accessibility D-Bus daemons, a manually started accessibility registry, a virtual input seat, and a foreground sentinel. This avoids both Unix socket path limits and dbus-broker attempting systemd activation inside the private session. Its successful old/new comparison recorded 72 focus samples and no sentinel refocus. Earlier setup failures are retained.
+
+## Open native dropdowns inside select_options
+
+The dropdown helper now opens unexposed combo boxes, supports GTK menu click actions, and verifies the displayed combo value after a native popup closes. Already matching closed controls are skipped without opening. Duplicate controls and invalid exposed options still fail before input; an invalid previously hidden option can leave its menu open, with completed steps reported.
+
+Two controlled native selections and unchanged repeats passed; repeat helpers only observed AX (0.229/0.223 s). Fresh Astra chose select_options for both native and browser tasks. Native Country: two calls/20.25 s versus the preceding three calls/35.98 s; browser two-dropdown filter: two calls/29.16 s. All passed without errors/refocuses. These single-run timings do not establish an average speedup. All 33 JS/protocol tests pass. Evidence: loop-native-dropdown-workflow and loop-native-dropdown-astra.
