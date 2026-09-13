@@ -7,7 +7,10 @@ from monitor import Monitor,ctl
 from catalog import catalog
 from web_fixture import Fixture
 import odf
-phase=sys.argv[1];selected=set(sys.argv[2:]);out=here/'runs'/phase;out.mkdir(parents=True,exist_ok=True)
+phase=sys.argv[1];selected=set(sys.argv[2:])
+unknown=selected-{t['id'] for t in catalog()}
+if unknown:raise SystemExit('Unknown task IDs: '+', '.join(sorted(unknown)))
+out=here/'runs'/phase;out.mkdir(parents=True,exist_ok=True)
 variant=os.environ.get('HYPR_USE_SUITE_VARIANT','standard')
 assert variant in ['standard','reactive-form','prefilled-form'],'Unknown suite variant'
 if variant!='standard':assert selected=={'21-web-profile'},'Form variants require only task 21-web-profile'

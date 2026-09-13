@@ -145,6 +145,16 @@
         ],
         "reason": "AT-SPI text selection failed; the next keyboard selection replaced the wrong span, producing alphaDELTAa gamma, before explicit cursor positioning recovered."
       }
+    },
+    "loop-ax-bytecode-astra": {
+      "03-country": {
+        "gaps": [
+          2,
+          3,
+          4
+        ],
+        "reason": "Pointer click on Germany closed the native menu without changing Country. The next observation diagnosed the unchanged value and a keyboard retry recovered."
+      }
     }
   }
 }

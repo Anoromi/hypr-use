@@ -85,3 +85,9 @@ Two controlled two-dropdown probes passed, including unchanged repeat calls. Fre
 The production paste handler reproduced an unwanted Escape before any bulk paste in a snapshot containing a table, even when the focused control was an unrelated entry. Unified paste now passes prepare_grid=false. The standalone portal retains its legacy default, with the option exposed in its schema. Clipboard and input authorization are unchanged.
 
 Three production-handler regression tests cover the old unwanted Escape, the corrected path, and rejecting a malformed flag before clipboard/input mutation. The facade test verifies the actual option sent. All 31 JS/protocol and ten general regression tests pass. This correction has isolated handler coverage; a live clipboard paste was not benchmarked in this iteration.
+
+## Reject unknown benchmark task IDs
+
+A requested `31-table` task did not exist; the harness silently skipped it while running valid `03-country`. The harness now rejects unknown IDs before creating a phase or launching apps. The invalid-ID smoke test exits with an explicit error. The actual Calc catalog ID is `31-calc-table`; no Calc result is claimed for loop-ax-bytecode-astra.
+
+The native run in that phase passed after a silent pointer-selection failure and keyboard recovery. Its reviewed failure-associated gaps are recorded separately (indices 2,3,4), even though no tool returned isError.
