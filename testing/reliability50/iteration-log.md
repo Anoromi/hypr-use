@@ -57,3 +57,9 @@ Two negative probes now correctly rejected the invalid form without saving; an o
 Default `fill_form` skips visible string values already equal to the request, just as it already skipped matching checkboxes. An explicit method forces re-entry; missing values and password fields are never assumed to match. The final whole-form verification remains active.
 
 Two repeated-fill probes changed from 3.593/3.633 s to 0.360/0.350 s (median 3.613 → 0.355 s, 90.2% less helper time). Fresh first fills and the reactive negative test still passed. Fresh Astra selected combined fill_form on a separately labeled prefilled-form variant, skipped the correct name, and saved the correct email. Independent input-event grading confirmed zero unnecessary name input. Agent run 59.57 s: helper savings did not translate into a demonstrated end-to-end gain in this single run. No refocuses. All 24 JS/protocol tests pass. Evidence: loop-unchanged-before/after diagnostics and loop-unchanged-astra.
+
+## Lossless compact AX geometry
+
+AX text now prints frame coordinates as `[x,y,width,height]` with one legend, retaining all nodes, indices, actions, states and geometry. `compactGeometry:false` retains the verbose labels. Raw structured snapshots are unchanged. The sampled native tree shrank 1341 → 1058 characters (21.1%); browser tree 18228 → 14801 (18.8%). These are character counts, not measured token or inference savings.
+
+Fresh Astra dropdown-selection and product-comparison tasks both passed (35.35 s, 23.94 s), with no tool errors or refocuses (`loop-compact-ax-astra`). All 25 JS/protocol tests pass. End-to-end speed improvement is not established by these adoption runs.

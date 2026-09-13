@@ -15,7 +15,10 @@ export function createFacade(call, output, options={}) {
       `App: ${state.app?.name??''}; Window: ${state.windowTitle??''}; Target: ${state.target??key}`,
       ...(state.attention?[`Attention: ${JSON.stringify(state.attention)}`]:[]),
       ...(state.lastAction?.windowDelta?[`Window changes: ${JSON.stringify(state.lastAction.windowDelta)}`]:[]),
-      ...state.treeLines,
+      ...(opt.compactGeometry===false?state.treeLines:[
+        'Frame arrays are [x,y,width,height] in the same screenshot coordinate space.',
+        ...state.treeLines.map(line=>line.replace(/ Frame: \{x: (-?\d+), y: (-?\d+), width: (-?\d+), height: (-?\d+)\}$/, ' Frame: [$1,$2,$3,$4]'))
+      ]),
       ...(state.accessibility?.status!=='ok'?[`Accessibility: ${state.accessibility?.status??'unavailable'}. ${state.accessibility?.error??''}`]:[]),
       ...(state.accessibility?.treeTruncated?[`Tree truncated: ${state.accessibility.treeTruncatedReason??'limit'}`]:[])
     ].join('\n'):result.content.filter(x=>x.type==='text').map(x=>x.text).join('\n');

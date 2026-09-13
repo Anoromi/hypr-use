@@ -38,3 +38,12 @@ test('fused typing keeps flags explicit and validates key budget before dispatch
  assert.deepEqual(calls.at(-1),['type_text',{app:'owned',text:'hello',method:'keys',replace_all:true,submit:true}]);
  const count=calls.length;await assert.rejects(app.typeText('x'.repeat(4096),{replaceAll:true}),/4096/);await assert.rejects(app.typeText('x',{submit:'yes'}),/booleans/);assert.equal(calls.length,count);
 });
+
+test('compact geometry preserves every coordinate and offers full labels',async()=>{
+ const line='\t9 button Move Secondary Actions: press Frame: {x: -5, y: 10, width: 30, height: 40}';
+ const state={target:'owned',treeLines:[line],accessibility:{status:'ok'}};const out=[];
+ const {cua}=createFacade(async()=>({content:[],structuredContent:state}),x=>out.push(x));const app=await cua.getApp('Editor');
+ assert.match(out[0].text,/Frame: \[-5,10,30,40\]/);assert.match(out[0].text,/\[x,y,width,height\]/);
+ const full=await app.getAXState({compactGeometry:false,disableDiffing:true,emit:false});assert.ok(full.includes(line));
+ assert.equal(state.treeLines[0],line);
+});

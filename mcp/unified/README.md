@@ -24,7 +24,7 @@ await app.pressKey("Return");
 await app.getAXState();
 ```
 
-App methods: `getAXState`, `getScreenshot`, `getAXStateAndScreenshot`, `click`, `drag`, `scroll`, `pressKey`, `typeText`, `paste`, `setValue`, `selectText`, `performSecondaryAction`. `cua` provides `getApp`, `listApps`, `getState` and `initialize`. Observations emit themselves by default. `emit:false` suppresses output; `disableDiffing:true` requests a complete tree. Element indices are numbers; coordinates are `[x,y]` relative to the screenshot.
+App methods: `getAXState`, `getScreenshot`, `getAXStateAndScreenshot`, `click`, `drag`, `scroll`, `pressKey`, `typeText`, `paste`, `setValue`, `selectText`, `performSecondaryAction`. `cua` provides `getApp`, `listApps`, `getState` and `initialize`. Observations emit themselves by default. `emit:false` suppresses output; `disableDiffing:true` requests a complete tree. `compactGeometry:false` retains verbose frame labels; the default uses lossless `[x,y,width,height]` frame arrays. Element indices are numbers; coordinates are `[x,y]` relative to the screenshot.
 
 Bindings persist and can be redeclared. Top-level await and ordinary JS control flow are supported. Imports and direct filesystem/network/process APIs are not exposed. This is not a security boundary against hostile JavaScript; authority is enforced by the backend and owner configuration. Timeout/reset terminates the worker process group; a dispatched OS action cannot be undone. Host `turn_ended` notifications clean up sessions and are deduplicated per session/turn.
 
