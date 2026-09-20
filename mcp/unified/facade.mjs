@@ -51,6 +51,11 @@ export function createFacade(call, output, options={}) {
     const r=await call('get_ax_state',{app:name});
     if(expectedTitle!==undefined&&r.structuredContent?.windowTitle!==expectedTitle)throw Error('Related dialog changed before binding; inspect the root app again');
     name=r.structuredContent?.target??name;bound.add(name);
+    // A bound dialog is what the agent is now looking at, so the live view
+    // should follow it there: beat with it as the target (which also attaches
+    // it to the agent). Acting on the root app again moves the target back on
+    // its own, because every dispatched action beats with its own app.
+    if(expectedTitle!==undefined)options.hyprnav?.beat({state:'working',target:name,action:`dialog ${expectedTitle}`});
     if(!workflow)ax(r,name,{disableDiffing:true});
     let recent=workflow?{result:r,time:Date.now()}:null;
     const act=async(tool,args)=>{

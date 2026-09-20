@@ -84,3 +84,15 @@ test('dialog recycled into a different title is not returned as requested dialog
  const f=createFacade(async(tool,args)=>({structuredContent:{target:args.app,windowTitle:args.app==='child'?'Other':'Root',attention:{type:'active-related-popup',title:'Wanted',target:'child'},elements:[],treeLines:[]},content:[]}),()=>{});
  const root=await f.cua.getApp('root');await assert.rejects(root.getDialog({title:'Wanted'}),/changed before binding/);
 });
+
+test('a bound dialog becomes the hyprnav target so the live view follows it',async()=>{
+ const beats=[];const hyprnav={beat:b=>beats.push(b)};
+ const state=target=>({content:[],structuredContent:{target,windowTitle:target==='address:0xdlg'?'Save File':'Editor',app:{name:'test'},accessibility:{status:'ok'},treeLines:['1 button Save'],elements:[],
+  attention:target==='address:0xapp'?{type:'active-related-popup',title:'Save File',target:'address:0xdlg'}:undefined}});
+ const {cua}=createFacade(async(n,a)=>state(a.app==='address:0xdlg'?'address:0xdlg':'address:0xapp'),()=>{},{hyprnav});
+ const app=await cua.getApp('address:0xapp');
+ assert.deepEqual(beats,[],'binding the root app beats through the worker, not the facade');
+ const dialog=await app.getDialog({title:'Save File'});
+ assert.deepEqual(beats,[{state:'working',target:'address:0xdlg',action:'dialog Save File'}]);
+ await dialog.click(1);
+});
