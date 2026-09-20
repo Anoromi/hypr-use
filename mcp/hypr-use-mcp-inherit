@@ -1,0 +1,29 @@
+#!/run/current-system/sw/bin/python3
+"""cua MCP launcher that targets the compositor of the current session.
+
+The stock launcher (~/.local/bin/hypr-use-mcp) drives a separate headless
+desktop. This one inherits WAYLAND_DISPLAY / HYPRLAND_INSTANCE_SIGNATURE from
+its environment, so agents work on the desktop the user (or the lab) is in and
+register with that session's hyprnav daemon.
+"""
+import os, sys, json
+from pathlib import Path
+root = Path(__file__).resolve().parents[1]
+env = dict(os.environ)
+for k in ("HYPRLAND_INSTANCE_SIGNATURE", "WAYLAND_DISPLAY", "XDG_RUNTIME_DIR"):
+    if not env.get(k):
+        sys.exit(f"hypr-use-mcp-inherit: {k} is not set; run inside a Hyprland session")
+env.setdefault("HYPR_AGENT_PORTAL_PERMISSION_MODE", "full")
+env.setdefault("HYPR_AGENT_PORTAL_APPROVAL_POLICY", "never")
+# Typelibs for the AT-SPI backend, same runtime the headless launcher uses.
+saved = Path.home() / ".local/share/hypr-use/headless-env.json"
+if saved.exists():
+    try:
+        gi = json.loads(saved.read_text()).get("GI_TYPELIB_PATH")
+        if gi and not env.get("GI_TYPELIB_PATH"):
+            env["GI_TYPELIB_PATH"] = gi
+    except Exception:
+        pass
+node = "/home/anoromi/.local/share/fnm/node-versions/v22.22.0/installation/bin/node"
+env["PATH"] = str(Path(node).parent) + ":/run/current-system/sw/bin:/etc/profiles/per-user/anoromi/bin:" + env.get("PATH", "")
+os.execve(node, [node, str(root / "mcp/unified/server.mjs")], env)

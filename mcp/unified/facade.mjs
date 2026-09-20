@@ -107,6 +107,11 @@ export function createFacade(call, output, options={}) {
     return Object.freeze(app);
   }
   const cua={getApp:input=>bindApp(input),listApps:apps,getState:async(opt={})=>{const state={apps:await apps({emit:false}),browsers:[]};if(opt.emit!==false)output({type:'text',text:JSON.stringify(state)});return state;}};
+  const hyprnav=options.hyprnav??null;
+  cua.myWorkspace=()=>{const w=hyprnav?.myWorkspace()??null;output({type:'text',text:JSON.stringify(w)});return w;};
+  cua.setLabel=async text=>{const r=await (hyprnav?hyprnav.setLabel(string(text,'label')):Promise.resolve({label:text}));output({type:'text',text:JSON.stringify(r)});return r;};
+  cua.listWorkspaceApps=async(opt={})=>{const rows=hyprnav?(await hyprnav.workspaceWindows()).map(w=>({id:`address:${w.address}`,displayName:w.class,isRunning:true,title:w.title,workspace:w.workspace,mine:w.mine})):[];if(opt.emit!==false)output({type:'text',text:JSON.stringify(rows)});return rows;};
+  cua.launch=async(argv,opt={})=>{if(!Array.isArray(argv)||!argv.length||argv.some(a=>typeof a!=='string'))throw Error('launch takes an argv array of strings');if(!hyprnav)throw Error('hyprnav is not available in this session');const w=await hyprnav.launch(argv,{timeoutMs:opt.timeoutMs??15000});output({type:'text',text:`Launched ${argv[0]} on workspace ${w.workspace.id} as address:${w.address} (${w.class}: ${w.title})`});return bindApp(`address:${w.address}`);};
   cua.initialize=cua.getState;
   return {cua,async executeWorkflow(name,args){validateWorkflow(name,args);const {app:target,...options}=args;const app=await bindApp(target,true);return app[workflowMethods[name]](options);},async cleanup(){for(const target of bound){await call('computer',{action:'session',session_action:'end',target}).catch(()=>{});}bound.clear();}};
 }

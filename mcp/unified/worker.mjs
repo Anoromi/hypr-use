@@ -5,6 +5,7 @@ import readline from 'node:readline';
 import {parse} from 'acorn';
 import {fileURLToPath} from 'node:url';
 import {createFacade} from './facade.mjs';
+import {HyprnavAgent} from './hyprnav-bridge.mjs';
 const backend=spawn(process.env.HYPR_USE_PYTHON??'python3',[fileURLToPath(new URL('./backend-launch.py',import.meta.url))],{stdio:['pipe','pipe','inherit']});
 let next=0,content=[],timings=[];const pending=new Map();const inFlight=new Set();
 readline.createInterface({input:backend.stdout}).on('line',line=>{try{const r=JSON.parse(line),p=pending.get(r.id);if(!p)return;pending.delete(r.id);r.error?p.reject(Error(r.error.message)):p.resolve(r.result);}catch(e){for(const p of pending.values())p.reject(e);pending.clear();}});
@@ -15,9 +16,12 @@ async function dispatch(name,args){const start=performance.now();try{
  if(r.isError)throw Error(r.content.filter(x=>x.type==='text').map(x=>x.text).join('\n'));
  return r;
 }catch(e){throw Error(`${name}: ${e.message}`);}}
-function call(name,args){const p=dispatch(name,args);inFlight.add(p);p.then(()=>inFlight.delete(p),()=>inFlight.delete(p));return p;}
+const agent=new HyprnavAgent({id:process.env.HYPR_USE_AGENT_ID??`cua-${process.ppid}`,pid:process.ppid});
+if(process.env.HYPR_USE_AGENT_JSON){try{agent.info=JSON.parse(process.env.HYPR_USE_AGENT_JSON);agent.enabled=true;agent.label=agent.info.label;}catch{}}
+const OBSERVE=new Set(['list_apps','get_ax_state','screenshot','get_app_state']);
+function call(name,args){const p=dispatch(name,args);inFlight.add(p);p.then(()=>{inFlight.delete(p);agent.beat({state:'working',target:args?.app,action:OBSERVE.has(name)?undefined:name});},()=>inFlight.delete(p));return p;}
 const output=block=>{content.push(block);process.send({event:'output',block});};
-const {cua,cleanup,executeWorkflow}=createFacade(call,output,{aliases:JSON.parse(process.env.HYPR_USE_APP_ALIASES??'{}'),commandModifier:process.env.HYPR_USE_COMMAND_MODIFIER??'ctrl'});
+const {cua,cleanup,executeWorkflow}=createFacade(call,output,{aliases:JSON.parse(process.env.HYPR_USE_APP_ALIASES??'{}'),commandModifier:process.env.HYPR_USE_COMMAND_MODIFIER??'ctrl',hyprnav:agent});
 const context=vm.createContext({cua,nodeRepl:Object.freeze({write:v=>output({type:'text',text:typeof v==='string'?v:JSON.stringify(v)}),emitImage:async v=>{output(imageBlock(v));}})}, {codeGeneration:{strings:false,wasm:false}});
 function names(pattern){if(pattern.type==='Identifier')return [pattern.name];if(pattern.type==='ObjectPattern')return pattern.properties.flatMap(p=>names(p.value??p.argument));if(pattern.type==='ArrayPattern')return pattern.elements.filter(Boolean).flatMap(names);if(pattern.type==='RestElement')return names(pattern.argument);if(pattern.type==='AssignmentPattern')return names(pattern.left);return [];}
 function rewrite(code){const ast=parse(code,{ecmaVersion:'latest',allowAwaitOutsideFunction:true});let out='',last=0;for(const n of ast.body){let replacement;
