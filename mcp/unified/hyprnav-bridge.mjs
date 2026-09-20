@@ -58,7 +58,11 @@ export class HyprnavAgent {
   async register() {
     if (this.env.HYPR_USE_NO_HYPRNAV === '1') { this.enabled = false; return null; }
     try {
-      this.info = await request('agent_register', {agent_id: this.id, label: this.label, client: this.client, pid: this.pid, cwd: this.cwd, env: this.env.HYPRNAV_ENV || null}, {env: this.env});
+      const params = {agent_id: this.id, label: this.label, client: this.client, pid: this.pid, cwd: this.cwd, env: this.env.HYPRNAV_ENV || null};
+      // Thread attribution: the host app (T3 Code) exports these for its MCP children.
+      if (this.env.T3CODE_THREAD_ID) params.thread_id = this.env.T3CODE_THREAD_ID;
+      if (this.env.T3CODE_ENVIRONMENT_ID) params.thread_environment_id = this.env.T3CODE_ENVIRONMENT_ID;
+      this.info = await request('agent_register', params, {env: this.env});
       this.enabled = true;
     } catch (e) {
       this.enabled = false;
