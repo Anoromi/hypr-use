@@ -56,6 +56,7 @@ export class HyprnavAgent {
     this.info = null; this.enabled = false; this.pendingBeat = null;
   }
   async register() {
+    if (this.env.HYPR_USE_NO_HYPRNAV === '1') { this.enabled = false; return null; }
     try {
       this.info = await request('agent_register', {agent_id: this.id, label: this.label, client: this.client, pid: this.pid, cwd: this.cwd, env: this.env.HYPRNAV_ENV || null}, {env: this.env});
       this.enabled = true;

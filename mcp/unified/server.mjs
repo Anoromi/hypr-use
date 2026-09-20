@@ -12,6 +12,9 @@ const instructions=`Hypr-use: background desktop control on Hyprland through per
 // hyprnav: this process is one agent. Registration is best effort.
 const agent=new HyprnavAgent({id:process.env.HYPR_USE_AGENT_ID??`cua-${process.pid}`,label:process.env.HYPR_USE_AGENT_LABEL??defaultLabel(),pid:process.pid});
 const agentReady=agent.register().catch(()=>null);
+// Hosts rarely call turn_ended; treat 20 s without a tool call as idle.
+let idleTimer=null;const IDLE_AFTER_MS=Number(process.env.HYPR_USE_IDLE_AFTER_MS??20000);
+function touchActivity(){if(idleTimer)clearTimeout(idleTimer);idleTimer=setTimeout(()=>{idleTimer=null;agent.beat({state:'idle'});},IDLE_AFTER_MS);}
 let worker=null,active=null,queue=Promise.resolve();const ended=new Set();
 function stop(reason='JavaScript state reset'){if(worker){try{process.kill(-worker.pid,'SIGKILL');}catch{}worker=null;}if(active){const a=active;active=null;clearTimeout(a.timer);a.reject(Object.assign(Error(reason),{timings:a.operations,content:a.content}));}}
 function start(){if(worker)return;worker=fork(fileURLToPath(new URL('./worker.mjs',import.meta.url)),[],{detached:true,stdio:['ignore','ignore','inherit','ipc'],env:{...process.env,HYPR_USE_AGENT_ID:agent.id,HYPR_USE_AGENT_JSON:agent.enabled&&agent.info?JSON.stringify(agent.info):''}});const current=worker;worker.on('message',r=>{if(worker===current&&active){if(r.event==='operation'){active.operations.push(r.timing);return;}if(r.event==='output'){active.content.push(r.block);return;}clearTimeout(active.timer);const a=active;active=null;a.resolve(r);}});worker.on('exit',()=>{if(worker!==current)return;worker=null;if(active){const a=active;active=null;clearTimeout(a.timer);a.reject(Error('JavaScript worker exited'));}});}
@@ -21,6 +24,7 @@ async function handle(m){if(!m||Array.isArray(m)||m.jsonrpc!=='2.0'||typeof m.me
  if(m.method==='initialize')return result(m.id,{protocolVersion:'2025-06-18',serverInfo:{name:'hypr-use-unified',version:'0.2.0'},capabilities:{tools:{listChanged:false}},instructions});
  if(m.method==='tools/list')return result(m.id,{tools});if(m.method==='ping')return result(m.id,{});
  if(m.method!=='tools/call')return error(m.id,-32601,'Method not found');
+ touchActivity();
  const startMs=performance.now();let r;try{const {name,arguments:a={}}=m.params??{};if(!a||Array.isArray(a)||typeof a!=='object')throw Error('arguments must be an object');
  if(name==='js'){if(typeof a.code!=='string'||Object.keys(a).some(k=>!['code','timeout_ms','title'].includes(k)))throw Error('Invalid js arguments');if(a.title!==undefined&&(typeof a.title!=='string'||!a.title.length||a.title.length>80))throw Error('Invalid title');const timeout=a.timeout_ms??30000;if(!Number.isInteger(timeout)||timeout<1||timeout>300000)throw Error('timeout_ms must be 1–300000');r=await execute({kind:'js',code:a.code},timeout,m.id);}
  else if(workflowTools.some(t=>t.name===name)){validateWorkflow(name,a);r=await execute({kind:'workflow',name,args:a},name==='wait_for'?(a.timeout_ms??10000)+15000:120000,m.id);}
