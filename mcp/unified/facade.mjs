@@ -48,7 +48,17 @@ export function createFacade(call, output, options={}) {
   }
   async function bindApp(input,workflow=false,expectedTitle) {
     let name=aliases[string(input,'app')]??input;
-    const r=await call('get_ax_state',{app:name});
+    let r;
+    try{r=await call('get_ax_state',{app:name});}
+    catch(error){
+      const listed=await call('list_apps',{}),needle=String(name).toLowerCase();
+      const candidates=(listed.structuredContent?.windows??[]).filter(w=>{
+        const cls=String(w.class??w.initialClass??'').toLowerCase(),title=String(w.title??w.initialTitle??'').toLowerCase();
+        return cls===needle||title===needle||title.startsWith(`${needle} [`);
+      }).sort((a,b)=>Number(b.processStartTime??0)-Number(a.processStartTime??0)||(Number(a.focusHistoryID??1e9)-Number(b.focusHistoryID??1e9)));
+      if(!candidates.length||typeof candidates[0].target!=='string')throw error;
+      name=candidates[0].target;r=await call('get_ax_state',{app:name});
+    }
     if(expectedTitle!==undefined&&r.structuredContent?.windowTitle!==expectedTitle)throw Error('Related dialog changed before binding; inspect the root app again');
     name=r.structuredContent?.target??name;bound.add(name);
     // A bound dialog is what the agent is now looking at, so the live view
@@ -65,6 +75,12 @@ export function createFacade(call, output, options={}) {
       if(!state?.observationDeferred&&state?.target===name&&Array.isArray(state.elements))recent={result:r,time:Date.now()};
     };
     const observe=async()=>{const saved=recent;recent=null;return saved&&Date.now()-saved.time<=100?saved.result:await call('get_ax_state',{app:name});};
+    const observationArgs=opt=>{
+      const args={app:name};
+      if(opt.maxRecords!==undefined){if(!Number.isInteger(opt.maxRecords)||opt.maxRecords<100||opt.maxRecords>10000)throw Error('maxRecords must be an integer from 100 to 10000');args.max_records=opt.maxRecords;}
+      if(opt.timeBudgetMs!==undefined){if(!Number.isInteger(opt.timeBudgetMs)||opt.timeBudgetMs<500||opt.timeBudgetMs>30000)throw Error('timeBudgetMs must be an integer from 500 to 30000');args.ax_time_budget_ms=opt.timeBudgetMs;}
+      return args;
+    };
     const app={
       getDialog:async(opt={})=>{
         if(!opt||typeof opt!=='object'||Array.isArray(opt)||Object.keys(opt).some(k=>!['title','timeout_ms'].includes(k))||typeof opt.title!=='string'||!opt.title)throw Error('getDialog requires an exact nonempty title');
@@ -78,14 +94,14 @@ export function createFacade(call, output, options={}) {
           await new Promise(resolve=>setTimeout(resolve,Math.min(300,timeout-(Date.now()-start))));
         }
       },
-      getAXState:async(opt={})=>ax(await observe(),name,opt),
+      getAXState:async(opt={})=>{const args=observationArgs(opt);if(args.max_records!==undefined||args.ax_time_budget_ms!==undefined)recent=null;return ax(args.max_records!==undefined||args.ax_time_budget_ms!==undefined?await call('get_ax_state',args):await observe(),name,opt);},
       getScreenshot:async(opt={})=>{recent=null;diffs.delete(name);return image(await call('get_screenshot',{app:name}),opt);},
-      getAXStateAndScreenshot:async(opt={})=>{recent=null;const r=await call('get_app_state',{app:name});const state=ax(r,name,opt);const has=r.content.some(x=>x.type==='image');return {state,...(has?{screenshot:image(r,opt)}:{})};},
+      getAXStateAndScreenshot:async(opt={})=>{recent=null;const r=await call('get_app_state',observationArgs(opt));const state=ax(r,name,opt);const has=r.content.some(x=>x.type==='image');return {state,...(has?{screenshot:image(r,opt)}:{})};},
       click:async(target,opt={})=>{
         const args=targetArgs(target);const button={l:'left',r:'right',m:'middle'}[opt.mouseButton]??opt.mouseButton??'left';
         if(!['left','right','middle'].includes(button))throw Error('Invalid mouseButton');
         const count=opt.clickCount??1;if(!Number.isInteger(count)||count<1||count>3)throw Error('clickCount must be 1–3');
-        await act('click',{...args,mouse_button:button,click_count:count,...(args.element_index&&button==='left'&&count===1?{element_click_mode:'pointer'}:{})});
+        await act('click',{...args,mouse_button:button,click_count:count,...(args.element_index&&button==='left'&&count===1?{element_click_mode:'auto'}:{})});
       },
       drag:async(from,to)=>{const a=targetArgs(from),z=targetArgs(to);if(a.x===undefined||z.x===undefined)throw Error('drag needs two points');await act('drag',{from_x:a.x,from_y:a.y,to_x:z.x,to_y:z.y});},
       scroll:async(target,direction,pages=1)=>{direction={u:'up',d:'down',l:'left',r:'right'}[direction]??direction;if(!['up','down','left','right'].includes(direction)||!Number.isFinite(pages)||pages<=0)throw Error('Invalid scroll direction/pages');await act('scroll',{...targetArgs(target),direction,pages});},

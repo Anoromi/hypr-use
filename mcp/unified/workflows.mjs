@@ -51,18 +51,34 @@ function select(state,target,purpose){
  if(found.length!==1)throw Error(`Expected one element named ${JSON.stringify(target.name)}, found ${found.length}; inspect AX and supply a role if needed`);
  return found[0];
 }
-function choiceOption(state,choice,allowUnexposed=false){
- const control=select(state,choice,'choice'),path=control.runtimeId;
- if(control.value===choice.option)return {control,option:null,selected:true};
+function choiceControl(state,choice,runtimeId){
+ if(!Array.isArray(runtimeId)||!runtimeId.length)return select(state,choice,'choice');
+ const found=(state.elements??[]).filter(e=>e.controlType==='combo box'&&Array.isArray(e.runtimeId)&&e.runtimeId.length===runtimeId.length&&runtimeId.every((v,i)=>e.runtimeId[i]===v));
+ if(found.length!==1)throw Error(`Expected one bound combo box for ${JSON.stringify(choice.name)}, found ${found.length}; inspect AX before retrying`);
+ return found[0];
+}
+function choiceOption(state,choice,allowUnexposed=false,runtimeId){
+ const control=choiceControl(state,choice,runtimeId),path=control.runtimeId;
+ if(control.value===choice.option)return {control,option:null,selected:true,committed:true};
  if(!Array.isArray(path)||!path.length)throw Error('Combo box has no AX ancestry; inspect its options');
  const options=(state.elements??[]).filter(e=>Array.isArray(e.runtimeId)&&e.runtimeId.length>path.length&&path.every((v,i)=>e.runtimeId[i]===v)&&['menu item','list item','radio button'].includes(e.controlType));
- const matches=options.filter(e=>e.name===choice.option);
- if(!options.length&&allowUnexposed)return {control,option:null,selected:false,unexposed:true};
+ const descendants=option=>(state.elements??[]).filter(e=>Array.isArray(e.runtimeId)&&e.runtimeId.length>option.runtimeId.length&&option.runtimeId.every((v,i)=>e.runtimeId[i]===v));
+ const matches=options.filter(e=>e.name===choice.option||descendants(e).some(child=>child.name===choice.option));
+ if(!options.length&&allowUnexposed)return {control,option:null,selected:false,committed:false,unexposed:true};
  if(matches.length!==1)throw Error(`Expected one exposed option ${JSON.stringify(choice.option)} under ${JSON.stringify(choice.name)}, found ${matches.length}; open the control and inspect AX if necessary`);
- const option=matches[0],selected=(option.states??[]).includes('selected');
+ const option=matches[0],selected=(option.states??[]).includes('selected')||descendants(option).some(e=>(e.states??[]).includes('selected'));
  const action=(option.actions??[]).includes('select')?'select':String(option.className??'').toLowerCase()==='gtk'&&(option.actions??[]).includes('click')?'click':null;
- if(!selected&&!action)throw Error('Option has no supported selection action; inspect available actions');
- return {control,option,selected,action};
+ let navigation=null;
+ if(!action){
+  const current=options.findIndex(e=>(e.states??[]).includes('selected')||descendants(e).some(child=>(child.states??[]).includes('selected'))),target=options.indexOf(option);
+  if(current<0)throw Error('Option rows have no selected item or supported action; inspect available states and actions');
+  const delta=target-current,key=delta<0?'Up':'Down';navigation=[...Array(Math.abs(delta)).fill(key),'Return'].join(' ');
+ }
+ return {control,option,selected,committed:false,action,navigation};
+}
+function choiceMatches(found,choice){
+ const value=found.control.value;
+ return value!==null&&value!==undefined&&String(value).trim()!==''?value===choice.option:found.selected;
 }
 export function createWorkflows(app,read,emit,showState){
  async function run(name,args){
@@ -115,21 +131,21 @@ export function createWorkflows(app,read,emit,showState){
     await step('verify complete date',async()=>{const actual=segments();for(const k of Object.keys(values))if(!matches(actual[k],values[k]))throw Error('Complete date does not match request');});
     if(args.submit){const e=select(state,args.submit);await step('submit date',()=>app.click(e.index));}
    }else if(name==='select_options'){
-    await refresh();const controls=new Set();
-    for(const c of args.choices){const {control}=choiceOption(state,c,true);if(controls.has(control.index))throw Error('Each combo box must appear only once');controls.add(control.index);}
+    await refresh();const controls=new Set(),bindings=new Map();
+    for(const c of args.choices){const {control}=choiceOption(state,c,true);if(controls.has(control.index))throw Error('Each combo box must appear only once');controls.add(control.index);bindings.set(c,Array.isArray(control.runtimeId)?[...control.runtimeId]:undefined);}
     if(args.submit)select(state,args.submit);
     for(const c of args.choices){
-     let found=choiceOption(state,c,true);
+     let found=choiceOption(state,c,true,bindings.get(c));
      if(found.unexposed){
       await step(`open ${c.name}`,()=>app.click(found.control.index));
-      await step(`inspect ${c.name} options`,refresh);found=choiceOption(state,c);
+      await step(`inspect ${c.name} options`,refresh);found=choiceOption(state,c,false,bindings.get(c));
      }
-     const {option,selected,action}=found;
-     if(selected){steps.push({step:`keep ${c.name}`,status:'unchanged',ms:0});continue;}
-     await step(`select ${c.option} in ${c.name}`,()=>app.performSecondaryAction(option.index,action));
-     await step(`verify ${c.name}`,async()=>{if(!choiceOption(await refresh(),c,true).selected)throw Error('Option selection does not match the request');});
+     const {option,action,navigation}=found;
+     if(choiceMatches(found,c)){steps.push({step:`keep ${c.name}`,status:'unchanged',ms:0});continue;}
+     await step(`select ${c.option} in ${c.name}`,()=>action?app.performSecondaryAction(option.index,action):app.pressKey(navigation));
+     await step(`verify ${c.name}`,async()=>{if(!choiceMatches(choiceOption(await refresh(),c,true,bindings.get(c)),c))throw Error('Option selection does not match the request');});
     }
-    await step('verify final choices',async()=>{for(const c of args.choices)if(!choiceOption(state,c,true).selected)throw Error(`Selection in ${JSON.stringify(c.name)} changed after a later input`);});
+    await step('verify final choices',async()=>{for(const c of args.choices)if(!choiceMatches(choiceOption(state,c,true,bindings.get(c)),c))throw Error(`Selection in ${JSON.stringify(c.name)} changed after a later input`);});
     if(args.submit){const e=select(state,args.submit);await step('submit choices',()=>app.click(e.index));}
    }else if(name==='fill_form'){
     // Validate selectors before the first mutation, then resolve afresh per field.

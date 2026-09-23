@@ -1,0 +1,166 @@
+diff --git a/mcp/hypr-agent-portal-mcp.py b/mcp/hypr-agent-portal-mcp.py
+index 6a4a434..2681bda 100755
+--- a/mcp/hypr-agent-portal-mcp.py
++++ b/mcp/hypr-agent-portal-mcp.py
+@@ -509,13 +509,21 @@ def tool_definitions() -> list[dict[str, Any]]:
+             "name": "get_app_state",
+             "description": "Get a target app/window screenshot, accessibility tree, and uiHints. Call this before action tools, then use element_index or screenshot/window-relative coordinates. uiHints separates AT-SPI menu entries from tab/ribbon/toolbar controls; do not substitute a same-named menu for a requested tab.",
+             "annotations": READ_ONLY_ANNOTATIONS,
+-            "inputSchema": object_schema({"app": app}, ["app"]),
++            "inputSchema": object_schema({
++                "app": app,
++                "max_records": {"type": "integer", "minimum": 100, "maximum": 10000, "default": 500, "description": "Bounded AX record limit. Increase explicitly for large virtualized or document trees."},
++                "ax_time_budget_ms": {"type": "integer", "minimum": 500, "maximum": 30000, "default": 4500, "description": "Bounded AT-SPI extraction time budget in milliseconds."},
++            }, ["app"]),
+         },
+         {
+             "name": "read_app_state",
+             "description": "Compatibility alias for get_app_state.",
+             "annotations": READ_ONLY_ANNOTATIONS,
+-            "inputSchema": object_schema({"app": app}, ["app"]),
++            "inputSchema": object_schema({
++                "app": app,
++                "max_records": {"type": "integer", "minimum": 100, "maximum": 10000, "default": 500},
++                "ax_time_budget_ms": {"type": "integer", "minimum": 500, "maximum": 30000, "default": 4500},
++            }, ["app"]),
+         },
+         {
+             "name": "screenshot",
+@@ -3254,7 +3262,7 @@ def atspi_record_for(
+     role = atspi_role(node)
+     state_set = atspi_safe(node.get_state_set)
+     states = []
+-    for name in ("FOCUSED", "CHECKED", "SELECTED", "EXPANDED", "ENABLED", "SHOWING", "VISIBLE", "ACTIVE", "INDETERMINATE"):
++    for name in ("FOCUSED", "CHECKED", "PRESSED", "SELECTED", "EXPANDED", "ENABLED", "SHOWING", "VISIBLE", "ACTIVE", "INDETERMINATE"):
+         state = getattr(_ATSPI.StateType, name, None)
+         if state is not None and state_set is not None and atspi_safe(lambda: state_set.contains(state), False):
+             states.append(name.lower())
+@@ -3276,7 +3284,7 @@ def atspi_record_for(
+         "actions": atspi_action_names(node),
+         "focused": "focused" in states,
+         "states": states,
+-        **({"checked": None if "indeterminate" in states else "checked" in states} if normalize(role) in {"check box", "check menu item", "toggle button", "radio button"} else {}),
++        **({"checked": None if "indeterminate" in states else "checked" in states or (normalize(role) == "toggle button" and "pressed" in states)} if normalize(role) in {"check box", "check menu item", "toggle button", "radio button"} else {}),
+         "editable": atspi_node_is_editable(node),
+         "supportsEditableText": bool(atspi_safe(node.is_editable_text, False)) and bool(atspi_safe(node.is_text, False)),
+         "supportsValue": bool(atspi_safe(node.is_value, False)),
+@@ -3284,11 +3292,11 @@ def atspi_record_for(
+     }
+ 
+ 
+-def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any], hypr_window: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str], dict[str, float] | None, str]:
++def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any], hypr_window: dict[str, Any], *, max_records: int = 500, time_budget_ms: int = 4500) -> tuple[list[dict[str, Any]], list[str], dict[str, float] | None, str]:
+     records: list[dict[str, Any]] = []
+     lines: list[str] = []
+     atspi_window_bounds = atspi_extents(root)
+-    deadline = time.monotonic() + 4.5
++    deadline = time.monotonic() + time_budget_ms / 1000.0
+     truncated_reason = ""
+     omitted_empty_cells = 0
+     omitted_grid_ranges = []
+@@ -3299,7 +3307,7 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+             truncated_reason = reason
+ 
+     def budget_exhausted() -> bool:
+-        if len(records) >= 500:
++        if len(records) >= max_records:
+             mark_truncated("record-limit")
+             return True
+         if time.monotonic() >= deadline:
+@@ -3308,8 +3316,8 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+         return False
+ 
+     def visit(node: Any, depth: int, path: list[int], bounds_hint: dict[str, float] | None = None, document_allowed: bool = False, coordinate_scale: float | None = None) -> None:
+-        if node is None or len(records) >= 500 or depth > 64:
+-            if len(records) >= 500:
++        if node is None or len(records) >= max_records or depth > 64:
++            if len(records) >= max_records:
+                 mark_truncated("record-limit")
+             return
+         if budget_exhausted():
+@@ -3363,7 +3371,7 @@ def atspi_render_tree(root: Any, root_path: list[int], screenshot: dict[str, Any
+         if coordinate_scale is None and visit_table_cells(node, depth, path, bounds):
+             return
+ 
+-        child_count = min(atspi_child_count(node), 512)
++        child_count = min(atspi_child_count(node), max_records)
+         for child_index in range(child_count):
+             if budget_exhausted():
+                 return
+@@ -3624,7 +3632,7 @@ def atspi_set_element_value(snapshot: dict[str, Any], element: dict[str, Any], v
+     return atspi_set_node_value(node, value)
+ 
+ 
+-def atspi_snapshot(window: dict[str, Any], screenshot: dict[str, Any]) -> dict[str, Any]:
++def atspi_snapshot(window: dict[str, Any], screenshot: dict[str, Any], *, max_records: int = 500, time_budget_ms: int = 4500) -> dict[str, Any]:
+     init_error = atspi_init_error()
+     if init_error is not None:
+         return {"status": "unavailable", "error": init_error, "elements": [], "treeLines": [], "windowBounds": None}
+@@ -3632,7 +3640,7 @@ def atspi_snapshot(window: dict[str, Any], screenshot: dict[str, Any]) -> dict[s
+     if not resolved:
+         return {"status": "not-found", "error": "No matching AT-SPI app/window for this Hyprland client.", "elements": [], "treeLines": [], "windowBounds": None}
+     app, window_index, window_node = resolved
+-    elements, tree_lines, bounds, truncated_reason = atspi_render_tree(window_node, [window_index], screenshot, window)
++    elements, tree_lines, bounds, truncated_reason = atspi_render_tree(window_node, [window_index], screenshot, window, max_records=max_records, time_budget_ms=time_budget_ms)
+     return {
+         "status": "ok",
+         "resolutionMode": "observation-compatible",
+@@ -3732,8 +3740,8 @@ def run_atspi_child(mode: str, payload: dict[str, Any], *, timeout: float = 5.0)
+     return result if isinstance(result, dict) else {"status": "error", "error": "AT-SPI child returned a non-object result.", "ok": False}
+ 
+ 
+-def atspi_snapshot_isolated(window: dict[str, Any], screenshot: dict[str, Any]) -> dict[str, Any]:
+-    result = run_atspi_child("--atspi-snapshot", {"window": window, "screenshot": screenshot}, timeout=6.0)
++def atspi_snapshot_isolated(window: dict[str, Any], screenshot: dict[str, Any], *, max_records: int = 500, time_budget_ms: int = 4500) -> dict[str, Any]:
++    result = run_atspi_child("--atspi-snapshot", {"window": window, "screenshot": screenshot, "maxRecords": max_records, "timeBudgetMs": time_budget_ms}, timeout=max(6.0, time_budget_ms / 1000.0 + 2.0))
+     if result.get("status") == "ok" and isinstance(result.get("elements"), list) and isinstance(result.get("treeLines"), list):
+         return result
+     status = str(result.get("status") or "error")
+@@ -4140,7 +4148,9 @@ def atspi_child_main(mode: str) -> int:
+         elif mode == "--atspi-snapshot":
+             window = payload.get("window") if isinstance(payload.get("window"), dict) else {}
+             screenshot = payload.get("screenshot") if isinstance(payload.get("screenshot"), dict) else {}
+-            result = atspi_snapshot(window, screenshot)
++            max_records = max(100, min(10000, int(payload.get("maxRecords") or 500)))
++            time_budget_ms = max(500, min(30000, int(payload.get("timeBudgetMs") or 4500)))
++            result = atspi_snapshot(window, screenshot, max_records=max_records, time_budget_ms=time_budget_ms)
+         elif mode == "--atspi-action":
+             result = atspi_child_action_payload(payload)
+         else:
+@@ -4528,7 +4538,7 @@ def synthetic_elements(window: dict[str, Any], screenshot: dict[str, Any]) -> tu
+     return [element], [line]
+ 
+ 
+-def build_app_snapshot(app_query: str) -> dict[str, Any]:
++def build_app_snapshot(app_query: str, *, ax_max_records: int = 500, ax_time_budget_ms: int = 4500) -> dict[str, Any]:
+     window = dict(resolve_hypr_window(app_query))
+     captured_starttime = process_start_time(window.get("pid"))
+     if captured_starttime:
+@@ -4560,7 +4570,7 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
+         }
+     )
+     include_ax = globals().get("SNAPSHOT_INCLUDE_AX", True)
+-    atspi = atspi_snapshot_isolated(window, screenshot) if include_ax else atspi_empty_snapshot("not-requested", "Screenshot-only observation")
++    atspi = atspi_snapshot_isolated(window, screenshot, max_records=ax_max_records, time_budget_ms=ax_time_budget_ms) if include_ax else atspi_empty_snapshot("not-requested", "Screenshot-only observation")
+     root_identity = atspi.get("rootIdentity")
+     if atspi.get("status") == "ok" and isinstance(root_identity, dict):
+         # This exact capture-time root is mandatory for every AT-SPI mutation.
+@@ -4594,6 +4604,7 @@ def build_app_snapshot(app_query: str) -> dict[str, Any]:
+         "snapshotId": screenshot_id,
+         "capturedAt": captured_at,
+         "windowStartTime": captured_starttime,
++        "axScan": {"maxRecords": ax_max_records, "timeBudgetMs": ax_time_budget_ms},
+         "treeLines": tree_lines,
+         "elements": elements,
+         "accessibility": {k: v for k, v in atspi.items() if k not in {"elements", "treeLines"}},
+@@ -5037,7 +5048,9 @@ def tool_get_app_state(args: dict[str, Any]) -> dict[str, Any]:
+     app = args.get("app")
+     if not isinstance(app, str) or not app:
+         raise RuntimeError("Missing required argument: app")
+-    return mcp_snapshot_result(build_app_snapshot(app))
++    max_records = int(args.get("max_records") or 500)
++    time_budget_ms = int(args.get("ax_time_budget_ms") or 4500)
++    return mcp_snapshot_result(build_app_snapshot(app, ax_max_records=max_records, ax_time_budget_ms=time_budget_ms))
+ 
+ 
+ def validate_visual_request_limits(args: dict[str, Any]) -> None:

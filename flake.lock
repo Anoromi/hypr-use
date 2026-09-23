@@ -1,0 +1,45 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1790046670,
+        "narHash": "sha256-MYiI+CzL0tuWgRPjGsKCDHqYs2T3OzMlMQWOYWG0qso=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "6774f7bc253789b113a4f39285dc0fa100abeacc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "portal-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788153466,
+        "narHash": "sha256-+SnQHOYyC55YvWtIcjW7PehNl20TcKsqOtKPibmCkH0=",
+        "owner": "gfhdhytghd",
+        "repo": "Hypr-Agent-Portal",
+        "rev": "bc0b100719dafb8bdf893ace4d3be1d78b1a0876",
+        "type": "github"
+      },
+      "original": {
+        "owner": "gfhdhytghd",
+        "repo": "Hypr-Agent-Portal",
+        "rev": "bc0b100719dafb8bdf893ace4d3be1d78b1a0876",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "portal-src": "portal-src"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

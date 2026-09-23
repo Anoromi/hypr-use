@@ -136,6 +136,40 @@ test('native closed combo opens once and verifies its value after the popup clos
  assert.deepEqual(calls,[['open',1],['action',2,'click'],['observe']]);calls.length=0;
  await w.selectOptions({choices:[{name:'Country',option:'Japan'}]});assert.deepEqual(calls,[['observe']]);
 });
+test('selection verifies a combo whose accessible name changes with its value',async()=>{
+ const calls=[];const elements=[
+  {index:1,name:'Country Germany',controlType:'combo box',runtimeId:[0],value:'Germany'},
+  {index:2,name:'Japan',controlType:'menu item',runtimeId:[0,1],actions:['select'],states:[]},
+ ];
+ const app={performSecondaryAction:async(i,a)=>{calls.push(['action',i,a]);elements[0].name='Country Japan';elements[0].value='Japan';elements.pop();},getAXState:async()=>calls.push(['observe'])};
+ const w=createWorkflows(app,async()=>({elements}),()=>{});
+ await w.selectOptions({choices:[{name:'Country Germany',option:'Japan'}]});
+ assert.deepEqual(calls,[['action',2,'select'],['observe']]);
+});
+test('renamed combo still fails when the selected value is wrong',async()=>{
+ const calls=[];const elements=[
+  {index:1,name:'Country Germany',controlType:'combo box',runtimeId:[0],value:'Germany'},
+  {index:2,name:'Japan',controlType:'menu item',runtimeId:[0,1],actions:['select'],states:[]},
+  {index:3,name:'Save'},
+ ];
+ const app={performSecondaryAction:async()=>{elements[0].name='Country France';elements[0].value='France';elements.splice(1,1);},click:async i=>calls.push(['click',i])};
+ const w=createWorkflows(app,async()=>({elements}),()=>{});
+ await assert.rejects(w.selectOptions({choices:[{name:'Country Germany',option:'Japan'}],submit:{name:'Save'}}),/does not match/);
+ assert.deepEqual(calls,[]);
+});
+test('nameless GTK list rows use their label text and keyboard navigation',async()=>{
+ const calls=[];let elements=[
+  {index:1,name:'Country',controlType:'combo box',runtimeId:[0],value:'Japan'},
+  {index:2,name:'',controlType:'list item',runtimeId:[0,1],actions:['listitem.scroll-to'],states:['selected']},
+  {index:3,name:'Japan',controlType:'label',runtimeId:[0,1,0],states:[]},
+  {index:4,name:'',controlType:'list item',runtimeId:[0,2],actions:['listitem.scroll-to'],states:[]},
+  {index:5,name:'Germany',controlType:'label',runtimeId:[0,2,0],states:[]},
+ ];
+ const app={click:async()=>assert.fail('popup is already open'),performSecondaryAction:async()=>assert.fail('row has no selection action'),pressKey:async keys=>{calls.push(['key',keys]);elements[0].value='Germany';elements.splice(1);},getAXState:async()=>calls.push(['observe'])};
+ const w=createWorkflows(app,async()=>({elements}),()=>{});
+ await w.selectOptions({choices:[{name:'Country',option:'Germany'}]});
+ assert.deepEqual(calls,[['key','Down Return'],['observe']]);
+});
 test('unexposed missing option stops after opening and reports partial progress',async()=>{
  const out=[],calls=[];const app={click:async()=>calls.push('open')};
  const w=createWorkflows(app,async()=>({elements:[{index:1,name:'Country',controlType:'combo box',runtimeId:[0],value:'Germany'}]}),v=>out.push(v));

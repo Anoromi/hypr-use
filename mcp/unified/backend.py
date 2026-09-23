@@ -5,6 +5,8 @@ root=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(root/'mcp'))
 from server import load_backend
 b=load_backend();b.ensure_session_environment()
+from runtime_fixes import install as install_runtime_fixes
+install_runtime_fixes(b)
 if os.environ.get('HYPR_USE_FAST_CONTROL','1') != '0':
  from control import install
  control=install(b)

@@ -1,0 +1,42 @@
+[
+  {
+    "id": "real-nautilus-folder",
+    "tier": "T2",
+    "app": "org.gnome.Nautilus",
+    "requires": ["nautilus"],
+    "isolation": "fresh XDG_CONFIG_HOME and temporary file:// workspace",
+    "prompt": "Create a folder named Archive, rename it Filed, then move note.txt into it.",
+    "oracle": ["launch isolated file URI", "create folder", "rename folder", "move note.txt"],
+    "grader": "temporary workspace contains Filed/note.txt and no Archive"
+  },
+  {
+    "id": "real-zen-local-form",
+    "tier": "T2",
+    "app": "zen",
+    "requires": ["zen-beta|zen-browser|zen", "python3"],
+    "isolation": "fresh browser profile and loopback-only seeded HTTP server",
+    "prompt": "Open the local form, enter Aster, submit, and report its receipt number.",
+    "oracle": ["launch isolated profile", "navigate loopback URL", "fill form", "submit", "read receipt"],
+    "grader": "server state records Aster and final answer contains seeded receipt"
+  },
+  {
+    "id": "real-terminal-output",
+    "tier": "T2",
+    "app": "kitty",
+    "requires": ["kitty|ghostty"],
+    "isolation": "fresh HOME and shell without rc files",
+    "prompt": "Run printf 'BENCH-417\\n' and report the output.",
+    "oracle": ["launch isolated terminal", "type command", "press Enter", "read output"],
+    "grader": "terminal transcript and final answer contain BENCH-417"
+  },
+  {
+    "id": "real-calculator",
+    "tier": "T2",
+    "app": "org.gnome.Calculator",
+    "requires": ["gnome-calculator"],
+    "isolation": "fresh dconf and XDG directories",
+    "prompt": "Calculate (73 * 19) + 8 and report the result.",
+    "oracle": ["launch isolated calculator", "enter expression", "evaluate", "read result"],
+    "grader": "calculator display and final answer equal 1395"
+  }
+]

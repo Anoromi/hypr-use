@@ -1,8 +1,8 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {spawn} from 'node:child_process';import readline from 'node:readline';import {createFacade} from './facade.mjs';
-test('AX clicks use pointer input and key sequences preserve order',async()=>{
+test('AX clicks use guarded semantic input and key sequences preserve order',async()=>{
  const calls=[];const {cua}=createFacade(async(n,a)=>{calls.push([n,a]);return {content:[],structuredContent:{target:'owned'}};},()=>{});
  const app=await cua.getApp('Editor');await app.click(3);
- assert.equal(calls.at(-1)[1].element_click_mode,'pointer');
+ assert.equal(calls.at(-1)[1].element_click_mode,'auto');
  await app.pressKey('  CMD+a   1 0 Return  ');
  assert.equal(calls.at(-1)[1].key,'ctrl+a 1 0 Return');
  await app.pressKey('ArrowDown SHIFT+ArrowUp ctrl+ArrowLeft CMD+ArrowRight');
@@ -10,11 +10,27 @@ test('AX clicks use pointer input and key sequences preserve order',async()=>{
  const count=calls.length;await assert.rejects(app.pressKey('  '),/empty/);assert.equal(calls.length,count);
 });
 test('facade bindings, numeric targets, diff output and images',async()=>{const calls=[],out=[];const response={content:[{type:'text',text:'1: Button\n2: Entry'},{type:'image',mimeType:'image/png',data:'YQ=='}],structuredContent:{target:'address:owned'}};const {cua}=createFacade(async(n,a)=>{calls.push([n,a]);return response;},b=>out.push(b));const app=await cua.getApp('Editor');assert.equal(out.length,1);await app.click(1);assert.equal(calls.at(-1)[1].element_index,'1');assert.equal(calls.at(-1)[1].app,'address:owned');await app.selectText(2,'x',{selectionType:'cursor_after'});assert.equal(calls.at(-1)[1].selection,'cursor_after');assert.equal(await app.getAXState(),'Accessibility state unchanged.');assert.equal((await app.getScreenshot({emit:false}))[0],97);assert.equal(out.length,2);await assert.rejects(app.click([1]),/target/);await assert.rejects(app.paste('x',{format:'html'}),/Rich paste/);});
+test('binding retries a partial window title with a qualified live target',async()=>{
+ const calls=[];const {cua}=createFacade(async(name,args)=>{
+  calls.push([name,args]);
+  if(name==='get_ax_state'&&args.app==='Target')throw Error('appNotFound');
+  if(name==='list_apps')return {content:[],structuredContent:{windows:[{title:'Target [old]',target:'address:old',processStartTime:4},{title:'Target [task]',target:'address:new',processStartTime:9}]}};
+  return {content:[],structuredContent:{target:args.app,treeLines:[],elements:[],accessibility:{status:'ok'}}};
+ },()=>{});
+ await cua.getApp('Target');assert.deepEqual(calls.map(([name,args])=>[name,args.app]),[['get_ax_state','Target'],['list_apps',undefined],['get_ax_state','address:new']]);
+});
 test('stdio MCP persistence, reset, validation, timeout',async()=>{const child=spawn(process.execPath,[new URL('./server.mjs',import.meta.url).pathname],{stdio:['pipe','pipe','pipe']});let id=0;const pending=new Map();readline.createInterface({input:child.stdout}).on('line',s=>{const r=JSON.parse(s);pending.get(r.id)?.(r);});const rpc=(method,params)=>new Promise(resolve=>{pending.set(++id,resolve);child.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method,params})+'\n');});const call=(name,a)=>rpc('tools/call',{name,arguments:a});try{assert.equal((await rpc('tools/list',{})).result.tools.length,9);assert.equal((await call('js',{code:'let a=5;'})).result.isError,false);const r=await call('js',{code:'let a=6; nodeRepl.write(a);'});assert.equal(r.result.content[0].text,'6');const timed=await call('js',{code:"nodeRepl.write('partial output'); await new Promise(()=>{});",timeout_ms:100});assert.equal(timed.result.isError,true);assert.equal(timed.result.content[0].text,'partial output');assert.match(timed.result.content.at(-1).text,/timed out after 100 ms/);await call('js_reset',{});assert.equal((await call('js',{code:'nodeRepl.write(typeof a);'})).result.content[0].text,'undefined');assert.equal((await call('js',{code:'',permission:'full'})).result.isError,true);}finally{child.stdin.end();}});
+test('stdio runtime provides bounded timers and top-level early return',async()=>{const child=spawn(process.execPath,[new URL('./server.mjs',import.meta.url).pathname],{stdio:['pipe','pipe','pipe']});let id=0;const pending=new Map();readline.createInterface({input:child.stdout}).on('line',s=>{const r=JSON.parse(s);pending.get(r.id)?.(r);});const call=(code,timeout_ms=1000)=>new Promise(resolve=>{pending.set(++id,resolve);child.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method:'tools/call',params:{name:'js',arguments:{code,timeout_ms}}})+'\n');});try{let r=await call("await new Promise(resolve=>setTimeout(resolve,10));nodeRepl.write('done');");assert.equal(r.result.content[0].text,'done');r=await call("nodeRepl.write('before');return;nodeRepl.write('after');");assert.equal(r.result.isError,false);assert.deepEqual(r.result.content.map(x=>x.text),['before']);r=await call("setTimeout(()=>{},30001);");assert.equal(r.result.isError,true);assert.match(r.result.content.at(-1).text,/30000/);}finally{child.stdin.end();}});
 
 test('post-action AX reuse stays separate from explicit screenshots',async()=>{
  const calls=[];let state='before';const {cua}=createFacade(async(name,args)=>{calls.push(name);if(name==='click')state='after';return {content:[{type:'text',text:state},{type:'image',mimeType:'image/png',data:'YQ=='}],structuredContent:{target:'address:owned',elements:[]}};},()=>{});
  const app=await cua.getApp('Editor');assert.equal(calls[0],'get_ax_state');await app.click(1);const count=calls.length;assert.match(await app.getAXState(),/after/);assert.equal(calls.length,count);await app.getScreenshot({emit:false});assert.equal(calls.at(-1),'get_screenshot');await app.getAXState();assert.equal(calls.at(-1),'get_ax_state');
+});
+test('large AX observations pass bounded extraction budgets and bypass cached state',async()=>{
+ const calls=[];const {cua}=createFacade(async(name,args)=>{calls.push([name,args]);return {content:[],structuredContent:{target:'owned',treeLines:[],elements:[],accessibility:{status:'ok'}}};},()=>{});
+ const app=await cua.getApp('Editor');await app.getAXState({maxRecords:1500,timeBudgetMs:12000,emit:false});
+ assert.deepEqual(calls.at(-1),['get_ax_state',{app:'owned',max_records:1500,ax_time_budget_ms:12000}]);
+ await assert.rejects(app.getAXState({maxRecords:99}),/100 to 10000/);await assert.rejects(app.getAXState({timeBudgetMs:30001}),/500 to 30000/);
 });
 
 test('deferred mutations require a real AX read and output avoids duplicate hints',async()=>{

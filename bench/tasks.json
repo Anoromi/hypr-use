@@ -1,0 +1,5392 @@
+[
+  {
+    "id": "t1-01-button",
+    "tier": "T1",
+    "app": "forms-app",
+    "seed": "t1-01-button",
+    "prompt": "Click Complete.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "completed",
+          "value": true,
+          "name": "completed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Complete"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t1-02-type",
+    "tier": "T1",
+    "app": "forms-app",
+    "seed": "t1-02-type",
+    "prompt": "Enter Akira in Name.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.name",
+          "value": "Akira",
+          "name": "fields.name"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Name"
+        },
+        "value": "Akira"
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t1-03-submit",
+    "tier": "T1",
+    "app": "forms-app",
+    "seed": "t1-03-submit",
+    "prompt": "Enter ready in Quick entry and submit that field with Enter.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "quick_entry",
+          "value": "ready"
+        },
+        {
+          "path": "events",
+          "op": "contains",
+          "value": "quick-submit"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Quick entry"
+        },
+        "value": "ready"
+      },
+      {
+        "tool": "press_key",
+        "app": "forms-app",
+        "key": "ENTER"
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t1-04-read",
+    "tier": "T1",
+    "app": "forms-app",
+    "seed": "t1-04-read",
+    "prompt": "Report the reference value shown in the window.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "$oracle_transcript",
+          "op": "contains",
+          "value": "REF-731",
+          "name": "observed reference"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_app_state",
+        "app": "forms-app"
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t1-05-dialog-close",
+    "tier": "T1",
+    "app": "dialog-storm",
+    "seed": "t1-05-dialog-close",
+    "prompt": "Close the open notice dialog.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "notice_closed",
+          "value": true,
+          "name": "notice_closed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Notice"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Close notice"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t1-06-dialog-confirm",
+    "tier": "T1",
+    "app": "dialog-storm",
+    "seed": "t1-06-dialog-confirm",
+    "prompt": "Confirm the open approval dialog.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "approved",
+          "value": true,
+          "name": "approved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Approve"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t1-07-editor-type",
+    "tier": "T1",
+    "app": "editor-app",
+    "seed": "t1-07-editor-type",
+    "prompt": "Type lunar into the editor.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "content",
+          "value": "lunar",
+          "name": "content"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "lunar"
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t1-08-editor-save",
+    "tier": "T1",
+    "app": "editor-app",
+    "seed": "t1-08-editor-save",
+    "prompt": "Save the open document.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "saved",
+          "value": true,
+          "name": "saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t1-09-list-select",
+    "tier": "T1",
+    "app": "list-app",
+    "seed": "t1-09-list-select",
+    "prompt": "Select Item 7.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "selected",
+          "value": "Item 7",
+          "name": "selected"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 7"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t1-10-list-filter",
+    "tier": "T1",
+    "app": "list-app",
+    "seed": "t1-10-list-filter",
+    "prompt": "Enter north in Filter.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "filter",
+          "value": "north",
+          "name": "filter"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "list-app",
+        "target": {
+          "name": "Filter"
+        },
+        "value": "north"
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t1-11-check",
+    "tier": "T1",
+    "app": "forms-app",
+    "seed": "t1-11-check",
+    "prompt": "Enable Newsletter.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.newsletter",
+          "value": true,
+          "name": "fields.newsletter"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Newsletter"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t1-12-dropdown",
+    "tier": "T1",
+    "app": "forms-app",
+    "seed": "t1-12-dropdown",
+    "prompt": "Choose Japan in Country.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.country",
+          "value": "Japan",
+          "name": "fields.country"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "select_options",
+        "app": "forms-app",
+        "choices": [
+          {
+            "name": "Germany",
+            "option": "Japan"
+          }
+        ]
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t1-13-next",
+    "tier": "T1",
+    "app": "forms-app",
+    "seed": "t1-13-next",
+    "prompt": "Go to the next form page.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "page",
+          "value": 2,
+          "name": "page"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Next"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t1-14-window",
+    "tier": "T1",
+    "app": "multi-window-app",
+    "seed": "t1-14-window",
+    "prompt": "Click Mark done in the Notes window.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "notes_done",
+          "value": true,
+          "name": "notes_done"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Mark done"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "multi-window-app"
+    ]
+  },
+  {
+    "id": "t1-15-launch",
+    "tier": "T1",
+    "app": "forms-app",
+    "seed": "t1-15-launch",
+    "prompt": "Launch the forms benchmark app.",
+    "max_steps": 3,
+    "budget_usd": 0.03,
+    "grader": {
+      "checks": [
+        {
+          "path": "launched",
+          "value": true,
+          "name": "launched"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_app_state",
+        "app": "forms-app"
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "ax"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-01",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-01",
+    "prompt": "Set Name to User 1, Email to user1@example.test, then save.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.name",
+          "value": "User 1",
+          "name": "fields.name"
+        },
+        {
+          "path": "fields.email",
+          "value": "user1@example.test",
+          "name": "fields.email"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Name"
+        },
+        "value": "User 1"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Email"
+        },
+        "value": "user1@example.test"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-02",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-02",
+    "prompt": "Select Germany, enable Newsletter and Archive, then save.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.country",
+          "value": "Germany",
+          "name": "fields.country"
+        },
+        {
+          "path": "fields.newsletter",
+          "value": true,
+          "name": "fields.newsletter"
+        },
+        {
+          "path": "fields.archive",
+          "value": true,
+          "name": "fields.archive"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "select_options",
+        "app": "forms-app",
+        "choices": [
+          {
+            "name": "Japan",
+            "option": "Germany"
+          }
+        ]
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Newsletter"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Archive"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-03",
+    "tier": "T2",
+    "app": "list-app",
+    "seed": "t2-03",
+    "prompt": "Enter the exact filter text 'Item 3', select Item 3, and report its Amount as 'Amount N'.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "filter",
+          "value": "Item 3",
+          "name": "filter"
+        },
+        {
+          "path": "selected",
+          "value": "Item 3",
+          "name": "selected"
+        },
+        {
+          "path": "$oracle_transcript",
+          "op": "regex",
+          "value": "Amount\\D+51\\b",
+          "name": "observed amount"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "list-app",
+        "target": {
+          "name": "Filter"
+        },
+        "value": "Item 3"
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 3"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "list-app"
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t2-04",
+    "tier": "T2",
+    "app": "editor-app",
+    "seed": "t2-04",
+    "prompt": "Replace the document with note 4 and save it.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "content",
+          "value": "note 4",
+          "name": "content"
+        },
+        {
+          "path": "saved_content",
+          "value": "note 4",
+          "name": "saved_content"
+        },
+        {
+          "path": "saved",
+          "value": true,
+          "name": "saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "note 4"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t2-05",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-05",
+    "prompt": "Set the due date to 2026-10-05 and save a draft.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.due_date",
+          "value": "2026-10-05",
+          "name": "fields.due_date"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Due date"
+        },
+        "value": "2026-10-05"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-06",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-06",
+    "prompt": "Set Name to User 6, Email to user6@example.test, then save.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.name",
+          "value": "User 6",
+          "name": "fields.name"
+        },
+        {
+          "path": "fields.email",
+          "value": "user6@example.test",
+          "name": "fields.email"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Name"
+        },
+        "value": "User 6"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Email"
+        },
+        "value": "user6@example.test"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-07",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-07",
+    "prompt": "Select Germany, enable Newsletter and Archive, then save.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.country",
+          "value": "Germany",
+          "name": "fields.country"
+        },
+        {
+          "path": "fields.newsletter",
+          "value": true,
+          "name": "fields.newsletter"
+        },
+        {
+          "path": "fields.archive",
+          "value": true,
+          "name": "fields.archive"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "select_options",
+        "app": "forms-app",
+        "choices": [
+          {
+            "name": "Japan",
+            "option": "Germany"
+          }
+        ]
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Newsletter"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Archive"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-08",
+    "tier": "T2",
+    "app": "list-app",
+    "seed": "t2-08",
+    "prompt": "Enter the exact filter text 'Item 8', select Item 8, and report its Amount as 'Amount N'.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "filter",
+          "value": "Item 8",
+          "name": "filter"
+        },
+        {
+          "path": "selected",
+          "value": "Item 8",
+          "name": "selected"
+        },
+        {
+          "path": "$oracle_transcript",
+          "op": "regex",
+          "value": "Amount\\D+136\\b",
+          "name": "observed amount"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "list-app",
+        "target": {
+          "name": "Filter"
+        },
+        "value": "Item 8"
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 8"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "list-app"
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t2-09",
+    "tier": "T2",
+    "app": "editor-app",
+    "seed": "t2-09",
+    "prompt": "Replace the document with note 9 and save it.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "content",
+          "value": "note 9",
+          "name": "content"
+        },
+        {
+          "path": "saved_content",
+          "value": "note 9",
+          "name": "saved_content"
+        },
+        {
+          "path": "saved",
+          "value": true,
+          "name": "saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "note 9"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t2-10",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-10",
+    "prompt": "Set the due date to 2026-10-10 and save a draft.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.due_date",
+          "value": "2026-10-10",
+          "name": "fields.due_date"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Due date"
+        },
+        "value": "2026-10-10"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-11",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-11",
+    "prompt": "Set Name to User 11, Email to user11@example.test, then save.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.name",
+          "value": "User 11",
+          "name": "fields.name"
+        },
+        {
+          "path": "fields.email",
+          "value": "user11@example.test",
+          "name": "fields.email"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Name"
+        },
+        "value": "User 11"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Email"
+        },
+        "value": "user11@example.test"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-12",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-12",
+    "prompt": "Select Germany, enable Newsletter and Archive, then save.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.country",
+          "value": "Germany",
+          "name": "fields.country"
+        },
+        {
+          "path": "fields.newsletter",
+          "value": true,
+          "name": "fields.newsletter"
+        },
+        {
+          "path": "fields.archive",
+          "value": true,
+          "name": "fields.archive"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "select_options",
+        "app": "forms-app",
+        "choices": [
+          {
+            "name": "Japan",
+            "option": "Germany"
+          }
+        ]
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Newsletter"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Archive"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-13",
+    "tier": "T2",
+    "app": "list-app",
+    "seed": "t2-13",
+    "prompt": "Enter the exact filter text 'Item 13', select Item 13, and report its Amount as 'Amount N'.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "filter",
+          "value": "Item 13",
+          "name": "filter"
+        },
+        {
+          "path": "selected",
+          "value": "Item 13",
+          "name": "selected"
+        },
+        {
+          "path": "$oracle_transcript",
+          "op": "regex",
+          "value": "Amount\\D+221\\b",
+          "name": "observed amount"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "list-app",
+        "target": {
+          "name": "Filter"
+        },
+        "value": "Item 13"
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 13"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "list-app"
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t2-14",
+    "tier": "T2",
+    "app": "editor-app",
+    "seed": "t2-14",
+    "prompt": "Replace the document with note 14 and save it.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "content",
+          "value": "note 14",
+          "name": "content"
+        },
+        {
+          "path": "saved_content",
+          "value": "note 14",
+          "name": "saved_content"
+        },
+        {
+          "path": "saved",
+          "value": true,
+          "name": "saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "note 14"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t2-15",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-15",
+    "prompt": "Set the due date to 2026-10-15 and save a draft.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.due_date",
+          "value": "2026-10-15",
+          "name": "fields.due_date"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Due date"
+        },
+        "value": "2026-10-15"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-16",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-16",
+    "prompt": "Set Name to User 16, Email to user16@example.test, then save.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.name",
+          "value": "User 16",
+          "name": "fields.name"
+        },
+        {
+          "path": "fields.email",
+          "value": "user16@example.test",
+          "name": "fields.email"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Name"
+        },
+        "value": "User 16"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Email"
+        },
+        "value": "user16@example.test"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-17",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-17",
+    "prompt": "Select Germany, enable Newsletter and Archive, then save.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.country",
+          "value": "Germany",
+          "name": "fields.country"
+        },
+        {
+          "path": "fields.newsletter",
+          "value": true,
+          "name": "fields.newsletter"
+        },
+        {
+          "path": "fields.archive",
+          "value": true,
+          "name": "fields.archive"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "select_options",
+        "app": "forms-app",
+        "choices": [
+          {
+            "name": "Japan",
+            "option": "Germany"
+          }
+        ]
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Newsletter"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Archive"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t2-18",
+    "tier": "T2",
+    "app": "list-app",
+    "seed": "t2-18",
+    "prompt": "Enter the exact filter text 'Item 18', select Item 18, and report its Amount as 'Amount N'.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "filter",
+          "value": "Item 18",
+          "name": "filter"
+        },
+        {
+          "path": "selected",
+          "value": "Item 18",
+          "name": "selected"
+        },
+        {
+          "path": "$oracle_transcript",
+          "op": "regex",
+          "value": "Amount\\D+306\\b",
+          "name": "observed amount"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "list-app",
+        "target": {
+          "name": "Filter"
+        },
+        "value": "Item 18"
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 18"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "list-app"
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t2-19",
+    "tier": "T2",
+    "app": "editor-app",
+    "seed": "t2-19",
+    "prompt": "Replace the document with note 19 and save it.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "content",
+          "value": "note 19",
+          "name": "content"
+        },
+        {
+          "path": "saved_content",
+          "value": "note 19",
+          "name": "saved_content"
+        },
+        {
+          "path": "saved",
+          "value": true,
+          "name": "saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "note 19"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t2-20",
+    "tier": "T2",
+    "app": "forms-app",
+    "seed": "t2-20",
+    "prompt": "Set the due date to 2026-10-20 and save a draft.",
+    "max_steps": 8,
+    "budget_usd": 0.08,
+    "grader": {
+      "checks": [
+        {
+          "path": "fields.due_date",
+          "value": "2026-10-20",
+          "name": "fields.due_date"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Due date"
+        },
+        "value": "2026-10-20"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "single-window"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t3-01",
+    "tier": "T3",
+    "app": "forms-app",
+    "seed": "t3-01",
+    "prompt": "Submit Name Person 1, Email person1@example.test, and Due date 2026-12-01. Advance the form, fix any visible validation error, and confirm submission.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "submitted",
+          "value": true,
+          "name": "submitted"
+        },
+        {
+          "path": "confirmed",
+          "value": true,
+          "name": "confirmed"
+        },
+        {
+          "path": "submission.name",
+          "value": "Person 1",
+          "name": "submission.name"
+        },
+        {
+          "path": "submission.email",
+          "value": "person1@example.test",
+          "name": "submission.email"
+        },
+        {
+          "path": "submission.due_date",
+          "value": "2026-12-01",
+          "name": "submission.due_date"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Name"
+        },
+        "value": "Person 1"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Email"
+        },
+        "value": "person1@example.test"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Next"
+        }
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Due date"
+        },
+        "value": "2026-12-01"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Submit"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t3-02",
+    "tier": "T3",
+    "app": "list-app",
+    "seed": "t3-02",
+    "prompt": "Sort Amount descending and record the top three rows.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "sort",
+          "value": "amount-desc",
+          "name": "sort"
+        },
+        {
+          "path": "top_recorded",
+          "value": true,
+          "name": "top_recorded"
+        },
+        {
+          "path": "top_three",
+          "value": [
+            999,
+            998,
+            997
+          ],
+          "name": "top_three"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Amount"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Amount"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Record top three"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t3-03",
+    "tier": "T3",
+    "app": "editor-app",
+    "seed": "t3-03",
+    "prompt": "Replace every alpha with omega-3, then save.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "find",
+          "value": "alpha",
+          "name": "find"
+        },
+        {
+          "path": "replace",
+          "value": "omega-3",
+          "name": "replace"
+        },
+        {
+          "path": "replaced",
+          "value": true,
+          "name": "replaced"
+        },
+        {
+          "path": "saved",
+          "value": true,
+          "name": "saved"
+        },
+        {
+          "path": "saved_content",
+          "value": "omega-3 beta omega-3",
+          "name": "saved_content"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Find"
+        },
+        "value": "alpha"
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace"
+        },
+        "value": "omega-3"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace all"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t3-04",
+    "tier": "T3",
+    "app": "dialog-storm",
+    "seed": "t3-04",
+    "prompt": "Open the destructive action, choose Continue, then confirm the nested dialog.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "nested_confirmed",
+          "value": true,
+          "name": "nested_confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Destructive action"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Continue?"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Continue"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Final confirmation"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t3-05",
+    "tier": "T3",
+    "app": "multi-window-app",
+    "seed": "t3-05",
+    "prompt": "Copy the code shown in the Reference window into the Notes window and save.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "notes",
+          "value": "CODE-05",
+          "name": "notes"
+        },
+        {
+          "path": "notes_saved",
+          "value": true,
+          "name": "notes_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "copy_value",
+        "from_app": "multi-window-app",
+        "from_window": "Reference",
+        "to_app": "multi-window-app",
+        "pattern": "Reference code: (CODE-05)",
+        "target": {
+          "name": "Notes"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Save notes"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "multi-window-app"
+    ]
+  },
+  {
+    "id": "t3-06",
+    "tier": "T3",
+    "app": "forms-app",
+    "seed": "t3-06",
+    "prompt": "Submit Name Person 6, Email person6@example.test, and Due date 2026-12-01. Advance the form, fix any visible validation error, and confirm submission.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "submitted",
+          "value": true,
+          "name": "submitted"
+        },
+        {
+          "path": "confirmed",
+          "value": true,
+          "name": "confirmed"
+        },
+        {
+          "path": "submission.name",
+          "value": "Person 6",
+          "name": "submission.name"
+        },
+        {
+          "path": "submission.email",
+          "value": "person6@example.test",
+          "name": "submission.email"
+        },
+        {
+          "path": "submission.due_date",
+          "value": "2026-12-01",
+          "name": "submission.due_date"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Name"
+        },
+        "value": "Person 6"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Email"
+        },
+        "value": "person6@example.test"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Next"
+        }
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Due date"
+        },
+        "value": "2026-12-01"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Submit"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t3-07",
+    "tier": "T3",
+    "app": "list-app",
+    "seed": "t3-07",
+    "prompt": "Sort Amount descending and record the top three rows.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "sort",
+          "value": "amount-desc",
+          "name": "sort"
+        },
+        {
+          "path": "top_recorded",
+          "value": true,
+          "name": "top_recorded"
+        },
+        {
+          "path": "top_three",
+          "value": [
+            999,
+            998,
+            997
+          ],
+          "name": "top_three"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Amount"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Amount"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Record top three"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t3-08",
+    "tier": "T3",
+    "app": "editor-app",
+    "seed": "t3-08",
+    "prompt": "Replace every alpha with omega-8, then save.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "find",
+          "value": "alpha",
+          "name": "find"
+        },
+        {
+          "path": "replace",
+          "value": "omega-8",
+          "name": "replace"
+        },
+        {
+          "path": "replaced",
+          "value": true,
+          "name": "replaced"
+        },
+        {
+          "path": "saved",
+          "value": true,
+          "name": "saved"
+        },
+        {
+          "path": "saved_content",
+          "value": "omega-8 beta omega-8",
+          "name": "saved_content"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Find"
+        },
+        "value": "alpha"
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace"
+        },
+        "value": "omega-8"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace all"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t3-09",
+    "tier": "T3",
+    "app": "dialog-storm",
+    "seed": "t3-09",
+    "prompt": "Open the destructive action, choose Continue, then confirm the nested dialog.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "nested_confirmed",
+          "value": true,
+          "name": "nested_confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Destructive action"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Continue?"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Continue"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Final confirmation"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t3-10",
+    "tier": "T3",
+    "app": "multi-window-app",
+    "seed": "t3-10",
+    "prompt": "Copy the code shown in the Reference window into the Notes window and save.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "notes",
+          "value": "CODE-10",
+          "name": "notes"
+        },
+        {
+          "path": "notes_saved",
+          "value": true,
+          "name": "notes_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "copy_value",
+        "from_app": "multi-window-app",
+        "from_window": "Reference",
+        "to_app": "multi-window-app",
+        "pattern": "Reference code: (CODE-10)",
+        "target": {
+          "name": "Notes"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Save notes"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "multi-window-app"
+    ]
+  },
+  {
+    "id": "t3-11",
+    "tier": "T3",
+    "app": "forms-app",
+    "seed": "t3-11",
+    "prompt": "Submit Name Person 11, Email person11@example.test, and Due date 2026-12-01. Advance the form, fix any visible validation error, and confirm submission.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "submitted",
+          "value": true,
+          "name": "submitted"
+        },
+        {
+          "path": "confirmed",
+          "value": true,
+          "name": "confirmed"
+        },
+        {
+          "path": "submission.name",
+          "value": "Person 11",
+          "name": "submission.name"
+        },
+        {
+          "path": "submission.email",
+          "value": "person11@example.test",
+          "name": "submission.email"
+        },
+        {
+          "path": "submission.due_date",
+          "value": "2026-12-01",
+          "name": "submission.due_date"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Name"
+        },
+        "value": "Person 11"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Email"
+        },
+        "value": "person11@example.test"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Next"
+        }
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Due date"
+        },
+        "value": "2026-12-01"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Submit"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t3-12",
+    "tier": "T3",
+    "app": "list-app",
+    "seed": "t3-12",
+    "prompt": "Sort Amount descending and record the top three rows.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "sort",
+          "value": "amount-desc",
+          "name": "sort"
+        },
+        {
+          "path": "top_recorded",
+          "value": true,
+          "name": "top_recorded"
+        },
+        {
+          "path": "top_three",
+          "value": [
+            999,
+            998,
+            997
+          ],
+          "name": "top_three"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Amount"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Amount"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Record top three"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t3-13",
+    "tier": "T3",
+    "app": "editor-app",
+    "seed": "t3-13",
+    "prompt": "Replace every alpha with omega-13, then save.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "find",
+          "value": "alpha",
+          "name": "find"
+        },
+        {
+          "path": "replace",
+          "value": "omega-13",
+          "name": "replace"
+        },
+        {
+          "path": "replaced",
+          "value": true,
+          "name": "replaced"
+        },
+        {
+          "path": "saved",
+          "value": true,
+          "name": "saved"
+        },
+        {
+          "path": "saved_content",
+          "value": "omega-13 beta omega-13",
+          "name": "saved_content"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Find"
+        },
+        "value": "alpha"
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace"
+        },
+        "value": "omega-13"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace all"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t3-14",
+    "tier": "T3",
+    "app": "dialog-storm",
+    "seed": "t3-14",
+    "prompt": "Open the destructive action, choose Continue, then confirm the nested dialog.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "nested_confirmed",
+          "value": true,
+          "name": "nested_confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Destructive action"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Continue?"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Continue"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Final confirmation"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t3-15",
+    "tier": "T3",
+    "app": "multi-window-app",
+    "seed": "t3-15",
+    "prompt": "Copy the code shown in the Reference window into the Notes window and save.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "notes",
+          "value": "CODE-15",
+          "name": "notes"
+        },
+        {
+          "path": "notes_saved",
+          "value": true,
+          "name": "notes_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "copy_value",
+        "from_app": "multi-window-app",
+        "from_window": "Reference",
+        "to_app": "multi-window-app",
+        "pattern": "Reference code: (CODE-15)",
+        "target": {
+          "name": "Notes"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Save notes"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "multi-window-app"
+    ]
+  },
+  {
+    "id": "t3-16",
+    "tier": "T3",
+    "app": "forms-app",
+    "seed": "t3-16",
+    "prompt": "Submit Name Person 16, Email person16@example.test, and Due date 2026-12-01. Advance the form, fix any visible validation error, and confirm submission.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "submitted",
+          "value": true,
+          "name": "submitted"
+        },
+        {
+          "path": "confirmed",
+          "value": true,
+          "name": "confirmed"
+        },
+        {
+          "path": "submission.name",
+          "value": "Person 16",
+          "name": "submission.name"
+        },
+        {
+          "path": "submission.email",
+          "value": "person16@example.test",
+          "name": "submission.email"
+        },
+        {
+          "path": "submission.due_date",
+          "value": "2026-12-01",
+          "name": "submission.due_date"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Name"
+        },
+        "value": "Person 16"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Email"
+        },
+        "value": "person16@example.test"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Next"
+        }
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Due date"
+        },
+        "value": "2026-12-01"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Submit"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t3-17",
+    "tier": "T3",
+    "app": "list-app",
+    "seed": "t3-17",
+    "prompt": "Sort Amount descending and record the top three rows.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "sort",
+          "value": "amount-desc",
+          "name": "sort"
+        },
+        {
+          "path": "top_recorded",
+          "value": true,
+          "name": "top_recorded"
+        },
+        {
+          "path": "top_three",
+          "value": [
+            999,
+            998,
+            997
+          ],
+          "name": "top_three"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Amount"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Amount"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Record top three"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t3-18",
+    "tier": "T3",
+    "app": "editor-app",
+    "seed": "t3-18",
+    "prompt": "Replace every alpha with omega-18, then save.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "find",
+          "value": "alpha",
+          "name": "find"
+        },
+        {
+          "path": "replace",
+          "value": "omega-18",
+          "name": "replace"
+        },
+        {
+          "path": "replaced",
+          "value": true,
+          "name": "replaced"
+        },
+        {
+          "path": "saved",
+          "value": true,
+          "name": "saved"
+        },
+        {
+          "path": "saved_content",
+          "value": "omega-18 beta omega-18",
+          "name": "saved_content"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Find"
+        },
+        "value": "alpha"
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace"
+        },
+        "value": "omega-18"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace all"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t3-19",
+    "tier": "T3",
+    "app": "dialog-storm",
+    "seed": "t3-19",
+    "prompt": "Open the destructive action, choose Continue, then confirm the nested dialog.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "nested_confirmed",
+          "value": true,
+          "name": "nested_confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Destructive action"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Continue?"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Continue"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Final confirmation"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t3-20",
+    "tier": "T3",
+    "app": "multi-window-app",
+    "seed": "t3-20",
+    "prompt": "Copy the code shown in the Reference window into the Notes window and save.",
+    "max_steps": 14,
+    "budget_usd": 0.15,
+    "grader": {
+      "checks": [
+        {
+          "path": "notes",
+          "value": "CODE-20",
+          "name": "notes"
+        },
+        {
+          "path": "notes_saved",
+          "value": true,
+          "name": "notes_saved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "copy_value",
+        "from_app": "multi-window-app",
+        "from_window": "Reference",
+        "to_app": "multi-window-app",
+        "pattern": "Reference code: (CODE-20)",
+        "target": {
+          "name": "Notes"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Save notes"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "state",
+      "verification"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "multi-window-app"
+    ]
+  },
+  {
+    "id": "t4-01",
+    "tier": "T4",
+    "app": "forms-app",
+    "seed": "t4-01",
+    "prompt": "Read Item 1's Amount in list-app, enter it as the form Reference, and submit.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "reference",
+          "value": "17",
+          "name": "reference"
+        },
+        {
+          "path": "submission.reference",
+          "value": "17",
+          "name": "submission.reference"
+        },
+        {
+          "path": "submitted",
+          "value": true,
+          "name": "submitted"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "copy_value",
+        "from_app": "list-app",
+        "to_app": "forms-app",
+        "pattern": "Amount 17\\b",
+        "value_pattern": "(17)",
+        "target": {
+          "name": "Reference"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Submit"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app",
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t4-02",
+    "tier": "T4",
+    "app": "editor-app",
+    "seed": "t4-02",
+    "prompt": "Set the editor document to delay 2. Handle the delayed approval dialog through the related-dialog API, then save.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "apps.dialog-storm.delay_approved",
+          "value": true,
+          "name": "apps.dialog-storm.delay_approved"
+        },
+        {
+          "path": "saved_content",
+          "value": "delay 2",
+          "name": "saved_content"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "delay 2"
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Delayed approval",
+        "wait_ms": 6000
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Approve"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app",
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t4-03",
+    "tier": "T4",
+    "app": "multi-window-app",
+    "seed": "t4-03",
+    "prompt": "Use the window titled Target, ignore the identical distractor, and mark the target complete.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "target_complete",
+          "value": true,
+          "name": "target_complete"
+        },
+        {
+          "path": "distractor_untouched",
+          "value": true,
+          "name": "distractor_untouched"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_app_state",
+        "app": "multi-window-app",
+        "window": "Target"
+      },
+      {
+        "tool": "click",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Mark target complete"
+        },
+        "window": "Target"
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "multi-window-app"
+    ]
+  },
+  {
+    "id": "t4-04",
+    "tier": "T4",
+    "app": "multi-window-app",
+    "seed": "t4-04",
+    "prompt": "After the target window restarts, re-observe it and enter rebound in its field.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "rebound",
+          "value": "rebound",
+          "name": "rebound"
+        },
+        {
+          "path": "events",
+          "op": "contains",
+          "value": "restart",
+          "name": "target restarted"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Restart target"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "multi-window-app"
+      },
+      {
+        "tool": "set_value",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Rebound value"
+        },
+        "value": "rebound"
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "multi-window-app"
+    ]
+  },
+  {
+    "id": "t4-05",
+    "tier": "T4",
+    "app": "list-app",
+    "seed": "t4-05",
+    "prompt": "Scroll to Item 905, select it, and drag it before Item 904.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "selected",
+          "value": "Item 905",
+          "name": "selected"
+        },
+        {
+          "path": "reordered",
+          "value": true,
+          "name": "reordered"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "scroll",
+        "app": "list-app",
+        "target": {
+          "name": "Rows"
+        },
+        "direction": "down",
+        "pages": 20
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 905"
+        }
+      },
+      {
+        "tool": "drag",
+        "app": "list-app",
+        "from": {
+          "name": "Item 905"
+        },
+        "to": {
+          "name": "Item 904"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t4-06",
+    "tier": "T4",
+    "app": "forms-app",
+    "seed": "t4-06",
+    "prompt": "Read Item 6's Amount in list-app, enter it as the form Reference, and submit.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "reference",
+          "value": "102",
+          "name": "reference"
+        },
+        {
+          "path": "submission.reference",
+          "value": "102",
+          "name": "submission.reference"
+        },
+        {
+          "path": "submitted",
+          "value": true,
+          "name": "submitted"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "copy_value",
+        "from_app": "list-app",
+        "to_app": "forms-app",
+        "pattern": "Amount 102\\b",
+        "value_pattern": "(102)",
+        "target": {
+          "name": "Reference"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Submit"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app",
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t4-07",
+    "tier": "T4",
+    "app": "editor-app",
+    "seed": "t4-07",
+    "prompt": "Set the editor document to delay 7. Handle the delayed approval dialog through the related-dialog API, then save.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "apps.dialog-storm.delay_approved",
+          "value": true,
+          "name": "apps.dialog-storm.delay_approved"
+        },
+        {
+          "path": "saved_content",
+          "value": "delay 7",
+          "name": "saved_content"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "delay 7"
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Delayed approval",
+        "wait_ms": 6000
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Approve"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app",
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t4-08",
+    "tier": "T4",
+    "app": "multi-window-app",
+    "seed": "t4-08",
+    "prompt": "Use the window titled Target, ignore the identical distractor, and mark the target complete.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "target_complete",
+          "value": true,
+          "name": "target_complete"
+        },
+        {
+          "path": "distractor_untouched",
+          "value": true,
+          "name": "distractor_untouched"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_app_state",
+        "app": "multi-window-app",
+        "window": "Target"
+      },
+      {
+        "tool": "click",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Mark target complete"
+        },
+        "window": "Target"
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "multi-window-app"
+    ]
+  },
+  {
+    "id": "t4-09",
+    "tier": "T4",
+    "app": "multi-window-app",
+    "seed": "t4-09",
+    "prompt": "After the target window restarts, re-observe it and enter rebound in its field.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "rebound",
+          "value": "rebound",
+          "name": "rebound"
+        },
+        {
+          "path": "events",
+          "op": "contains",
+          "value": "restart",
+          "name": "target restarted"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Restart target"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "multi-window-app"
+      },
+      {
+        "tool": "set_value",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Rebound value"
+        },
+        "value": "rebound"
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "multi-window-app"
+    ]
+  },
+  {
+    "id": "t4-10",
+    "tier": "T4",
+    "app": "list-app",
+    "seed": "t4-10",
+    "prompt": "Scroll to Item 910, select it, and drag it before Item 909.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "selected",
+          "value": "Item 910",
+          "name": "selected"
+        },
+        {
+          "path": "reordered",
+          "value": true,
+          "name": "reordered"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "scroll",
+        "app": "list-app",
+        "target": {
+          "name": "Rows"
+        },
+        "direction": "down",
+        "pages": 20
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 910"
+        }
+      },
+      {
+        "tool": "drag",
+        "app": "list-app",
+        "from": {
+          "name": "Item 910"
+        },
+        "to": {
+          "name": "Item 909"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t4-11",
+    "tier": "T4",
+    "app": "forms-app",
+    "seed": "t4-11",
+    "prompt": "Read Item 11's Amount in list-app, enter it as the form Reference, and submit.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "reference",
+          "value": "187",
+          "name": "reference"
+        },
+        {
+          "path": "submission.reference",
+          "value": "187",
+          "name": "submission.reference"
+        },
+        {
+          "path": "submitted",
+          "value": true,
+          "name": "submitted"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "copy_value",
+        "from_app": "list-app",
+        "to_app": "forms-app",
+        "pattern": "Amount 187\\b",
+        "value_pattern": "(187)",
+        "target": {
+          "name": "Reference"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Submit"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app",
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t4-12",
+    "tier": "T4",
+    "app": "editor-app",
+    "seed": "t4-12",
+    "prompt": "Set the editor document to delay 12. Handle the delayed approval dialog through the related-dialog API, then save.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "apps.dialog-storm.delay_approved",
+          "value": true,
+          "name": "apps.dialog-storm.delay_approved"
+        },
+        {
+          "path": "saved_content",
+          "value": "delay 12",
+          "name": "saved_content"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "delay 12"
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Delayed approval",
+        "wait_ms": 6000
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Approve"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app",
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t4-13",
+    "tier": "T4",
+    "app": "multi-window-app",
+    "seed": "t4-13",
+    "prompt": "Use the window titled Target, ignore the identical distractor, and mark the target complete.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "target_complete",
+          "value": true,
+          "name": "target_complete"
+        },
+        {
+          "path": "distractor_untouched",
+          "value": true,
+          "name": "distractor_untouched"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_app_state",
+        "app": "multi-window-app",
+        "window": "Target"
+      },
+      {
+        "tool": "click",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Mark target complete"
+        },
+        "window": "Target"
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "multi-window-app"
+    ]
+  },
+  {
+    "id": "t4-14",
+    "tier": "T4",
+    "app": "multi-window-app",
+    "seed": "t4-14",
+    "prompt": "After the target window restarts, re-observe it and enter rebound in its field.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "rebound",
+          "value": "rebound",
+          "name": "rebound"
+        },
+        {
+          "path": "events",
+          "op": "contains",
+          "value": "restart",
+          "name": "target restarted"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "click",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Restart target"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "multi-window-app"
+      },
+      {
+        "tool": "set_value",
+        "app": "multi-window-app",
+        "target": {
+          "name": "Rebound value"
+        },
+        "value": "rebound"
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "multi-window-app"
+    ]
+  },
+  {
+    "id": "t4-15",
+    "tier": "T4",
+    "app": "list-app",
+    "seed": "t4-15",
+    "prompt": "Scroll to Item 915, select it, and drag it before Item 914.",
+    "max_steps": 24,
+    "budget_usd": 0.28,
+    "grader": {
+      "checks": [
+        {
+          "path": "selected",
+          "value": "Item 915",
+          "name": "selected"
+        },
+        {
+          "path": "reordered",
+          "value": true,
+          "name": "reordered"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "scroll",
+        "app": "list-app",
+        "target": {
+          "name": "Rows"
+        },
+        "direction": "down",
+        "pages": 20
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 915"
+        }
+      },
+      {
+        "tool": "drag",
+        "app": "list-app",
+        "from": {
+          "name": "Item 915"
+        },
+        "to": {
+          "name": "Item 914"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "recovery"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t5-01",
+    "tier": "T5",
+    "app": "forms-app",
+    "seed": "t5-01",
+    "prompt": "Complete the cross-app expedition 1: inspect Item 1, then select Item 2 and use its displayed Amount as the form Reference. Set Name to Expedition 1, Email to expedition1@example.test, Quick entry to verified, enable Newsletter and Archive, and choose Germany. Save the editor note 'checkpoint 1 verified'. Save the form draft, submit, and confirm.",
+    "max_steps": 40,
+    "budget_usd": 0.5,
+    "grader": {
+      "checks": [
+        {
+          "path": "apps.editor-app.saved_content",
+          "value": "checkpoint 1 verified",
+          "name": "apps.editor-app.saved_content"
+        },
+        {
+          "path": "apps.list-app.selected",
+          "value": "Item 2",
+          "name": "apps.list-app.selected"
+        },
+        {
+          "path": "submission.reference",
+          "value": "34",
+          "name": "submission.reference"
+        },
+        {
+          "path": "submission.name",
+          "value": "Expedition 1",
+          "name": "submission.name"
+        },
+        {
+          "path": "submission.email",
+          "value": "expedition1@example.test",
+          "name": "submission.email"
+        },
+        {
+          "path": "submission.quick_entry",
+          "value": "verified",
+          "name": "submission.quick_entry"
+        },
+        {
+          "path": "submission.newsletter",
+          "value": true,
+          "name": "submission.newsletter"
+        },
+        {
+          "path": "submission.archive",
+          "value": true,
+          "name": "submission.archive"
+        },
+        {
+          "path": "submission.country",
+          "value": "Germany",
+          "name": "submission.country"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        },
+        {
+          "path": "submitted",
+          "value": true,
+          "name": "submitted"
+        },
+        {
+          "path": "confirmed",
+          "value": true,
+          "name": "confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "list-app",
+        "target": {
+          "name": "Filter"
+        },
+        "value": "Item 1"
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 1"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "list-app"
+      },
+      {
+        "tool": "set_value",
+        "app": "list-app",
+        "target": {
+          "name": "Filter"
+        },
+        "value": "Item 2"
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 2"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "list-app"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Name"
+        },
+        "value": "Expedition 1"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Email"
+        },
+        "value": "expedition1@example.test"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Next"
+        }
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Quick entry"
+        },
+        "value": "verified"
+      },
+      {
+        "tool": "press_key",
+        "app": "forms-app",
+        "key": "ENTER"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Newsletter"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Archive"
+        }
+      },
+      {
+        "tool": "select_options",
+        "app": "forms-app",
+        "choices": [
+          {
+            "name": "Japan",
+            "option": "Germany"
+          }
+        ]
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "draft 1"
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Find"
+        },
+        "value": "draft"
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace"
+        },
+        "value": "checkpoint"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace all"
+        }
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "checkpoint 1 verified"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "editor-app"
+      },
+      {
+        "tool": "copy_value",
+        "from_app": "list-app",
+        "to_app": "forms-app",
+        "pattern": "Amount 34\\b",
+        "value_pattern": "(34)",
+        "target": {
+          "name": "Reference"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "forms-app"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Submit"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "long-horizon",
+      "partial-credit"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app",
+      "forms-app",
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t5-02",
+    "tier": "T5",
+    "app": "forms-app",
+    "seed": "t5-02",
+    "prompt": "Use a screenshot to find the unlabeled visual field, enter visual-2, then submit and confirm.",
+    "max_steps": 40,
+    "budget_usd": 0.5,
+    "grader": {
+      "checks": [
+        {
+          "path": "visual_value",
+          "value": "visual-2",
+          "name": "visual_value"
+        },
+        {
+          "path": "submitted",
+          "value": true,
+          "name": "submitted"
+        },
+        {
+          "path": "confirmed",
+          "value": true,
+          "name": "confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_app_state",
+        "app": "forms-app"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "x": 310,
+        "y": 180
+      },
+      {
+        "tool": "type_text",
+        "app": "forms-app",
+        "text": "visual-2"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Submit"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "long-horizon",
+      "partial-credit"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t5-03",
+    "tier": "T5",
+    "app": "forms-app",
+    "seed": "t5-03",
+    "prompt": "Use tooltips to choose the export action for the archive, then confirm.",
+    "max_steps": 40,
+    "budget_usd": 0.5,
+    "grader": {
+      "checks": [
+        {
+          "path": "exported",
+          "value": true,
+          "name": "exported"
+        },
+        {
+          "path": "confirmed",
+          "value": true,
+          "name": "confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_app_state",
+        "app": "forms-app"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "x": 460,
+        "y": 420
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "long-horizon",
+      "partial-credit"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t5-04",
+    "tier": "T5",
+    "app": "dialog-storm",
+    "seed": "t5-04",
+    "prompt": "Recover from the pre-opened wrong dialog, then open and confirm the correct dialog.",
+    "max_steps": 40,
+    "budget_usd": 0.5,
+    "grader": {
+      "checks": [
+        {
+          "path": "wrong_cancelled",
+          "value": true,
+          "name": "wrong_cancelled"
+        },
+        {
+          "path": "correct_confirmed",
+          "value": true,
+          "name": "correct_confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Wrong dialog"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Cancel"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Correct action"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Correct dialog"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "long-horizon",
+      "partial-credit"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t5-05",
+    "tier": "T5",
+    "app": "dialog-storm",
+    "seed": "t5-05",
+    "prompt": "The accessibility snapshot is stale. Use a current screenshot and approve before the dialog closes.",
+    "max_steps": 40,
+    "budget_usd": 0.5,
+    "grader": {
+      "checks": [
+        {
+          "path": "timed_approved",
+          "value": true,
+          "name": "timed_approved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_app_state",
+        "app": "dialog-storm",
+        "fresh": true
+      },
+      {
+        "tool": "click",
+        "app": "dialog-storm",
+        "x": 380,
+        "y": 260
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "long-horizon",
+      "partial-credit"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t5-06",
+    "tier": "T5",
+    "app": "forms-app",
+    "seed": "t5-06",
+    "prompt": "Complete the cross-app expedition 6: inspect Item 6, then select Item 2 and use its displayed Amount as the form Reference. Set Name to Expedition 6, Email to expedition6@example.test, Quick entry to verified, enable Newsletter and Archive, and choose Germany. Save the editor note 'checkpoint 6 verified'. Save the form draft, submit, and confirm.",
+    "max_steps": 40,
+    "budget_usd": 0.5,
+    "grader": {
+      "checks": [
+        {
+          "path": "apps.editor-app.saved_content",
+          "value": "checkpoint 6 verified",
+          "name": "apps.editor-app.saved_content"
+        },
+        {
+          "path": "apps.list-app.selected",
+          "value": "Item 2",
+          "name": "apps.list-app.selected"
+        },
+        {
+          "path": "submission.reference",
+          "value": "34",
+          "name": "submission.reference"
+        },
+        {
+          "path": "submission.name",
+          "value": "Expedition 6",
+          "name": "submission.name"
+        },
+        {
+          "path": "submission.email",
+          "value": "expedition6@example.test",
+          "name": "submission.email"
+        },
+        {
+          "path": "submission.quick_entry",
+          "value": "verified",
+          "name": "submission.quick_entry"
+        },
+        {
+          "path": "submission.newsletter",
+          "value": true,
+          "name": "submission.newsletter"
+        },
+        {
+          "path": "submission.archive",
+          "value": true,
+          "name": "submission.archive"
+        },
+        {
+          "path": "submission.country",
+          "value": "Germany",
+          "name": "submission.country"
+        },
+        {
+          "path": "draft_saved",
+          "value": true,
+          "name": "draft_saved"
+        },
+        {
+          "path": "submitted",
+          "value": true,
+          "name": "submitted"
+        },
+        {
+          "path": "confirmed",
+          "value": true,
+          "name": "confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "set_value",
+        "app": "list-app",
+        "target": {
+          "name": "Filter"
+        },
+        "value": "Item 6"
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 6"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "list-app"
+      },
+      {
+        "tool": "set_value",
+        "app": "list-app",
+        "target": {
+          "name": "Filter"
+        },
+        "value": "Item 2"
+      },
+      {
+        "tool": "click",
+        "app": "list-app",
+        "target": {
+          "name": "Item 2"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "list-app"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Name"
+        },
+        "value": "Expedition 6"
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Email"
+        },
+        "value": "expedition6@example.test"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Next"
+        }
+      },
+      {
+        "tool": "set_value",
+        "app": "forms-app",
+        "target": {
+          "name": "Quick entry"
+        },
+        "value": "verified"
+      },
+      {
+        "tool": "press_key",
+        "app": "forms-app",
+        "key": "ENTER"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Newsletter"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Archive"
+        }
+      },
+      {
+        "tool": "select_options",
+        "app": "forms-app",
+        "choices": [
+          {
+            "name": "Japan",
+            "option": "Germany"
+          }
+        ]
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "draft 6"
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Find"
+        },
+        "value": "draft"
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace"
+        },
+        "value": "checkpoint"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Replace all"
+        }
+      },
+      {
+        "tool": "set_value",
+        "app": "editor-app",
+        "target": {
+          "name": "Document"
+        },
+        "value": "checkpoint 6 verified"
+      },
+      {
+        "tool": "click",
+        "app": "editor-app",
+        "target": {
+          "name": "Save"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "editor-app"
+      },
+      {
+        "tool": "copy_value",
+        "from_app": "list-app",
+        "to_app": "forms-app",
+        "pattern": "Amount 34\\b",
+        "value_pattern": "(34)",
+        "target": {
+          "name": "Reference"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Save draft"
+        }
+      },
+      {
+        "tool": "get_app_state",
+        "app": "forms-app"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Submit"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "long-horizon",
+      "partial-credit"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app",
+      "forms-app",
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t5-07",
+    "tier": "T5",
+    "app": "forms-app",
+    "seed": "t5-07",
+    "prompt": "Use a screenshot to find the unlabeled visual field, enter visual-7, then submit and confirm.",
+    "max_steps": 40,
+    "budget_usd": 0.5,
+    "grader": {
+      "checks": [
+        {
+          "path": "visual_value",
+          "value": "visual-7",
+          "name": "visual_value"
+        },
+        {
+          "path": "submitted",
+          "value": true,
+          "name": "submitted"
+        },
+        {
+          "path": "confirmed",
+          "value": true,
+          "name": "confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_app_state",
+        "app": "forms-app"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "x": 310,
+        "y": 180
+      },
+      {
+        "tool": "type_text",
+        "app": "forms-app",
+        "text": "visual-7"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "target": {
+          "name": "Submit"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "long-horizon",
+      "partial-credit"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t5-08",
+    "tier": "T5",
+    "app": "forms-app",
+    "seed": "t5-08",
+    "prompt": "Use tooltips to choose the export action for the archive, then confirm.",
+    "max_steps": 40,
+    "budget_usd": 0.5,
+    "grader": {
+      "checks": [
+        {
+          "path": "exported",
+          "value": true,
+          "name": "exported"
+        },
+        {
+          "path": "confirmed",
+          "value": true,
+          "name": "confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_app_state",
+        "app": "forms-app"
+      },
+      {
+        "tool": "click",
+        "app": "forms-app",
+        "x": 460,
+        "y": 420
+      },
+      {
+        "tool": "get_dialog",
+        "app": "forms-app",
+        "title": "Confirm submission"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "forms-app",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "long-horizon",
+      "partial-credit"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t5-09",
+    "tier": "T5",
+    "app": "dialog-storm",
+    "seed": "t5-09",
+    "prompt": "Recover from the pre-opened wrong dialog, then open and confirm the correct dialog.",
+    "max_steps": 40,
+    "budget_usd": 0.5,
+    "grader": {
+      "checks": [
+        {
+          "path": "wrong_cancelled",
+          "value": true,
+          "name": "wrong_cancelled"
+        },
+        {
+          "path": "correct_confirmed",
+          "value": true,
+          "name": "correct_confirmed"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Wrong dialog"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Cancel"
+        }
+      },
+      {
+        "tool": "click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Correct action"
+        }
+      },
+      {
+        "tool": "get_dialog",
+        "app": "dialog-storm",
+        "title": "Correct dialog"
+      },
+      {
+        "tool": "dialog_click",
+        "app": "dialog-storm",
+        "target": {
+          "name": "Confirm"
+        }
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "long-horizon",
+      "partial-credit"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t5-10",
+    "tier": "T5",
+    "app": "dialog-storm",
+    "seed": "t5-10",
+    "prompt": "The accessibility snapshot is stale. Use a current screenshot and approve before the dialog closes.",
+    "max_steps": 40,
+    "budget_usd": 0.5,
+    "grader": {
+      "checks": [
+        {
+          "path": "timed_approved",
+          "value": true,
+          "name": "timed_approved"
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool": "get_app_state",
+        "app": "dialog-storm",
+        "fresh": true
+      },
+      {
+        "tool": "click",
+        "app": "dialog-storm",
+        "x": 380,
+        "y": 260
+      }
+    ],
+    "distractors": [
+      "sentinel"
+    ],
+    "tags": [
+      "long-horizon",
+      "partial-credit"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "dialog-storm"
+    ]
+  },
+  {
+    "id": "t6-01-rapid-200",
+    "tier": "T6",
+    "app": "stress-app",
+    "seed": "t6-01-rapid-200",
+    "prompt": "200 rapid actions without loss",
+    "max_steps": 205,
+    "budget_usd": 0,
+    "grader": {
+      "checks": [
+        {
+          "path": "tool_passed",
+          "value": true
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool_benchmark": {
+          "kind": "rapid",
+          "count": 200
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "tool-only"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t6-02-ax-1000",
+    "tier": "T6",
+    "app": "stress-app",
+    "seed": "t6-02-ax-1000",
+    "prompt": "Extract all 1,000 AX rows and confirm Item 1000",
+    "max_steps": 25,
+    "budget_usd": 0,
+    "grader": {
+      "checks": [
+        {
+          "path": "tool_passed",
+          "value": true
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool_benchmark": {
+          "kind": "latency",
+          "tool": "get_app_state",
+          "limit_ms": 2000
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "tool-only"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "list-app"
+    ]
+  },
+  {
+    "id": "t6-03-launch-10",
+    "tier": "T6",
+    "app": "stress-app",
+    "seed": "t6-03-launch-10",
+    "prompt": "Ten launches bind to the right frames",
+    "max_steps": 15,
+    "budget_usd": 0,
+    "grader": {
+      "checks": [
+        {
+          "path": "tool_passed",
+          "value": true
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool_benchmark": {
+          "kind": "launch",
+          "count": 10
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "tool-only"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t6-04-restart",
+    "tier": "T6",
+    "app": "stress-app",
+    "seed": "t6-04-restart",
+    "prompt": "Resume after an MCP restart",
+    "max_steps": 25,
+    "budget_usd": 0,
+    "grader": {
+      "checks": [
+        {
+          "path": "tool_passed",
+          "value": true
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool_benchmark": {
+          "kind": "restart"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "tool-only"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t6-05-parallel-2",
+    "tier": "T6",
+    "app": "stress-app",
+    "seed": "t6-05-parallel-2",
+    "prompt": "Two frame sets do not interfere",
+    "max_steps": 7,
+    "budget_usd": 0,
+    "grader": {
+      "checks": [
+        {
+          "path": "tool_passed",
+          "value": true
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool_benchmark": {
+          "kind": "parallel",
+          "count": 2
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "tool-only"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app",
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t6-06-unicode",
+    "tier": "T6",
+    "app": "stress-app",
+    "seed": "t6-06-unicode",
+    "prompt": "Unicode text entry round trips",
+    "max_steps": 25,
+    "budget_usd": 0,
+    "grader": {
+      "checks": [
+        {
+          "path": "tool_passed",
+          "value": true
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool_benchmark": {
+          "kind": "text",
+          "value": "\u6771\u4eac caf\u00e9 \ud83d\udc4b"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "tool-only"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t6-07-newlines",
+    "tier": "T6",
+    "app": "stress-app",
+    "seed": "t6-07-newlines",
+    "prompt": "Multiline entry preserves newlines",
+    "max_steps": 25,
+    "budget_usd": 0,
+    "grader": {
+      "checks": [
+        {
+          "path": "tool_passed",
+          "value": true
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool_benchmark": {
+          "kind": "text",
+          "value": "one\ntwo\nthree"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "tool-only"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "editor-app"
+    ]
+  },
+  {
+    "id": "t6-08-click-index",
+    "tier": "T6",
+    "app": "stress-app",
+    "seed": "t6-08-click-index",
+    "prompt": "Index clicks hit the intended element",
+    "max_steps": 25,
+    "budget_usd": 0,
+    "grader": {
+      "checks": [
+        {
+          "path": "tool_passed",
+          "value": true
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool_benchmark": {
+          "kind": "click",
+          "mode": "index"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "tool-only"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t6-09-click-pixel",
+    "tier": "T6",
+    "app": "stress-app",
+    "seed": "t6-09-click-pixel",
+    "prompt": "Pixel clicks hit the intended element",
+    "max_steps": 25,
+    "budget_usd": 0,
+    "grader": {
+      "checks": [
+        {
+          "path": "tool_passed",
+          "value": true
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool_benchmark": {
+          "kind": "click",
+          "mode": "pixel"
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "tool-only"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  },
+  {
+    "id": "t6-10-tracking",
+    "tier": "T6",
+    "app": "stress-app",
+    "seed": "t6-10-tracking",
+    "prompt": "A moving target remains bound",
+    "max_steps": 30,
+    "budget_usd": 0,
+    "grader": {
+      "checks": [
+        {
+          "path": "tool_passed",
+          "value": true
+        }
+      ]
+    },
+    "oracle": [
+      {
+        "tool_benchmark": {
+          "kind": "tracking",
+          "count": 25
+        }
+      }
+    ],
+    "distractors": [],
+    "tags": [
+      "tool-only"
+    ],
+    "requires": [],
+    "setup_apps": [
+      "forms-app"
+    ]
+  }
+]

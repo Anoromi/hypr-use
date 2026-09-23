@@ -46,14 +46,14 @@ class Observations:
         original_after = b.snapshot_after_action
         original_atspi = b.atspi_snapshot_isolated
 
-        def fresh_atspi(window, screenshot):
+        def fresh_atspi(window, screenshot, **scan_options):
             # Hidden Wayland windows can retain a closed tab in their AX tree
             # until frame callbacks advance the UI. Screenshots already wake
             # the client; AX-only reads need the same preparation, without pixels.
             if screenshot.get('captureKind') == 'geometry-only':
                 b.call_ctl(['prepare-frame', '--target', b.window_selector(window)])
                 b.time.sleep(0.12)
-            return original_atspi(window, screenshot)
+            return original_atspi(window, screenshot, **scan_options)
 
         b.atspi_snapshot_isolated = fresh_atspi
 
@@ -88,7 +88,12 @@ class Observations:
                     if previous is None:
                         raise RuntimeError('Indexed input requires getAXState first')
                     old = b.lookup_element(previous, str(index))
-                    fresh = b.build_app_snapshot(b.snapshot_window_query(previous, app))
+                    scan = previous.get('axScan') if isinstance(previous.get('axScan'), dict) else {}
+                    fresh = b.build_app_snapshot(
+                        b.snapshot_window_query(previous, app),
+                        ax_max_records=int(scan.get('maxRecords') or 500),
+                        ax_time_budget_ms=int(scan.get('timeBudgetMs') or 4500),
+                    )
                     selected = self.rematch(old, fresh)
                     args = {**args, 'element_index': str(selected['index'])}
                     # GTK popup pointer clicks can dismiss the menu without
