@@ -1,0 +1,13 @@
+{
+  "packageVersion": "26.908.40834",
+  "url": "https://persistent.oaistatic.com/codex-app-prod/linux/deb/pool/main/c/chatgpt/chatgpt_26.908.40834_amd64.deb",
+  "sha256": "da37b8e7bcefaaea019c478cacbe6c73ee1ddd15e0e1ebb3c7ef0a42dd818ac2",
+  "httpLastModified": "2026-09-11T18:52:20Z",
+  "probe": "initialize and tools/list only; no js execution",
+  "files": {
+    "package/usr/lib/chatgpt/resources/cua_node/lib/node_modules/@oai/cua/docs/tinysky-alt-core-cua-repl.md": "67c0bd7f2d9ce350e3b7e6202505234a1defb980c14feaf75ed6bfe9d598de1a",
+    "package/usr/lib/chatgpt/resources/plugins/openai-bundled/plugins/unified-computer-use/.mcp.json": "e7297a8851d46bb5d7f53d57e82d86cfdf4b04524bedf8c2ce6cf4a80ffe71da",
+    "package/usr/lib/chatgpt/resources/plugins/openai-bundled/plugins/unified-computer-use/.codex-plugin/plugin.json": "f6ead89b445f8a802abdc2c682fe759fd99d485238f8caad3f6121840414d9c8",
+    "package/usr/lib/chatgpt/resources/cua_node/bin/node_repl": "d414c40039933bd9dac95c07d15dd243f0afe8402955400de0d800811873dd75"
+  }
+}

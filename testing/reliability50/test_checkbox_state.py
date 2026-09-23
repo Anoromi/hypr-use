@@ -13,4 +13,18 @@ class CheckboxState(unittest.TestCase):
    for name,value in {'atspi_role':'check box','atspi_accessible_id':'','atspi_name':'Mixed','atspi_text_value':'','atspi_numeric_value':'','atspi_image_frame':{},'atspi_action_names':[],'atspi_node_is_editable':False}.items():stack.enter_context(patch.object(b,name,return_value=value))
    result=b.atspi_record_for(node,0,[],None,None,{}, {})
   self.assertIsNone(result['checked']);self.assertIn('indeterminate',result['states'])
+ def test_toggle_button_uses_pressed_state(self):
+  state=NS(contains=lambda flag:flag==2)
+  node=NS(get_state_set=lambda:state,get_toolkit_name=lambda:'gtk',is_editable_text=lambda:False,is_text=lambda:False,is_value=lambda:False)
+  with ExitStack() as stack:
+   stack.enter_context(patch.object(b,'_ATSPI',NS(StateType=NS(CHECKED=1,PRESSED=2,INDETERMINATE=3))))
+   for name,value in {'atspi_role':'toggle button','atspi_accessible_id':'','atspi_name':'Archive','atspi_text_value':'','atspi_numeric_value':'','atspi_image_frame':{},'atspi_action_names':['click'],'atspi_node_is_editable':False}.items():stack.enter_context(patch.object(b,name,return_value=value))
+   result=b.atspi_record_for(node,0,[],None,None,{}, {})
+  self.assertTrue(result['checked']);self.assertIn('pressed',result['states'])
+  state.contains=lambda _flag:False
+  with ExitStack() as stack:
+   stack.enter_context(patch.object(b,'_ATSPI',NS(StateType=NS(CHECKED=1,PRESSED=2,INDETERMINATE=3))))
+   for name,value in {'atspi_role':'toggle button','atspi_accessible_id':'','atspi_name':'Archive','atspi_text_value':'','atspi_numeric_value':'','atspi_image_frame':{},'atspi_action_names':['click'],'atspi_node_is_editable':False}.items():stack.enter_context(patch.object(b,name,return_value=value))
+   result=b.atspi_record_for(node,0,[],None,None,{}, {})
+  self.assertFalse(result['checked'])
 if __name__=='__main__':unittest.main()

@@ -1,0 +1,19 @@
+{
+  "baseline": {
+    "address": "0x5ecfa903e7b0",
+    "class": "t3-code-alpha",
+    "workspace": 2
+  },
+  "workspace": 901,
+  "refocus_events": [],
+  "checks": [],
+  "calls": 0,
+  "error": "Fixture did not map",
+  "final": {
+    "address": "0x5ecfa903e7b0",
+    "class": "t3-code-alpha",
+    "workspace": 2
+  },
+  "passed": false,
+  "definition": "Foreground changes to an agent-owned window. Switching among unrelated user windows is not a failure."
+}

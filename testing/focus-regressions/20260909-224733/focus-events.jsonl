@@ -1,0 +1,383 @@
+{"wall_time": 1788961653.181793, "monotonic_ns": 6912530503722, "stage": "baseline", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961653.238907, "monotonic_ns": 6912587617010, "stage": "launch", "kind": "stage-start", "data": "launch"}
+{"wall_time": 1788961653.4239888, "monotonic_ns": 6912772698629, "stage": "launch", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961653.4458504, "monotonic_ns": 6912794559837, "stage": "launch", "kind": "launch-result", "data": "ok"}
+{"wall_time": 1788961653.535603, "monotonic_ns": 6912884313036, "stage": "launch", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961653.649683, "monotonic_ns": 6912998392936, "stage": "launch", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961653.7012985, "monotonic_ns": 6913050008299, "stage": "launch", "kind": "openwindow", "data": {"address": "0x5ecfa9187970", "workspace": "901", "class": "hypr-use-focus-test"}}
+{"wall_time": 1788961653.7016385, "monotonic_ns": 6913050347267, "stage": "launch", "kind": "activewindowv2", "data": {"address": "0x5ecfa903e7b0"}}
+{"wall_time": 1788961653.7604337, "monotonic_ns": 6913109143295, "stage": "launch", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961653.79527, "monotonic_ns": 6913143979553, "stage": "get_app_state", "kind": "stage-start", "data": "get_app_state"}
+{"wall_time": 1788961653.8701417, "monotonic_ns": 6913218851461, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961654.0489206, "monotonic_ns": 6913397630439, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961654.1614285, "monotonic_ns": 6913510138369, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961654.2841086, "monotonic_ns": 6913632818789, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961654.4455147, "monotonic_ns": 6913794224533, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961654.5555744, "monotonic_ns": 6913904284181, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961654.6656868, "monotonic_ns": 6914014396698, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961654.7764165, "monotonic_ns": 6914125126238, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961654.8865604, "monotonic_ns": 6914235270045, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961654.9965131, "monotonic_ns": 6914345223002, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961655.1261432, "monotonic_ns": 6914474853053, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961655.2364306, "monotonic_ns": 6914585140741, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961655.346653, "monotonic_ns": 6914695362644, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961655.4577203, "monotonic_ns": 6914806430141, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961655.5688357, "monotonic_ns": 6914917545437, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961655.6790912, "monotonic_ns": 6915027800945, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961655.788659, "monotonic_ns": 6915137368796, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961655.8988872, "monotonic_ns": 6915247596591, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961656.0098107, "monotonic_ns": 6915358520387, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961656.1199434, "monotonic_ns": 6915468653193, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961656.2300909, "monotonic_ns": 6915578800336, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961656.340446, "monotonic_ns": 6915689155742, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961656.4501724, "monotonic_ns": 6915798882282, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961656.5605214, "monotonic_ns": 6915909231416, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961656.6706104, "monotonic_ns": 6916019319969, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961656.7839026, "monotonic_ns": 6916132612196, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961656.8983614, "monotonic_ns": 6916247071441, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961657.0132205, "monotonic_ns": 6916361930439, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961657.1278765, "monotonic_ns": 6916476586406, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961657.2419465, "monotonic_ns": 6916590656318, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961657.3564703, "monotonic_ns": 6916705180054, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961657.4663496, "monotonic_ns": 6916815059293, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961657.5763571, "monotonic_ns": 6916925066753, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961657.6863654, "monotonic_ns": 6917035075385, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961657.795757, "monotonic_ns": 6917144467036, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961657.905642, "monotonic_ns": 6917254351945, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961658.0152428, "monotonic_ns": 6917363952578, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961658.127743, "monotonic_ns": 6917476453195, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961658.2429209, "monotonic_ns": 6917591630713, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961658.3528707, "monotonic_ns": 6917701580555, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961658.4621909, "monotonic_ns": 6917810900830, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961658.571986, "monotonic_ns": 6917920695370, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961658.6808214, "monotonic_ns": 6918029531423, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961658.7893076, "monotonic_ns": 6918138017488, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961658.899211, "monotonic_ns": 6918247920702, "stage": "get_app_state", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961658.9520557, "monotonic_ns": 6918300765310, "stage": "get_app_state", "kind": "stage-end", "data": "get_app_state"}
+{"wall_time": 1788961658.9520915, "monotonic_ns": 6918300800035, "stage": "type_text", "kind": "stage-start", "data": "type_text"}
+{"wall_time": 1788961659.0069442, "monotonic_ns": 6918355653918, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961659.1698964, "monotonic_ns": 6918518606556, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961659.374278, "monotonic_ns": 6918722987688, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961659.482779, "monotonic_ns": 6918831488420, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961659.5931492, "monotonic_ns": 6918941858554, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961659.7119715, "monotonic_ns": 6919060681890, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961659.8391962, "monotonic_ns": 6919187905849, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961659.955352, "monotonic_ns": 6919304061590, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961660.0968597, "monotonic_ns": 6919445569835, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961660.2115111, "monotonic_ns": 6919560220802, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961660.3675258, "monotonic_ns": 6919716235722, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961660.4867857, "monotonic_ns": 6919835495350, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961660.6336415, "monotonic_ns": 6919982351088, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961660.7475333, "monotonic_ns": 6920096242945, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961660.8629193, "monotonic_ns": 6920211629327, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961660.9735022, "monotonic_ns": 6920322212151, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961661.1049545, "monotonic_ns": 6920453663994, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961661.3106794, "monotonic_ns": 6920659389108, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961661.5360084, "monotonic_ns": 6920884718239, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961661.6504307, "monotonic_ns": 6920999140455, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961661.7632875, "monotonic_ns": 6921111997092, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961661.9651432, "monotonic_ns": 6921313852949, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961662.152757, "monotonic_ns": 6921501466548, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961662.346621, "monotonic_ns": 6921695330591, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961662.5380924, "monotonic_ns": 6921886802028, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961662.7233145, "monotonic_ns": 6922072024383, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961662.9091659, "monotonic_ns": 6922257875343, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961663.1092296, "monotonic_ns": 6922457939354, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961663.2276711, "monotonic_ns": 6922576380661, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961663.3979676, "monotonic_ns": 6922746677533, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961663.513201, "monotonic_ns": 6922861910787, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961663.658201, "monotonic_ns": 6923006910890, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961663.7723684, "monotonic_ns": 6923121077965, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961663.9557667, "monotonic_ns": 6923304476626, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961664.070491, "monotonic_ns": 6923419200821, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961664.2298388, "monotonic_ns": 6923578548700, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961664.3439488, "monotonic_ns": 6923692658598, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961664.4912026, "monotonic_ns": 6923839912376, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961664.6062675, "monotonic_ns": 6923954977463, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961664.7600417, "monotonic_ns": 6924108751603, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961664.8763497, "monotonic_ns": 6924225059661, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961664.991459, "monotonic_ns": 6924340168692, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961665.1051605, "monotonic_ns": 6924453870291, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961665.2188177, "monotonic_ns": 6924567527586, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961665.33458, "monotonic_ns": 6924683289857, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961665.448928, "monotonic_ns": 6924797637603, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961665.6137877, "monotonic_ns": 6924962497214, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961665.7281628, "monotonic_ns": 6925076872642, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961665.8702686, "monotonic_ns": 6925218978363, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961665.9849615, "monotonic_ns": 6925333671830, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961666.0993102, "monotonic_ns": 6925448020067, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961666.2142422, "monotonic_ns": 6925562952265, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961666.3279028, "monotonic_ns": 6925676612316, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961666.4425457, "monotonic_ns": 6925791255188, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961666.5570347, "monotonic_ns": 6925905744511, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961666.6715071, "monotonic_ns": 6926020216932, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961666.7858615, "monotonic_ns": 6926134570940, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961666.9003527, "monotonic_ns": 6926249062747, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961667.0106785, "monotonic_ns": 6926359388438, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961667.120812, "monotonic_ns": 6926469521716, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961667.231342, "monotonic_ns": 6926580051530, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961667.3421593, "monotonic_ns": 6926690868937, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961667.4526188, "monotonic_ns": 6926801328269, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961667.562935, "monotonic_ns": 6926911644612, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961667.6724617, "monotonic_ns": 6927021171437, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961667.78272, "monotonic_ns": 6927131429540, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961667.892903, "monotonic_ns": 6927241612662, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961668.0025544, "monotonic_ns": 6927351263842, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961668.11294, "monotonic_ns": 6927461649576, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961668.2237368, "monotonic_ns": 6927572446213, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961668.3326595, "monotonic_ns": 6927681368881, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961668.4433599, "monotonic_ns": 6927792069397, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961668.552557, "monotonic_ns": 6927901266562, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961668.6622753, "monotonic_ns": 6928010984788, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961668.7734427, "monotonic_ns": 6928122152895, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961668.8819826, "monotonic_ns": 6928230692371, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961668.9912078, "monotonic_ns": 6928339917769, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961669.1003304, "monotonic_ns": 6928449039873, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961669.214183, "monotonic_ns": 6928562892517, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961669.3230104, "monotonic_ns": 6928671720306, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961669.4308236, "monotonic_ns": 6928779533454, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961669.5404787, "monotonic_ns": 6928889188250, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961669.6517591, "monotonic_ns": 6929000468379, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961669.7652225, "monotonic_ns": 6929113932030, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961669.869143, "monotonic_ns": 6929217852546, "stage": "type_text", "kind": "stage-end", "data": "type_text"}
+{"wall_time": 1788961669.8692427, "monotonic_ns": 6929217951332, "stage": "press_key", "kind": "stage-start", "data": "press_key"}
+{"wall_time": 1788961669.875043, "monotonic_ns": 6929223752349, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961669.9838078, "monotonic_ns": 6929332517139, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961670.1088512, "monotonic_ns": 6929457561093, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961670.3031213, "monotonic_ns": 6929651830972, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961670.4110537, "monotonic_ns": 6929759762894, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961670.5184035, "monotonic_ns": 6929867113620, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961670.6981413, "monotonic_ns": 6930046851126, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961670.8743813, "monotonic_ns": 6930223091294, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961670.9843981, "monotonic_ns": 6930333107812, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961671.0942323, "monotonic_ns": 6930442941816, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961671.2042444, "monotonic_ns": 6930552954137, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961671.311956, "monotonic_ns": 6930660665653, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961671.4215584, "monotonic_ns": 6930770267952, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961671.5798292, "monotonic_ns": 6930928538933, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961671.6902277, "monotonic_ns": 6931038937340, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961671.817914, "monotonic_ns": 6931166624353, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961671.9273703, "monotonic_ns": 6931276079975, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961672.0377345, "monotonic_ns": 6931386444108, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961672.1480117, "monotonic_ns": 6931496721548, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961672.2584789, "monotonic_ns": 6931607188545, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961672.3701444, "monotonic_ns": 6931718853879, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961672.4812262, "monotonic_ns": 6931829935944, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961672.590361, "monotonic_ns": 6931939070902, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961672.7016506, "monotonic_ns": 6932050360529, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961672.8115742, "monotonic_ns": 6932160283992, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961672.922469, "monotonic_ns": 6932271178605, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961673.0325472, "monotonic_ns": 6932381256749, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961673.1427445, "monotonic_ns": 6932491454339, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961673.2536087, "monotonic_ns": 6932602318394, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961673.364615, "monotonic_ns": 6932713324596, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961673.4751186, "monotonic_ns": 6932823828222, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961673.585355, "monotonic_ns": 6932934064605, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961673.6960166, "monotonic_ns": 6933044726479, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961673.806703, "monotonic_ns": 6933155413090, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961673.9168432, "monotonic_ns": 6933265553211, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961674.027329, "monotonic_ns": 6933376039014, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961674.137357, "monotonic_ns": 6933486066623, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961674.248835, "monotonic_ns": 6933597545025, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961674.3591952, "monotonic_ns": 6933707904790, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961674.4697492, "monotonic_ns": 6933818459393, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961674.5811822, "monotonic_ns": 6933929892059, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961674.6917915, "monotonic_ns": 6934040501244, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961674.8017817, "monotonic_ns": 6934150491292, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961674.9113762, "monotonic_ns": 6934260085796, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961675.0213442, "monotonic_ns": 6934370053783, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961675.131176, "monotonic_ns": 6934479885273, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961675.2409089, "monotonic_ns": 6934589618639, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961675.3518617, "monotonic_ns": 6934700571411, "stage": "press_key", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961675.3646443, "monotonic_ns": 6934713353678, "stage": "press_key", "kind": "stage-end", "data": "press_key"}
+{"wall_time": 1788961675.364691, "monotonic_ns": 6934713399615, "stage": "type_text", "kind": "stage-start", "data": "type_text"}
+{"wall_time": 1788961675.461109, "monotonic_ns": 6934809818811, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961675.6032271, "monotonic_ns": 6934951937007, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961675.8070226, "monotonic_ns": 6935155732188, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961675.9156933, "monotonic_ns": 6935264402491, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961676.0250683, "monotonic_ns": 6935373778073, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961676.2060213, "monotonic_ns": 6935554731199, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961676.3799355, "monotonic_ns": 6935728644875, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961676.5763812, "monotonic_ns": 6935925091024, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961676.7658784, "monotonic_ns": 6936114588034, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961676.9603002, "monotonic_ns": 6936309009729, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961677.1561458, "monotonic_ns": 6936504855367, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961677.3553944, "monotonic_ns": 6936704103995, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961677.5499845, "monotonic_ns": 6936898694168, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961677.7614849, "monotonic_ns": 6937110194233, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961677.8711557, "monotonic_ns": 6937219865181, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961677.9817717, "monotonic_ns": 6937330481269, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961678.0922558, "monotonic_ns": 6937440965058, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961678.2012317, "monotonic_ns": 6937549941097, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961678.3107736, "monotonic_ns": 6937659482712, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961678.4425938, "monotonic_ns": 6937791303412, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961678.5505996, "monotonic_ns": 6937899309123, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961678.676981, "monotonic_ns": 6938025690617, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961678.7872653, "monotonic_ns": 6938135974680, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961678.8965528, "monotonic_ns": 6938245262296, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961679.0079432, "monotonic_ns": 6938356652452, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961679.1181884, "monotonic_ns": 6938466897793, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961679.2287457, "monotonic_ns": 6938577455391, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961679.3396418, "monotonic_ns": 6938688351637, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961679.4502342, "monotonic_ns": 6938798943750, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961679.559767, "monotonic_ns": 6938908476368, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961679.6687746, "monotonic_ns": 6939017484257, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961679.7794967, "monotonic_ns": 6939128206195, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961679.8895283, "monotonic_ns": 6939238237932, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961680.0001166, "monotonic_ns": 6939348825777, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961680.1095374, "monotonic_ns": 6939458246885, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961680.220364, "monotonic_ns": 6939569073480, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961680.330922, "monotonic_ns": 6939679631699, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961680.4425387, "monotonic_ns": 6939791248122, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961680.5532882, "monotonic_ns": 6939901997782, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961680.6640513, "monotonic_ns": 6940012760858, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961680.771853, "monotonic_ns": 6940120562455, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961680.881061, "monotonic_ns": 6940229770691, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961680.9917767, "monotonic_ns": 6940340486387, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961681.1027856, "monotonic_ns": 6940451495246, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961681.2139187, "monotonic_ns": 6940562628008, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961681.3255615, "monotonic_ns": 6940674271381, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961681.4351928, "monotonic_ns": 6940783902444, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961681.5434144, "monotonic_ns": 6940892123532, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961681.6545615, "monotonic_ns": 6941003271342, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961681.7664094, "monotonic_ns": 6941115118880, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961681.874331, "monotonic_ns": 6941223039832, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961681.9844747, "monotonic_ns": 6941333184262, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961682.093915, "monotonic_ns": 6941442624426, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961682.2026386, "monotonic_ns": 6941551348290, "stage": "type_text", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961682.2496827, "monotonic_ns": 6941598391422, "stage": "type_text", "kind": "stage-end", "data": "type_text"}
+{"wall_time": 1788961682.2497637, "monotonic_ns": 6941598472494, "stage": "click", "kind": "stage-start", "data": "click"}
+{"wall_time": 1788961682.3107548, "monotonic_ns": 6941659464921, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961682.4863164, "monotonic_ns": 6941835026502, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961682.6899912, "monotonic_ns": 6942038700997, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961682.7989814, "monotonic_ns": 6942147690813, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961682.909985, "monotonic_ns": 6942258694692, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961683.0214036, "monotonic_ns": 6942370112961, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961683.1415682, "monotonic_ns": 6942490278047, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961683.2522805, "monotonic_ns": 6942600990086, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961683.3761866, "monotonic_ns": 6942724896820, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961683.4857855, "monotonic_ns": 6942834495261, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961683.597233, "monotonic_ns": 6942945943187, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961683.7078109, "monotonic_ns": 6943056520102, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961683.8186889, "monotonic_ns": 6943167397944, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961683.928184, "monotonic_ns": 6943276893322, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961684.0359805, "monotonic_ns": 6943384689649, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961684.1467676, "monotonic_ns": 6943495476920, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961684.2574756, "monotonic_ns": 6943606184832, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961684.3665779, "monotonic_ns": 6943715287200, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961684.476542, "monotonic_ns": 6943825251330, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961684.5870285, "monotonic_ns": 6943935738276, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961684.696032, "monotonic_ns": 6944044741437, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961684.8046296, "monotonic_ns": 6944153338973, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961684.9151905, "monotonic_ns": 6944263899898, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961685.0254633, "monotonic_ns": 6944374172490, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961685.1343768, "monotonic_ns": 6944483085982, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961685.2444694, "monotonic_ns": 6944593179106, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961685.353452, "monotonic_ns": 6944702161768, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961685.4636195, "monotonic_ns": 6944812328891, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961685.5736463, "monotonic_ns": 6944922355800, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961685.6845136, "monotonic_ns": 6945033223503, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961685.7943456, "monotonic_ns": 6945143055134, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961685.904159, "monotonic_ns": 6945252868451, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961686.0146086, "monotonic_ns": 6945363317816, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961686.1257846, "monotonic_ns": 6945474494010, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961686.2367673, "monotonic_ns": 6945585476179, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961686.3467808, "monotonic_ns": 6945695489933, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961686.4564087, "monotonic_ns": 6945805118311, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961686.5667875, "monotonic_ns": 6945915496943, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961686.6783416, "monotonic_ns": 6946027051370, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961686.7891672, "monotonic_ns": 6946137876292, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961686.900264, "monotonic_ns": 6946248973628, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961687.0102732, "monotonic_ns": 6946358982653, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961687.0224955, "monotonic_ns": 6946371204935, "stage": "click", "kind": "openwindow", "data": {"address": "0x5ecfa918eed0", "workspace": "2", "class": "hypr-use-focus-test"}}
+{"wall_time": 1788961687.0226464, "monotonic_ns": 6946371355309, "stage": "click", "kind": "activewindowv2", "data": {"address": "0x5ecfa918eed0"}}
+{"wall_time": 1788961687.022679, "monotonic_ns": 6946371387810, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "socket2"}}
+{"wall_time": 1788961687.1210191, "monotonic_ns": 6946469728837, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961687.1211624, "monotonic_ns": 6946469871095, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961687.230838, "monotonic_ns": 6946579547985, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961687.230985, "monotonic_ns": 6946579693579, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961687.340804, "monotonic_ns": 6946689513819, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961687.3409503, "monotonic_ns": 6946689659033, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961687.447518, "monotonic_ns": 6946796227017, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961687.4476068, "monotonic_ns": 6946796315524, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961687.6581054, "monotonic_ns": 6947006815076, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961687.6583676, "monotonic_ns": 6947007076478, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961687.7682426, "monotonic_ns": 6947116952022, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961687.7683964, "monotonic_ns": 6947117105080, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961687.898186, "monotonic_ns": 6947246895286, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961687.8984034, "monotonic_ns": 6947247112145, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961688.008748, "monotonic_ns": 6947357458075, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961688.0089982, "monotonic_ns": 6947357706914, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961688.1176863, "monotonic_ns": 6947466395182, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961688.1177936, "monotonic_ns": 6947466502343, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961688.2275662, "monotonic_ns": 6947576275685, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961688.2276988, "monotonic_ns": 6947576407433, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961688.336795, "monotonic_ns": 6947685504201, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961688.337019, "monotonic_ns": 6947685727662, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961688.4472637, "monotonic_ns": 6947795972952, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961688.4473674, "monotonic_ns": 6947796076117, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961688.5588996, "monotonic_ns": 6947907609053, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961688.5591428, "monotonic_ns": 6947907851630, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961688.6698527, "monotonic_ns": 6948018561886, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961688.6700618, "monotonic_ns": 6948018770670, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961688.7810807, "monotonic_ns": 6948129790419, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961688.7813034, "monotonic_ns": 6948130012167, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961688.8922176, "monotonic_ns": 6948240926628, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961688.8924227, "monotonic_ns": 6948241131384, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961689.0022333, "monotonic_ns": 6948350942336, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961689.0024376, "monotonic_ns": 6948351146521, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961689.1124794, "monotonic_ns": 6948461188619, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961689.112693, "monotonic_ns": 6948461401740, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961689.2236075, "monotonic_ns": 6948572316783, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961689.2237916, "monotonic_ns": 6948572500359, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961689.3347154, "monotonic_ns": 6948683424528, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961689.3349001, "monotonic_ns": 6948683609126, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961689.444864, "monotonic_ns": 6948793573157, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961689.4450421, "monotonic_ns": 6948793751042, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961689.5553987, "monotonic_ns": 6948904107682, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961689.555538, "monotonic_ns": 6948904246724, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961689.6642232, "monotonic_ns": 6949012932357, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961689.664437, "monotonic_ns": 6949013145729, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961689.775614, "monotonic_ns": 6949124323006, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961689.775819, "monotonic_ns": 6949124527891, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961689.8864694, "monotonic_ns": 6949235178516, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961689.886671, "monotonic_ns": 6949235379785, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961689.9977844, "monotonic_ns": 6949346493632, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961689.9980054, "monotonic_ns": 6949346714367, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961690.1089194, "monotonic_ns": 6949457628047, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961690.1090045, "monotonic_ns": 6949457713288, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961690.2199697, "monotonic_ns": 6949568678695, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961690.220056, "monotonic_ns": 6949568764767, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961690.3311892, "monotonic_ns": 6949679897971, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961690.3313909, "monotonic_ns": 6949680099841, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961690.4420204, "monotonic_ns": 6949790729696, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961690.4422724, "monotonic_ns": 6949790981200, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961690.5515335, "monotonic_ns": 6949900242678, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961690.5516627, "monotonic_ns": 6949900371160, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961690.6608937, "monotonic_ns": 6950009603032, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961690.6609895, "monotonic_ns": 6950009698121, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961690.7703867, "monotonic_ns": 6950119095865, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961690.7706113, "monotonic_ns": 6950119320028, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961690.8809013, "monotonic_ns": 6950229610313, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961690.8809967, "monotonic_ns": 6950229705202, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961690.990128, "monotonic_ns": 6950338837797, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961690.9903462, "monotonic_ns": 6950339055046, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961691.1014185, "monotonic_ns": 6950450127625, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961691.101537, "monotonic_ns": 6950450245708, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961691.2130406, "monotonic_ns": 6950561750291, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961691.2133203, "monotonic_ns": 6950562029026, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961691.3241024, "monotonic_ns": 6950672811819, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961691.3243182, "monotonic_ns": 6950673027035, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961691.5289018, "monotonic_ns": 6950877611455, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961691.529143, "monotonic_ns": 6950877851788, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961691.6391034, "monotonic_ns": 6950987812794, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961691.6392226, "monotonic_ns": 6950987931117, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961691.7641873, "monotonic_ns": 6951112896665, "stage": "click", "kind": "refocus", "data": {"address": "0x5ecfa918eed0", "source": "poll"}}
+{"wall_time": 1788961691.7644897, "monotonic_ns": 6951113198804, "stage": "click", "kind": "sample", "data": {"address": "0x5ecfa918eed0", "class": "hypr-use-focus-test", "workspace": 2}}
+{"wall_time": 1788961691.7940943, "monotonic_ns": 6951142803438, "stage": "click", "kind": "stage-end", "data": "click"}
+{"wall_time": 1788961691.8198225, "monotonic_ns": 6951168532171, "stage": "cleanup", "kind": "closewindow", "data": "5ecfa9187970"}
+{"wall_time": 1788961691.820072, "monotonic_ns": 6951168780890, "stage": "cleanup", "kind": "closewindow", "data": "5ecfa918eed0"}
+{"wall_time": 1788961691.8204749, "monotonic_ns": 6951169184009, "stage": "cleanup", "kind": "activewindowv2", "data": {"address": "0x5ecfa903e7b0"}}
+{"wall_time": 1788961691.8725479, "monotonic_ns": 6951221257206, "stage": "cleanup", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961691.9830031, "monotonic_ns": 6951331712582, "stage": "cleanup", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}
+{"wall_time": 1788961692.093221, "monotonic_ns": 6951441930602, "stage": "cleanup", "kind": "sample", "data": {"address": "0x5ecfa903e7b0", "class": "t3-code-alpha", "workspace": 2}}

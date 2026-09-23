@@ -1,0 +1,15 @@
+{
+  "fixture": {
+    "attempts": 5,
+    "observed_clicks": 3,
+    "isolated": true,
+    "observed_format": "ODF Spreadsheet",
+    "resized_between_snapshot_and_click": true
+  },
+  "calc_atspi_clicks": 7,
+  "calc_tool_errors": 0,
+  "calc_final_format": "ODF Spreadsheet (.ods)",
+  "off_capture_odf_item_y": -105,
+  "regression_scripts_passed": 18,
+  "scope": "Isolated desktop and private Calc profile; controlled tests, not a full autonomous benchmark."
+}

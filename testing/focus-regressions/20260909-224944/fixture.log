@@ -1,0 +1,47 @@
+Gtk-Message: 22:49:45.208: Not loading module "atk-bridge": The functionality is provided by GTK natively. Please try to not load it.
+/home/anoromi/code/experiments/hypr-use/testing/focus-regression-fixture.py:15: PyGIDeprecationWarning: GLib.unix_signal_add is deprecated; use GLibUnix.signal_add instead
+  GLib.unix_signal_add(GLib.PRIORITY_DEFAULT,signal.SIGTERM,lambda:(Gtk.main_quit(),False)[1]);w.show_all();entry.grab_focus();save();Gtk.main()
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:49:49.650: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:49:49.651: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:49:58.854: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:49:58.855: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:04.070: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:04.071: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:10.804: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:10.805: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:15.343: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:15.343: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:20.309: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:20.310: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:22.330: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:22.331: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:22.331: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:22.331: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:23.990: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:23.991: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:23.991: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:23.991: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:31.153: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:169014): CRITICAL **: 22:50:31.154: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed

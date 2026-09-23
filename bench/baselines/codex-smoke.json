@@ -1,0 +1,95 @@
+{
+  "run_id": "codex-smoke",
+  "driver": "codex exec",
+  "model": "gpt-5.6-sol",
+  "results": [
+    {
+      "id": "t1-01-button",
+      "tier": "T1",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "wrong_action",
+      "detail": "0/1 checks met",
+      "tool_calls": 3,
+      "input_tokens": 161770,
+      "output_tokens": 1090,
+      "cost_usd": 0.0,
+      "wall_s": 64.78573856601724,
+      "exit_code": 0,
+      "oracle_steps": 1,
+      "recording": "/home/anoromi/code/experiments/hypr-use/bench/results/codex-smoke/run-1/t1-01-button/desktop.mp4",
+      "state": {
+        "app": "forms-app",
+        "events": [
+          "launch"
+        ],
+        "fields": {
+          "archive": false,
+          "country": "Japan",
+          "newsletter": false
+        },
+        "launched": true,
+        "observed": true,
+        "pid": 188478,
+        "seed": "t1-01-button",
+        "starttime": 31613171,
+        "apps": {
+          "seed-result": {
+            "seed": "t1-01-button",
+            "task": "t1-01-button",
+            "apps": [
+              "forms-app"
+            ],
+            "processes": [
+              {
+                "pid": 188478,
+                "starttime": 31613171,
+                "app": "forms-app"
+              }
+            ],
+            "workspace": 128,
+            "bench_state_dir": "/home/anoromi/code/experiments/hypr-testbed/lab/seeds/t1-01-button",
+            "ready": true
+          },
+          "seed": {
+            "scenario": "t1-01-button",
+            "state_dir": "/home/anoromi/code/experiments/hypr-testbed/lab/seeds/t1-01-button",
+            "seeded": true,
+            "seed": "t1-01-button",
+            "task": "t1-01-button",
+            "apps": [
+              "forms-app"
+            ],
+            "processes": [
+              {
+                "pid": 188478,
+                "starttime": 31613171,
+                "app": "forms-app"
+              }
+            ],
+            "workspace": 128,
+            "bench_state_dir": "/home/anoromi/code/experiments/hypr-testbed/lab/seeds/t1-01-button",
+            "ready": true
+          },
+          "forms-app": {
+            "app": "forms-app",
+            "events": [
+              "launch"
+            ],
+            "fields": {
+              "archive": false,
+              "country": "Japan",
+              "newsletter": false
+            },
+            "launched": true,
+            "observed": true,
+            "pid": 188478,
+            "seed": "t1-01-button",
+            "starttime": 31613171
+          }
+        }
+      }
+    }
+  ]
+}

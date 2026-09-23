@@ -1,0 +1,13 @@
+[
+  {
+    "type": "thread.started",
+    "thread_id": "01a09b03-9f2f-7e23-b955-ee76007cdeae"
+  },
+  {
+    "type": "turn.started"
+  },
+  {
+    "type": "error",
+    "message": "Reconnecting... 2/5 (stream disconnected before completion: failed to send websocket request: IO error: Broken pipe (os error 32))"
+  }
+]

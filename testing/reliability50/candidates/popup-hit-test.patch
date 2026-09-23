@@ -1,0 +1,52 @@
+diff --git a/src/plugin/main.cpp b/src/plugin/main.cpp
+index 7caf46f..ba54377 100644
+--- a/src/plugin/main.cpp
++++ b/src/plugin/main.cpp
+@@ -1609,6 +1609,18 @@ std::optional<TargetSurface> resolveTargetSurface(const std::string& targetRegex
+         return TargetSurface{.window = window, .surface = window->wlSurface()->resource(), .local = local};
+     }
+ 
++    // XDG popups are separate surface trees, not subsurfaces of the main
++    // window. Hit-test the owned popup tree first, as Hyprland does for normal
++    // pointer input; otherwise a menu click reaches the underlying window.
++    if (window->m_popupHead) {
++        if (const auto popup = window->m_popupHead->at(globalPos, true); popup && popup->wlSurface() && popup->wlSurface()->resource()) {
++            const auto popupLocal = globalPos - popup->coordsGlobal();
++            auto [popupSurface, surfaceLocal] = popup->wlSurface()->resource()->at(popupLocal, true);
++            if (popupSurface)
++                return TargetSurface{.window = window, .surface = popupSurface, .local = surfaceLocal};
++        }
++    }
++
+     Vector2D local;
+     const auto mainBox = windowMainSurfaceGoalBox(window);
+     auto [surface, surfaceLocal] = window->wlSurface()->resource()->at(globalPos - mainBox.pos(), true);
+@@ -2199,6 +2211,28 @@ SDispatchResult dispatchPointerWithMode(const std::string& args, bool windowRela
+     if ((action == "drag" || action == "doubleclick" || action == "double-click") && g_asyncPointerOperation)
+         cancelAsyncPointerOperation();
+ 
++    if (action == "inspect") {
++        std::ostringstream info;
++        const auto current = target->window->position(Desktop::View::IGeometric::GEOMETRIC_CURRENT);
++        const auto goal = target->window->position(Desktop::View::IGeometric::GEOMETRIC_GOAL);
++        info << "global=" << globalPoint->x << "," << globalPoint->y
++             << " current=" << current.x << "," << current.y << " goal=" << goal.x << "," << goal.y
++             << " root=" << (target->surface == target->window->wlSurface()->resource())
++             << " local=" << target->local.x << "," << target->local.y;
++        if (target->window->m_popupHead)
++            target->window->m_popupHead->breadthfirst([](SP<Desktop::View::CPopup> popup, void* data) {
++                if (!popup || !popup->m_mapped || !popup->wlSurface() || !popup->wlSurface()->resource())
++                    return;
++                auto& stream = *static_cast<std::ostringstream*>(data);
++                const auto global = popup->coordsGlobal();
++                const auto relative = popup->coordsRelativeToParent();
++                const auto size = popup->size();
++                stream << " popup(global=" << global.x << "," << global.y << " relative=" << relative.x << "," << relative.y
++                       << " size=" << size.x << "," << size.y << ")";
++            }, &info);
++        return {.success = false, .error = info.str()};
++    }
++
+     wakeBackgroundSurface(target->surface);
+     // Deliver focus to this client's keyboard resource before its pointer
+     // activation. Otherwise a later key enter can restore an older widget and

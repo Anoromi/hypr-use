@@ -1,0 +1,27 @@
+Gtk-Message: 22:47:33.638: Not loading module "atk-bridge": The functionality is provided by GTK natively. Please try to not load it.
+/home/anoromi/code/experiments/hypr-use/testing/focus-regression-fixture.py:15: PyGIDeprecationWarning: GLib.unix_signal_add is deprecated; use GLibUnix.signal_add instead
+  GLib.unix_signal_add(GLib.PRIORITY_DEFAULT,signal.SIGTERM,lambda:(Gtk.main_quit(),False)[1]);w.show_all();entry.grab_focus();save();Gtk.main()
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:47:38.703: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:47:38.704: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:47:49.629: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:47:49.630: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:47:55.120: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:47:55.121: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:48:02.005: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:48:02.006: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:48:06.542: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:48:06.543: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:48:11.080: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed
+
+** (hypr-use-focus-test:166010): CRITICAL **: 22:48:11.081: impl_get_NActions: assertion 'ATK_IS_ACTION (user_data)' failed

@@ -1,0 +1,70 @@
+diff --git a/src/plugin/screenshot_capture.cpp b/src/plugin/screenshot_capture.cpp
+index 37a4328..7fd107c 100644
+--- a/src/plugin/screenshot_capture.cpp
++++ b/src/plugin/screenshot_capture.cpp
+@@ -9,6 +9,7 @@
+ #include <hyprland/src/desktop/state/ViewState.hpp>
+ #include <hyprland/src/desktop/state/WindowState.hpp>
+ #include <hyprland/src/desktop/view/WLSurface.hpp>
++#include <hyprland/src/desktop/view/Popup.hpp>
+ #include <hyprland/src/helpers/time/Time.hpp>
+ #include <hyprland/src/managers/input/InputManager.hpp>
+ #include <hyprland/src/render/OpenGL.hpp>
+@@ -291,7 +292,22 @@ class FullSurfaceVisibleRegionOverride {
+         if (!window || !window->wlSurface() || !window->wlSurface()->resource())
+             return;
+ 
+-        window->wlSurface()->resource()->breadthfirst(
++        m_workspace = window->m_workspace;
++        if (m_workspace) {
++            m_previousForceRendering = m_workspace->m_forceRendering;
++            m_workspace->m_forceRendering = true;
++        }
++        includeTree(window->wlSurface()->resource());
++        if (window->m_popupHead) {
++            window->m_popupHead->breadthfirst([this](WP<Desktop::View::CPopup> popup, void*) {
++                if (popup && popup->aliveAndVisible() && popup->wlSurface() && popup->wlSurface()->resource())
++                    includeTree(popup->wlSurface()->resource());
++            }, nullptr);
++        }
++    }
++
++    void includeTree(const SP<CWLSurfaceResource>& resource) {
++        resource->breadthfirst(
+             [this](SP<CWLSurfaceResource> resource, const Vector2D&, void*) {
+                 auto surface = Desktop::View::CWLSurface::fromResource(resource);
+                 if (!surface)
+@@ -309,6 +325,8 @@ class FullSurfaceVisibleRegionOverride {
+     }
+ 
+     ~FullSurfaceVisibleRegionOverride() {
++        if (m_workspace)
++            m_workspace->m_forceRendering = m_previousForceRendering;
+         for (auto& record : m_records) {
+             if (record.surface)
+                 record.surface->m_visibleRegion = record.visibleRegion;
+@@ -325,6 +343,8 @@ class FullSurfaceVisibleRegionOverride {
+     };
+ 
+     std::vector<Record> m_records;
++    PHLWORKSPACE m_workspace;
++    bool m_previousForceRendering = false;
+ };
+ 
+ CBox renderedWindowBox(const PHLWINDOW& window, CBox box) {
+@@ -439,6 +459,7 @@ bool renderWindowArtifact(const PHLWINDOW& window,
+         return false;
+ 
+     WindowAnimationGoalOverride windowGoal(window);
++    FullSurfaceVisibleRegionOverride fullVisibleRegion(window);
+     const CBox mainBox = renderedWindowMainSurfaceBox(window);
+     CBox sourceCropBox = mainBox.copy().translate(-monitor->m_position).scale(monitor->m_scale <= 0.0 ? 1.0 : monitor->m_scale).round();
+     width = positiveIntFromDouble(sourceCropBox.w);
+@@ -477,7 +498,6 @@ bool renderWindowArtifact(const PHLWINDOW& window,
+ 
+     g_pHyprRenderer->m_bRenderingSnapshot = true;
+     {
+-        FullSurfaceVisibleRegionOverride fullVisibleRegion(window);
+         glClearColor(0.F, 0.F, 0.F, 0.F);
+         glClear(GL_COLOR_BUFFER_BIT);
+         // Standalone capture must ignore workspace fade alpha: hidden workspaces

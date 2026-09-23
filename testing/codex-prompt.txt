@@ -1,0 +1,5 @@
+Test the hypr_agent_test MCP server against the disposable native Wayland app titled "hypr-use test fixture". Use only this MCP server; do not use shell, browser, clipboard, desktop focus, workspace switches, or other servers. Call list_apps, then get_app_state. Select that exact fixture with its returned identity. Use type_text with method="keys" to enter "portal test" into the entry, then click "Record value". Read fresh app state after each action. Report whether the screenshot was readable, typing worked, and the recorded label changed. Stop and report any failed tool instead of using a foreground fallback. Keep the answer brief.
+
+The focus sentinel window must remain foreground. Click the entry in the target app before typing. If accessibility is unavailable, use the screenshot coordinates in the same MCP server.
+
+For this fixed GTK fixture, the 613x758 screenshot has the entry centered at [306,86] and Record value button centered at [306,140]. Verify those positions in the current screenshot and use them if the layout matches.

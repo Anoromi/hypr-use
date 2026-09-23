@@ -1,0 +1,49 @@
+[
+  {
+    "type": "thread.started",
+    "thread_id": "01a09b01-36ae-7731-8847-f662fbec04c0"
+  },
+  {
+    "type": "turn.started"
+  },
+  {
+    "type": "item.completed",
+    "item": {
+      "type": "agent_message",
+      "text": "I\u2019ll call `cua.listApps()` once without interacting with any windows.\n"
+    }
+  },
+  {
+    "type": "item.started",
+    "item": {
+      "type": "mcp_tool_call",
+      "tool": "js",
+      "status": "in_progress"
+    }
+  },
+  {
+    "type": "item.completed",
+    "item": {
+      "type": "mcp_tool_call",
+      "tool": "js",
+      "status": "completed"
+    }
+  },
+  {
+    "type": "item.completed",
+    "item": {
+      "type": "agent_message",
+      "text": "CONNECTION_OK"
+    }
+  },
+  {
+    "type": "turn.completed",
+    "usage": {
+      "input_tokens": 53356,
+      "cached_input_tokens": 32768,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 116,
+      "reasoning_output_tokens": 0
+    }
+  }
+]

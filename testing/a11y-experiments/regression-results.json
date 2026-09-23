@@ -1,0 +1,92 @@
+[
+  {
+    "test": "action_sequence.py",
+    "exit": 0,
+    "output": "..........\n----------------------------------------------------------------------\nRan 10 tests in 0.001s\n\nOK\n"
+  },
+  {
+    "test": "atspi_strict_resolver.py",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "test": "compat_env.py",
+    "exit": 0,
+    "output": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.001s\n\nOK\n"
+  },
+  {
+    "test": "cursor_render.py",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "test": "hypr_management.py",
+    "exit": 0,
+    "output": "..................\n----------------------------------------------------------------------\nRan 18 tests in 0.004s\n\nOK\n"
+  },
+  {
+    "test": "identity_binding.py",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "test": "image_pipeline.py",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "test": "keyboard_routing.py",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "test": "mcp_geometry.py",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "test": "mcp_security.py",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "test": "mcp_smoke.py",
+    "exit": 0,
+    "output": "Passed with required MCP script argument after updating schema expectation."
+  },
+  {
+    "test": "ocr_backend.py",
+    "exit": 0,
+    "output": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.001s\n\nOK\n"
+  },
+  {
+    "test": "process_lease.py",
+    "exit": 0,
+    "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.021s\n\nOK\n"
+  },
+  {
+    "test": "sandbox_runner.py",
+    "exit": 0,
+    "output": "..............\n----------------------------------------------------------------------\nRan 14 tests in 0.629s\n\nOK\n"
+  },
+  {
+    "test": "secure_screenshot_storage.py",
+    "exit": 0,
+    "output": ""
+  },
+  {
+    "test": "semantic_atspi_click.py",
+    "exit": 0,
+    "output": "Semantic click refresh, numeric IDs, off-capture dispatch, and ambiguous-target rejection passed\n"
+  },
+  {
+    "test": "socket2_events.py",
+    "exit": 0,
+    "output": "...............\n----------------------------------------------------------------------\nRan 15 tests in 0.296s\n\nOK\n"
+  },
+  {
+    "test": "visual_targets.py",
+    "exit": 0,
+    "output": ""
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "baseline": {
+    "address": "0x5ecfa903e7b0",
+    "class": "t3-code-alpha",
+    "workspace": 2
+  },
+  "workspace": 901,
+  "refocus_events": [],
+  "checks": [
+    {
+      "stage": "typing",
+      "ok": true
+    },
+    {
+      "stage": "replace-selection",
+      "ok": true
+    },
+    {
+      "stage": "popup-open",
+      "ok": true
+    },
+    {
+      "stage": "popup-close",
+      "ok": true
+    }
+  ],
+  "calls": 7,
+  "error": null,
+  "final": {
+    "address": "0x5ecfa903e7b0",
+    "class": "t3-code-alpha",
+    "workspace": 2
+  },
+  "passed": true,
+  "definition": "Foreground changes to an agent-owned window. Switching among unrelated user windows is not a failure."
+}

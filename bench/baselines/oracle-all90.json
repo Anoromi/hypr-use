@@ -1,0 +1,1238 @@
+{
+  "run_id": "oracle-all90",
+  "driver": "deterministic-mcp-oracle",
+  "tasks": 90,
+  "passed": 30,
+  "results": [
+    {
+      "id": "t1-01-button",
+      "tier": "T1",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "completed"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 7.624095568957273,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t1-02-type",
+      "tier": "T1",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "wrong_action",
+      "detail": "0/1 checks met",
+      "wall_s": 6.804828437976539,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t1-03-submit",
+      "tier": "T1",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "wrong_action",
+      "detail": "0/1 checks met",
+      "wall_s": 12.318749766040128,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t1-04-read",
+      "tier": "T1",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "reported reference"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 4.262752192036714,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t1-05-dialog-close",
+      "tier": "T1",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "notice_closed"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 12.846289485984016,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t1-06-dialog-confirm",
+      "tier": "T1",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "approved"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 7.403296893055085,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t1-07-editor-type",
+      "tier": "T1",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "content"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 6.789355852000881,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t1-08-editor-save",
+      "tier": "T1",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "saved"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 7.288094597985037,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t1-09-list-select",
+      "tier": "T1",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "selected"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 7.839612821000628,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t1-10-list-filter",
+      "tier": "T1",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "wrong_action",
+      "detail": "0/1 checks met",
+      "wall_s": 8.662827901018318,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t1-11-check",
+      "tier": "T1",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "fields.newsletter"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 7.292370971001219,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t1-12-dropdown",
+      "tier": "T1",
+      "passed": false,
+      "score": 1.0,
+      "milestones": [
+        "fields.country"
+      ],
+      "failure_class": "tool_error",
+      "detail": "1/1 checks met",
+      "wall_s": 2.6081149800447747,
+      "oracle_steps": 2,
+      "error": "expected one AX target named 'Country', found []: []"
+    },
+    {
+      "id": "t1-13-next",
+      "tier": "T1",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "page"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 7.183595402981155,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t1-14-window",
+      "tier": "T1",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "notes_done"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 6.3982087330077775,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t1-15-launch",
+      "tier": "T1",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "launched"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 3.9119781789486296,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t2-01",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "milestones": [
+        "draft_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/3 checks met",
+      "wall_s": 22.00827891199151,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t2-02",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/4 checks met",
+      "wall_s": 2.5876190569833852,
+      "oracle_steps": 5,
+      "error": "expected one AX target named 'Country', found []: []"
+    },
+    {
+      "id": "t2-03",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "milestones": [
+        "selected",
+        "observed"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "2/3 checks met",
+      "wall_s": 21.550946924020536,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t2-04",
+      "tier": "T2",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "content",
+        "saved_content",
+        "saved"
+      ],
+      "failure_class": null,
+      "detail": "3/3 checks met",
+      "wall_s": 12.711342436028644,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t2-05",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "draft_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/2 checks met",
+      "wall_s": 14.433548028988298,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t2-06",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "milestones": [
+        "draft_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/3 checks met",
+      "wall_s": 22.02026650100015,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t2-07",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/4 checks met",
+      "wall_s": 2.594248281966429,
+      "oracle_steps": 5,
+      "error": "expected one AX target named 'Country', found []: []"
+    },
+    {
+      "id": "t2-08",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "milestones": [
+        "selected",
+        "observed"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "2/3 checks met",
+      "wall_s": 21.086121210013516,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t2-09",
+      "tier": "T2",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "content",
+        "saved_content",
+        "saved"
+      ],
+      "failure_class": null,
+      "detail": "3/3 checks met",
+      "wall_s": 12.741484733007383,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t2-10",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "draft_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/2 checks met",
+      "wall_s": 13.26261362398509,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t2-11",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "milestones": [
+        "draft_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/3 checks met",
+      "wall_s": 19.765865526976995,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t2-12",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/4 checks met",
+      "wall_s": 2.3645762230153196,
+      "oracle_steps": 5,
+      "error": "expected one AX target named 'Country', found []: []"
+    },
+    {
+      "id": "t2-13",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "milestones": [
+        "selected",
+        "observed"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "2/3 checks met",
+      "wall_s": 20.920788325020112,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t2-14",
+      "tier": "T2",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "content",
+        "saved_content",
+        "saved"
+      ],
+      "failure_class": null,
+      "detail": "3/3 checks met",
+      "wall_s": 11.95379066397436,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t2-15",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "draft_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/2 checks met",
+      "wall_s": 13.610246832016855,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t2-16",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "milestones": [
+        "draft_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/3 checks met",
+      "wall_s": 20.07841274398379,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t2-17",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/4 checks met",
+      "wall_s": 2.4732074419735,
+      "oracle_steps": 5,
+      "error": "expected one AX target named 'Country', found []: []"
+    },
+    {
+      "id": "t2-18",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.6666666666666666,
+      "milestones": [
+        "selected",
+        "observed"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "2/3 checks met",
+      "wall_s": 22.0944222350372,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t2-19",
+      "tier": "T2",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "content",
+        "saved_content",
+        "saved"
+      ],
+      "failure_class": null,
+      "detail": "3/3 checks met",
+      "wall_s": 12.14897983201081,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t2-20",
+      "tier": "T2",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "draft_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/2 checks met",
+      "wall_s": 13.236681031004991,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t3-01",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "submitted"
+      ],
+      "failure_class": "tool_error",
+      "detail": "1/2 checks met",
+      "wall_s": 34.730621850991156,
+      "oracle_steps": 6,
+      "error": "expected one AX target named 'Confirm', found []: []"
+    },
+    {
+      "id": "t3-02",
+      "tier": "T3",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "sort",
+        "top_recorded",
+        "top_three"
+      ],
+      "failure_class": null,
+      "detail": "3/3 checks met",
+      "wall_s": 23.72411818394903,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t3-03",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.4,
+      "milestones": [
+        "replaced",
+        "saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "2/5 checks met",
+      "wall_s": 29.16483507899102,
+      "oracle_steps": 4,
+      "error": null
+    },
+    {
+      "id": "t3-04",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/1 checks met",
+      "wall_s": 7.788024071021937,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Continue', found []: []"
+    },
+    {
+      "id": "t3-05",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "notes_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/2 checks met",
+      "wall_s": 17.546557041991036,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t3-06",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "submitted"
+      ],
+      "failure_class": "tool_error",
+      "detail": "1/2 checks met",
+      "wall_s": 35.65647359896684,
+      "oracle_steps": 6,
+      "error": "expected one AX target named 'Confirm', found []: []"
+    },
+    {
+      "id": "t3-07",
+      "tier": "T3",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "sort",
+        "top_recorded",
+        "top_three"
+      ],
+      "failure_class": null,
+      "detail": "3/3 checks met",
+      "wall_s": 22.52651622099802,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t3-08",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.4,
+      "milestones": [
+        "replaced",
+        "saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "2/5 checks met",
+      "wall_s": 23.990724974952172,
+      "oracle_steps": 4,
+      "error": null
+    },
+    {
+      "id": "t3-09",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/1 checks met",
+      "wall_s": 6.926706105004996,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Continue', found []: []"
+    },
+    {
+      "id": "t3-10",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "notes_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/2 checks met",
+      "wall_s": 15.632666509016417,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t3-11",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "submitted"
+      ],
+      "failure_class": "tool_error",
+      "detail": "1/2 checks met",
+      "wall_s": 32.14420095499372,
+      "oracle_steps": 6,
+      "error": "expected one AX target named 'Confirm', found []: []"
+    },
+    {
+      "id": "t3-12",
+      "tier": "T3",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "sort",
+        "top_recorded",
+        "top_three"
+      ],
+      "failure_class": null,
+      "detail": "3/3 checks met",
+      "wall_s": 20.440734683012124,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t3-13",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.4,
+      "milestones": [
+        "replaced",
+        "saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "2/5 checks met",
+      "wall_s": 25.422089810017496,
+      "oracle_steps": 4,
+      "error": null
+    },
+    {
+      "id": "t3-14",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/1 checks met",
+      "wall_s": 7.240841316990554,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Continue', found []: []"
+    },
+    {
+      "id": "t3-15",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "notes_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/2 checks met",
+      "wall_s": 15.382025755010545,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t3-16",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "submitted"
+      ],
+      "failure_class": "tool_error",
+      "detail": "1/2 checks met",
+      "wall_s": 34.65199235395994,
+      "oracle_steps": 6,
+      "error": "expected one AX target named 'Confirm', found []: []"
+    },
+    {
+      "id": "t3-17",
+      "tier": "T3",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "sort",
+        "top_recorded",
+        "top_three"
+      ],
+      "failure_class": null,
+      "detail": "3/3 checks met",
+      "wall_s": 23.341731017979328,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t3-18",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.4,
+      "milestones": [
+        "replaced",
+        "saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "2/5 checks met",
+      "wall_s": 25.685892851965036,
+      "oracle_steps": 4,
+      "error": null
+    },
+    {
+      "id": "t3-19",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/1 checks met",
+      "wall_s": 8.05379808600992,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Continue', found []: []"
+    },
+    {
+      "id": "t3-20",
+      "tier": "T3",
+      "passed": false,
+      "score": 0.5,
+      "milestones": [
+        "notes_saved"
+      ],
+      "failure_class": "wrong_action",
+      "detail": "1/2 checks met",
+      "wall_s": 17.142171554034576,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t4-01",
+      "tier": "T4",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "milestones": [
+        "submitted"
+      ],
+      "failure_class": "tool_error",
+      "detail": "1/3 checks met",
+      "wall_s": 20.147567336040083,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Confirm', found []: []"
+    },
+    {
+      "id": "t4-02",
+      "tier": "T4",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "apps.dialog-storm.delay_approved",
+        "saved_content"
+      ],
+      "failure_class": null,
+      "detail": "2/2 checks met",
+      "wall_s": 23.12920246896101,
+      "oracle_steps": 4,
+      "error": null
+    },
+    {
+      "id": "t4-03",
+      "tier": "T4",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "target_complete",
+        "distractor_untouched"
+      ],
+      "failure_class": null,
+      "detail": "2/2 checks met",
+      "wall_s": 12.007111574988812,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t4-04",
+      "tier": "T4",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "wrong_action",
+      "detail": "0/1 checks met",
+      "wall_s": 18.75215496396413,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t4-05",
+      "tier": "T4",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/2 checks met",
+      "wall_s": 9.397879214957356,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Item 905', found []: []"
+    },
+    {
+      "id": "t4-06",
+      "tier": "T4",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "milestones": [
+        "submitted"
+      ],
+      "failure_class": "tool_error",
+      "detail": "1/3 checks met",
+      "wall_s": 20.6234845140134,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Confirm', found []: []"
+    },
+    {
+      "id": "t4-07",
+      "tier": "T4",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "apps.dialog-storm.delay_approved",
+        "saved_content"
+      ],
+      "failure_class": null,
+      "detail": "2/2 checks met",
+      "wall_s": 25.915975585987326,
+      "oracle_steps": 4,
+      "error": null
+    },
+    {
+      "id": "t4-08",
+      "tier": "T4",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "target_complete",
+        "distractor_untouched"
+      ],
+      "failure_class": null,
+      "detail": "2/2 checks met",
+      "wall_s": 11.942130158015061,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t4-09",
+      "tier": "T4",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "wrong_action",
+      "detail": "0/1 checks met",
+      "wall_s": 20.335358056006953,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t4-10",
+      "tier": "T4",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/2 checks met",
+      "wall_s": 10.744306681968737,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Item 910', found []: []"
+    },
+    {
+      "id": "t4-11",
+      "tier": "T4",
+      "passed": false,
+      "score": 0.3333333333333333,
+      "milestones": [
+        "submitted"
+      ],
+      "failure_class": "tool_error",
+      "detail": "1/3 checks met",
+      "wall_s": 23.652552913001273,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Confirm', found []: []"
+    },
+    {
+      "id": "t4-12",
+      "tier": "T4",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "apps.dialog-storm.delay_approved",
+        "saved_content"
+      ],
+      "failure_class": null,
+      "detail": "2/2 checks met",
+      "wall_s": 23.473482209956273,
+      "oracle_steps": 4,
+      "error": null
+    },
+    {
+      "id": "t4-13",
+      "tier": "T4",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "target_complete",
+        "distractor_untouched"
+      ],
+      "failure_class": null,
+      "detail": "2/2 checks met",
+      "wall_s": 12.900871426973026,
+      "oracle_steps": 2,
+      "error": null
+    },
+    {
+      "id": "t4-14",
+      "tier": "T4",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "wrong_action",
+      "detail": "0/1 checks met",
+      "wall_s": 20.146717492025346,
+      "oracle_steps": 3,
+      "error": null
+    },
+    {
+      "id": "t4-15",
+      "tier": "T4",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/2 checks met",
+      "wall_s": 8.299988048966043,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Item 915', found []: []"
+    },
+    {
+      "id": "t5-01",
+      "tier": "T5",
+      "passed": false,
+      "score": 0.2,
+      "milestones": [
+        "apps.list-app.selected"
+      ],
+      "failure_class": "tool_error",
+      "detail": "1/5 checks met",
+      "wall_s": 88.08521956403274,
+      "oracle_steps": 27,
+      "error": "expected one AX target named 'Country', found []: []"
+    },
+    {
+      "id": "t5-02",
+      "tier": "T5",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/2 checks met",
+      "wall_s": 4.388196801999584,
+      "oracle_steps": 5,
+      "error": "cannot access local variable 'idx' where it is not associated with a value"
+    },
+    {
+      "id": "t5-03",
+      "tier": "T5",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/2 checks met",
+      "wall_s": 5.876789880974684,
+      "oracle_steps": 3,
+      "error": "cannot access local variable 'idx' where it is not associated with a value"
+    },
+    {
+      "id": "t5-04",
+      "tier": "T5",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/2 checks met",
+      "wall_s": 3.937928518978879,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Cancel', found []: []"
+    },
+    {
+      "id": "t5-05",
+      "tier": "T5",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/1 checks met",
+      "wall_s": 5.163639385951683,
+      "oracle_steps": 2,
+      "error": "cannot access local variable 'idx' where it is not associated with a value"
+    },
+    {
+      "id": "t5-06",
+      "tier": "T5",
+      "passed": false,
+      "score": 0.2,
+      "milestones": [
+        "apps.list-app.selected"
+      ],
+      "failure_class": "tool_error",
+      "detail": "1/5 checks met",
+      "wall_s": 92.50385370396543,
+      "oracle_steps": 27,
+      "error": "expected one AX target named 'Country', found []: []"
+    },
+    {
+      "id": "t5-07",
+      "tier": "T5",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/2 checks met",
+      "wall_s": 7.74570472096093,
+      "oracle_steps": 5,
+      "error": "cannot access local variable 'idx' where it is not associated with a value"
+    },
+    {
+      "id": "t5-08",
+      "tier": "T5",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/2 checks met",
+      "wall_s": 5.75522547098808,
+      "oracle_steps": 3,
+      "error": "cannot access local variable 'idx' where it is not associated with a value"
+    },
+    {
+      "id": "t5-09",
+      "tier": "T5",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/2 checks met",
+      "wall_s": 3.268650358018931,
+      "oracle_steps": 3,
+      "error": "expected one AX target named 'Cancel', found []: []"
+    },
+    {
+      "id": "t5-10",
+      "tier": "T5",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/1 checks met",
+      "wall_s": 4.281245185993612,
+      "oracle_steps": 2,
+      "error": "cannot access local variable 'idx' where it is not associated with a value"
+    },
+    {
+      "id": "t6-01-rapid-200",
+      "tier": "T6",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/1 checks met",
+      "wall_s": 49.40460014203563,
+      "oracle_steps": 1,
+      "error": "Execution timed out after 45000 ms. Completed actions may already be applied. Inspect state and increase timeout_ms before retrying. JavaScript state reset."
+    },
+    {
+      "id": "t6-02-ax-1000",
+      "tier": "T6",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/1 checks met",
+      "wall_s": 2.3431940879672766,
+      "oracle_steps": 1,
+      "error": "app not listed"
+    },
+    {
+      "id": "t6-03-launch-10",
+      "tier": "T6",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "tool_error",
+      "detail": "0/1 checks met",
+      "wall_s": 1.2377464710152708,
+      "oracle_steps": 1,
+      "error": "hyprnav: agent has no workspace; is the daemon running?"
+    },
+    {
+      "id": "t6-04-restart",
+      "tier": "T6",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "tool_passed"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 8.47055355401244,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t6-05-parallel-2",
+      "tier": "T6",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "tool_passed"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 5.963395908998791,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t6-06-unicode",
+      "tier": "T6",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "wrong_action",
+      "detail": "0/1 checks met",
+      "wall_s": 11.996922293037642,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t6-07-newlines",
+      "tier": "T6",
+      "passed": false,
+      "score": 0.0,
+      "milestones": [],
+      "failure_class": "wrong_action",
+      "detail": "0/1 checks met",
+      "wall_s": 11.736291226989124,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t6-08-click-index",
+      "tier": "T6",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "tool_passed"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 12.286488445010036,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t6-09-click-pixel",
+      "tier": "T6",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "tool_passed"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 8.844437587016728,
+      "oracle_steps": 1,
+      "error": null
+    },
+    {
+      "id": "t6-10-tracking",
+      "tier": "T6",
+      "passed": true,
+      "score": 1.0,
+      "milestones": [
+        "tool_passed"
+      ],
+      "failure_class": null,
+      "detail": "1/1 checks met",
+      "wall_s": 90.12064962799195,
+      "oracle_steps": 1,
+      "error": null
+    }
+  ]
+}

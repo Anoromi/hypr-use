@@ -1,0 +1,16 @@
+[
+  {
+    "type": "thread.started",
+    "thread_id": "01a09b05-4106-7210-8f6e-f0b2b6b75660"
+  },
+  {
+    "type": "turn.started"
+  },
+  {
+    "type": "item.completed",
+    "item": {
+      "type": "error",
+      "message": "Falling back from WebSockets to HTTPS transport. stream disconnected before completion: idle timeout sending websocket request"
+    }
+  }
+]

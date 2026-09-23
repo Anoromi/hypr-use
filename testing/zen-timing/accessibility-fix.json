@@ -1,0 +1,36 @@
+{
+  "accessibility": {
+    "status": "ok",
+    "resolutionMode": "observation-compatible",
+    "appName": "Zen",
+    "appPid": 7890,
+    "windowTitle": "Google \u2014 Zen Browser",
+    "rootIdentity": {
+      "windowIndex": 0,
+      "title": "Google \u2014 Zen Browser",
+      "role": "frame",
+      "accessibleId": "",
+      "bounds": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1756.0,
+        "height": 1118.0
+      }
+    },
+    "windowBounds": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 1756.0,
+      "height": 1118.0
+    },
+    "treeTruncated": true,
+    "treeTruncatedReason": "record-limit"
+  },
+  "element_count": 500,
+  "element_sources": [
+    "atspi"
+  ],
+  "foreground_class": "t3-code-alpha",
+  "foreground_workspace": 1,
+  "fix": "Set org.a11y.Status.IsEnabled=true, then portal press_key Escape to initialize background Zen."
+}

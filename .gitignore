@@ -15,3 +15,21 @@ node_modules/
 /testing/debug/
 
 /testing/calc-session/
+
+# large generated evidence and vendored downloads; keep the repo light
+/testing/unified-benchmark/
+/research/2026-09-12/chatgpt.deb
+/research/2026-09-12/package/
+/research/2026-09-12/package-files.txt
+/research/2026-09-12/published-timings/
+/research/2026-09-12/codex-desktop-linux/
+/research/2026-09-12/codex-computer-use-cli/
+/research/2026-09-12/open-codex-computer-use/
+/research/2026-09-12/macuse/
+# raw session dumps and caches from a11y/calc experiments
+/testing/a11y-experiments/session/
+/testing/a11y-experiments/*.jsonl
+/testing/a11y-experiments/*.log
+/testing/calc-session-a11y-20260909/
+/testing/calc-data/
+/testing/zen-timing/wire*.json
