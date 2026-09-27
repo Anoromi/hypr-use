@@ -3,8 +3,50 @@
 import json
 import os
 from pathlib import Path
+import shutil
 import socket
+import subprocess
 import sys
+
+DEFAULT_MEMORY_MAX = "8G"
+HOST_BIN = "/run/current-system/sw/bin"
+
+
+def systemd_tool(name):
+    return shutil.which(name) or (f"{HOST_BIN}/{name}" if os.access(f"{HOST_BIN}/{name}", os.X_OK) else None)
+
+
+def user_manager_reachable(systemctl):
+    """False in non-systemd sessions and on the lab's private D-Bus."""
+    try:
+        probe = subprocess.run([systemctl, "--user", "show", "-p", "Version", "--value"],
+                               stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=5)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return probe.returncode == 0 and bool(probe.stdout.strip())
+
+
+def enter_scope(args):
+    """Re-exec this launcher inside a capped transient scope.
+
+    Node, the Python portal backend, and every worker they start inherit the
+    scope, so a leak is OOM-killed inside it instead of failing the caller's
+    scope (T3 Code's, when an agent starts the server). OOMPolicy=continue
+    keeps the scope running after a kill. Returns only when no user manager
+    is reachable or scoping is disabled; the server then runs unscoped.
+    """
+    if os.environ.get("HYPR_USE_MCP_SCOPE") or os.environ.get("HYPR_USE_NO_SCOPE") == "1":
+        return
+    systemd_run, systemctl = systemd_tool("systemd-run"), systemd_tool("systemctl")
+    if not systemd_run or not systemctl or not user_manager_reachable(systemctl):
+        return
+    memory_max = os.environ.get("HYPR_USE_MEMORY_MAX") or DEFAULT_MEMORY_MAX
+    unit = f"hypr-use-mcp-{os.getpid()}.scope"
+    argv = [systemd_run, "--user", "--scope", "--quiet", "--collect", "--unit", unit,
+            "--description", "hypr-use MCP server",
+            "-p", f"MemoryMax={memory_max}", "-p", "MemorySwapMax=0", "-p", "OOMPolicy=continue",
+            sys.executable, os.path.abspath(__file__), *args]
+    os.execve(systemd_run, argv, dict(os.environ, HYPR_USE_MCP_SCOPE=unit))
 
 
 def usage():
@@ -19,6 +61,7 @@ def main():
     if args not in ([], ["--headless"]):
         usage()
         return 2
+    enter_scope(args)
     env = os.environ.copy()
     if args == ["--headless"]:
         config = Path(os.environ.get("HYPR_USE_HEADLESS_ENV", str(Path.home() / ".local/share/hypr-use/headless-env.json")))

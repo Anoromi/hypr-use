@@ -12,6 +12,28 @@ The original feasibility reports compare Hypr-Agent-Portal 0.4.0 with the smalle
 
 [Local Hyprnav comparison](HYPRNAV-COMPARISON.md) explains the C++ plugin / Rust daemon split and how it could inform hypr-use.
 
+## Memory cap for the packaged server
+
+`nix run .#hypr-use-mcp` (or the installed `bin/hypr-use-mcp`) re-executes itself
+under
+
+```sh
+systemd-run --user --scope --unit hypr-use-mcp-<pid> --collect \
+  -p MemoryMax=8G -p MemorySwapMax=0 -p OOMPolicy=continue
+```
+
+The Node server, its JavaScript worker, the Python portal backend, and any app
+started through `hyprnav spawn` all run in that scope. If one of them leaks,
+the kernel kills it at 8G inside the scope. It does not grow inside the
+caller's scope, which is T3 Code's when an agent starts the server, and take
+that scope down. Set `HYPR_USE_MEMORY_MAX` (for example `12G`) to change the
+cap, or `HYPR_USE_NO_SCOPE=1` to skip the scope. If no systemd user manager is
+reachable (a non-systemd session, or inside the testbed lab with its private
+D-Bus), the launcher starts the server directly. Inside the lab, the server is
+still covered by the lab's own scope. Check a running server with
+`systemctl --user list-units 'hypr-use-mcp-*'` and
+`systemctl --user show hypr-use-mcp-<pid>.scope -p MemoryCurrent`.
+
 - [Codex implementation and model expectations](reports/codex-computer-use.html)
 - [Hyprland feasibility and limits](reports/hyprland-feasibility.html)
 
