@@ -122,12 +122,15 @@ export function createFacade(call, output, options={}) {
       paste:async(text,opt={})=>{if(opt.format&&opt.format!=='text')throw Error('Rich paste is not implemented; use format=text');await act('paste_text',{text:string(text,'text'),prepare_grid:false});},
       setValue:async(index,value)=>{const t=targetArgs(index);if(!t.element_index)throw Error('setValue requires element index');await act('set_value',{...t,value:string(value,'value')});},
       selectText:async(index,text,opt={})=>{const t=targetArgs(index);if(!t.element_index)throw Error('selectText requires element index');if(opt.selectionType&&!['text','cursor_before','cursor_after'].includes(opt.selectionType))throw Error('Invalid selectionType');await act('select_text',{...t,text:string(text,'text'),prefix:opt.prefix??'',suffix:opt.suffix??'',selection:opt.selectionType??'text'});},
+      startRecording:async(opt={})=>{if(!options.recorder)throw Error('Recording is not available in this session');const r=await options.recorder.start(name,opt);output({type:'text',text:`Recording ${name} to ${r.path} (${r.width}x${r.height} at ${r.fps} fps). Call stopRecording() to finish the file.`});return r;},
+      stopRecording:async()=>stopRecording(),
       performSecondaryAction:async(index,action)=>{const t=targetArgs(index);if(!t.element_index)throw Error('Secondary action requires element index');await act('perform_secondary_action',{...t,action:string(action,'action')});}
     };
     Object.assign(app,createWorkflows(app,async()=> (await observe()).structuredContent,output,state=>ax({structuredContent:state,content:[]},name,{disableDiffing:true})));
     return Object.freeze(app);
   }
-  const cua={getApp:input=>bindApp(input),listApps:apps,getState:async(opt={})=>{const state={apps:await apps({emit:false}),browsers:[]};if(opt.emit!==false)output({type:'text',text:JSON.stringify(state)});return state;}};
+  async function stopRecording(){if(!options.recorder)throw Error('Recording is not available in this session');const r=await options.recorder.stop();output({type:'text',text:JSON.stringify(r)});return r;}
+  const cua={stopRecording,getApp:input=>bindApp(input),listApps:apps,getState:async(opt={})=>{const state={apps:await apps({emit:false}),browsers:[]};if(opt.emit!==false)output({type:'text',text:JSON.stringify(state)});return state;}};
   const hyprnav=options.hyprnav??null;
   cua.myWorkspace=()=>{const w=hyprnav?.myWorkspace()??null;output({type:'text',text:JSON.stringify(w)});return w;};
   cua.setLabel=async text=>{const r=await (hyprnav?hyprnav.setLabel(string(text,'label')):Promise.resolve({label:text}));output({type:'text',text:JSON.stringify(r)});return r;};

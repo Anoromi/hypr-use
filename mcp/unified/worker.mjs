@@ -6,12 +6,14 @@ import {parse} from 'acorn';
 import {fileURLToPath} from 'node:url';
 import {createFacade} from './facade.mjs';
 import {HyprnavAgent} from './hyprnav-bridge.mjs';
+import {createRecorder} from './recorder.mjs';
 const backend=spawn(process.env.HYPR_USE_PYTHON??'python3',[fileURLToPath(new URL('./backend-launch.py',import.meta.url))],{stdio:['pipe','pipe','inherit']});
 let next=0,content=[],timings=[];const pending=new Map();const inFlight=new Set();
 readline.createInterface({input:backend.stdout}).on('line',line=>{try{const r=JSON.parse(line),p=pending.get(r.id);if(!p)return;pending.delete(r.id);r.error?p.reject(Error(r.error.message)):p.resolve(r.result);}catch(e){for(const p of pending.values())p.reject(e);pending.clear();}});
 backend.on('exit',()=>{for(const p of pending.values())p.reject(Error('Portal process exited'));pending.clear();});
+const send=(name,args)=>new Promise((resolve,reject)=>{const id=++next;pending.set(id,{resolve,reject});backend.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method:'tools/call',params:{name,arguments:args}})+'\n');});
 async function dispatch(name,args){const start=performance.now();try{
- const r=await new Promise((resolve,reject)=>{const id=++next;pending.set(id,{resolve,reject});backend.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method:'tools/call',params:{name,arguments:args}})+'\n');});
+ const r=await send(name,args);
  const timing={name,duration_ms:performance.now()-start,backend:r._meta?.['hypr-use/timing'],images:r._meta?.['hypr-use/images']};timings.push(timing);process.send({event:'operation',timing});
  if(r.isError)throw Error(r.content.filter(x=>x.type==='text').map(x=>x.text).join('\n'));
  return r;
@@ -20,8 +22,16 @@ const agent=new HyprnavAgent({id:process.env.HYPR_USE_AGENT_ID??`cua-${process.p
 if(process.env.HYPR_USE_AGENT_JSON){try{agent.info=JSON.parse(process.env.HYPR_USE_AGENT_JSON);agent.enabled=true;agent.label=agent.info.label;}catch{}}
 const OBSERVE=new Set(['list_apps','get_ax_state','screenshot','get_app_state']);
 function call(name,args){const p=dispatch(name,args);inFlight.add(p);p.then(()=>{inFlight.delete(p);agent.beat({state:'working',target:args?.app,action:OBSERVE.has(name)?undefined:name});},()=>inFlight.delete(p));return p;}
-const output=block=>{content.push(block);process.send({event:'output',block});};
-const {cua,cleanup,executeWorkflow}=createFacade(call,output,{aliases:JSON.parse(process.env.HYPR_USE_APP_ALIASES??'{}'),commandModifier:process.env.HYPR_USE_COMMAND_MODIFIER??'ctrl',hyprnav:agent});
+// Cap each call's output: a runaway loop that writes frames or logs would
+// otherwise stream tens of megabytes through IPC and stdio until the client
+// drops the connection. Later blocks are counted and reported, not sent.
+const MAX_OUTPUT=Number(process.env.HYPR_USE_MAX_OUTPUT_BYTES??4*1024*1024);
+let outputBytes=0,dropped=0;
+const output=block=>{const size=(block.text??block.data??'').length;if(outputBytes+size>MAX_OUTPUT){dropped++;return;}outputBytes+=size;content.push(block);process.send({event:'output',block});};
+const droppedNotice=()=>dropped?[{type:'text',text:`Output limit reached: ${dropped} later block(s) dropped after ${Math.round(outputBytes/1024)} KB. Write less per call; for video use app.startRecording().`}]:[];
+// Recording frames go straight to ffmpeg; they bypass timings and in-flight tracking so calls still finish while a recording runs.
+const recorder=createRecorder(async app=>{const r=await send('get_screenshot',{app});if(r.isError)throw Error(r.content.filter(x=>x.type==='text').map(x=>x.text).join('\n'));const block=r.content.filter(x=>x.type==='image').at(-1);if(!block)throw Error('Screenshot unavailable');return Uint8Array.from(Buffer.from(block.data,'base64'));});
+const {cua,cleanup,executeWorkflow}=createFacade(call,output,{aliases:JSON.parse(process.env.HYPR_USE_APP_ALIASES??'{}'),commandModifier:process.env.HYPR_USE_COMMAND_MODIFIER??'ctrl',hyprnav:agent,recorder});
 let nextTimer=0;const timers=new Map();
 function safeSetTimeout(callback,delay=0,...args){
  if(typeof callback!=='function')throw Error('setTimeout callback must be a function');
@@ -39,9 +49,9 @@ function rewrite(code){const ast=parse(code,{ecmaVersion:'latest',allowAwaitOuts
  if(replacement!==undefined){out+=code.slice(last,n.start)+replacement;last=n.end;}}
  return out+code.slice(last);
 }
-process.on('message',async msg=>{content=[];timings=[];try{if(msg.kind==='cleanup'){await cleanup();process.send({ok:true,content:[],timings});return;}
+process.on('message',async msg=>{content=[];timings=[];outputBytes=0;dropped=0;try{if(msg.kind==='cleanup'){await cleanup();process.send({ok:true,content:[],timings});return;}
  if(msg.kind==='workflow'){const value=await executeWorkflow(msg.name,msg.args);output({type:'text',text:JSON.stringify(value)});process.send({ok:true,content,timings});return;}
  const transformed=rewrite(msg.code);await new vm.Script(`(async()=>{${transformed}\n})()`).runInContext(context,{timeout:Math.min(msg.timeout,1000)});
  while(inFlight.size)await Promise.all([...inFlight]);
- process.send({ok:true,content,timings});clearTimers();
-}catch(e){while(inFlight.size)await Promise.allSettled([...inFlight]);process.send({ok:false,content:[...content,{type:'text',text:e.message}],timings});clearTimers();}});
+ process.send({ok:true,content:[...content,...droppedNotice()],timings});clearTimers();
+}catch(e){while(inFlight.size)await Promise.allSettled([...inFlight]);process.send({ok:false,content:[...content,...droppedNotice(),{type:'text',text:e.message}],timings});clearTimers();}});

@@ -112,3 +112,17 @@ test('a bound dialog becomes the hyprnav target so the live view follows it',asy
  assert.deepEqual(beats,[{state:'working',target:'address:0xdlg',action:'dialog Save File'}]);
  await dialog.click(1);
 });
+
+test('recorder reads frame sizes and rejects bad options',async()=>{
+ const {imageSize,createRecorder}=await import('./recorder.mjs');
+ const png=Buffer.alloc(24);png.writeUInt32BE(0x89504e47,0);png.writeUInt32BE(641,16);png.writeUInt32BE(480,20);
+ assert.deepEqual(imageSize(png),{width:641,height:480});
+ const jpeg=Buffer.from([0xff,0xd8,0xff,0xe0,0,4,0,0,0xff,0xc0,0,11,8,0,200,1,44,3,0,0,0]);
+ assert.deepEqual(imageSize(jpeg),{width:300,height:200});
+ assert.throws(()=>imageSize(Buffer.from('nope')),/PNG or JPEG/);
+ const recorder=createRecorder(async()=>png);
+ await assert.rejects(recorder.start('app',{fps:60}),/fps/);
+ await assert.rejects(recorder.start('app',{path:'relative.mp4'}),/absolute/);
+ await assert.rejects(recorder.stop(),/No recording/);
+});
+test('stdio output is capped per call',async()=>{const child=spawn(process.execPath,[new URL('./server.mjs',import.meta.url).pathname],{stdio:['pipe','pipe','pipe'],env:{...process.env,HYPR_USE_MAX_OUTPUT_BYTES:'1000',HYPR_USE_NO_HYPRNAV:'1'}});let id=0;const pending=new Map();readline.createInterface({input:child.stdout}).on('line',s=>{const r=JSON.parse(s);pending.get(r.id)?.(r);});const call=code=>new Promise(resolve=>{pending.set(++id,resolve);child.stdin.write(JSON.stringify({jsonrpc:'2.0',id,method:'tools/call',params:{name:'js',arguments:{code}}})+'\n');});try{let r=await call("for(let i=0;i<10;i++)nodeRepl.write('x'.repeat(300));");assert.equal(r.result.isError,false);assert.equal(r.result.content.length,4);assert.match(r.result.content.at(-1).text,/7 later block\(s\) dropped/);r=await call("nodeRepl.write('small');");assert.deepEqual(r.result.content.map(x=>x.text),['small']);}finally{child.stdin.end();}});
