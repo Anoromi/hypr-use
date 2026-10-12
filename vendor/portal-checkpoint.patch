@@ -1386,7 +1386,7 @@ index 0000000..5b8f6cb
 +    return std::nullopt;
 +}
 diff --git a/src/plugin/main.cpp b/src/plugin/main.cpp
-index 2881342..7caf46f 100644
+index 2881342..8db10e5 100644
 --- a/src/plugin/main.cpp
 +++ b/src/plugin/main.cpp
 @@ -1,4 +1,5 @@
@@ -1411,7 +1411,44 @@ index 2881342..7caf46f 100644
      }
  
      if (const auto it = keys.find(raw); it != keys.end())
-@@ -1650,6 +1656,42 @@ std::optional<TargetSurface> resolveTargetMainSurface(const std::string& targetR
+@@ -1294,6 +1300,11 @@ struct WorkspaceSession {
+     PHLWINDOWREF root;
+     pid_t        pid = -1;
+     PHLWORKSPACE targetWorkspace;
++    // Windows of the same client that were already on another workspace when
++    // the session began. They are someone's other windows of a multi-window
++    // app (a second browser window), not dialogs of the action: never move
++    // them. Windows that open during the session are still gathered.
++    std::vector<PHLWINDOWREF> elsewhere;
+ };
+ 
+ std::vector<WorkspaceSession> g_workspaceSessions;
+@@ -1373,11 +1384,24 @@ bool workspaceSessionMatchesWindow(const WorkspaceSession& session, const PHLWIN
+     const auto root = session.root.lock();
+     if (root && window == root)
+         return true;
++    if (std::ranges::any_of(session.elsewhere, [&window](const auto& other) { return other.lock() == window; }))
++        return false;
+     if (root && sameClientFamily(root, window))
+         return true;
+     return session.pid > 0 && window->getPID() == session.pid;
+ }
+ 
++void rememberWindowsElsewhere(WorkspaceSession& session) {
++    const auto root = session.root.lock();
++    if (!root)
++        return;
++
++    for (const auto& window : Desktop::windowState()->windows()) {
++        if (window != root && window->m_workspace != root->m_workspace && workspaceSessionMatchesWindow(session, window))
++            session.elsewhere.emplace_back(window);
++    }
++}
++
+ void constrainRelatedWindowFocusAndLayer(const PHLWINDOW& window) {
+     if (!window)
+         return;
+@@ -1650,6 +1674,42 @@ std::optional<TargetSurface> resolveTargetMainSurface(const std::string& targetR
      return TargetSurface{.window = window, .surface = window->wlSurface()->resource(), .local = mainBox.middle()};
  }
  
@@ -1454,7 +1491,7 @@ index 2881342..7caf46f 100644
  struct PointerFocusRestore {
      SP<CWLSurfaceResource> previousSurface;
      Vector2D               previousLocal;
-@@ -2031,6 +2073,7 @@ void cancelWorkspaceSessionTimers() {
+@@ -2031,6 +2091,7 @@ void cancelWorkspaceSessionTimers() {
  
  void cancelAgentActivity(bool cancelSessions) {
      cancelAsyncPointerOperation();
@@ -1462,7 +1499,7 @@ index 2881342..7caf46f 100644
      restoreXWaylandKeyboardFocus();
  
      if (cancelSessions) {
-@@ -2156,6 +2199,16 @@ SDispatchResult dispatchPointerWithMode(const std::string& args, bool windowRela
+@@ -2156,6 +2217,16 @@ SDispatchResult dispatchPointerWithMode(const std::string& args, bool windowRela
      if ((action == "drag" || action == "doubleclick" || action == "double-click") && g_asyncPointerOperation)
          cancelAsyncPointerOperation();
  
@@ -1479,7 +1516,7 @@ index 2881342..7caf46f 100644
      PointerFocusRestore restore;
      activateXWaylandTarget(*target);
      g_pSeatManager->setPointerFocus(target->surface, target->local);
-@@ -2465,7 +2518,81 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+@@ -2465,7 +2536,81 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
          return {.success = false, .error = *error};
  
      const auto action = lower(parts[1]);
@@ -1562,7 +1599,7 @@ index 2881342..7caf46f 100644
      if (!key)
          return {.success = false, .error = "unknown keyboard key"};
  
-@@ -2481,9 +2608,24 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+@@ -2481,9 +2626,24 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
          }
      }
  
@@ -1587,7 +1624,7 @@ index 2881342..7caf46f 100644
      KeyboardResourceTransaction transaction(target->surface);
      if (!transaction.ready()) {
          if (xwaylandLease)
-@@ -2496,17 +2638,17 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+@@ -2496,17 +2656,17 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
          return {.success = false, .error = "target key is currently held by the physical keyboard"};
      }
  
@@ -1608,7 +1645,7 @@ index 2881342..7caf46f 100644
          for (auto it = modifiers.rbegin(); it != modifiers.rend(); ++it)
              transaction.sendModifierKey(it->key, WL_KEYBOARD_KEY_STATE_RELEASED);
      };
-@@ -2565,6 +2707,9 @@ SDispatchResult dispatchScreenshot(const std::string& args) {
+@@ -2565,6 +2725,9 @@ SDispatchResult dispatchScreenshot(const std::string& args) {
          if (screenshotPrivacyDenied(window))
              return {.success = false, .error = "target window class is excluded by privacy_class_denylist"};
          targetWindow = window;
@@ -1618,6 +1655,14 @@ index 2881342..7caf46f 100644
      } else {
          // Full capture serializes metadata for every mapped window, including
          // hidden windows and windows on inactive workspaces. Apply privacy to
+@@ -2613,6 +2776,7 @@ SDispatchResult dispatchSession(const std::string& args) {
+                 .targetWorkspace = root->m_workspace,
+             });
+             existing = std::prev(g_workspaceSessions.end());
++            rememberWindowsElsewhere(*existing);
+         } else {
+             existing->targetWorkspace = root->m_workspace;
+         }
 diff --git a/src/plugin/screenshot_capture.cpp b/src/plugin/screenshot_capture.cpp
 index 48157d9..37a4328 100644
 --- a/src/plugin/screenshot_capture.cpp
