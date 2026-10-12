@@ -1386,7 +1386,7 @@ index 0000000..5b8f6cb
 +    return std::nullopt;
 +}
 diff --git a/src/plugin/main.cpp b/src/plugin/main.cpp
-index 2881342..8db10e5 100644
+index 2881342..88057a3 100644
 --- a/src/plugin/main.cpp
 +++ b/src/plugin/main.cpp
 @@ -1,4 +1,5 @@
@@ -1448,7 +1448,71 @@ index 2881342..8db10e5 100644
  void constrainRelatedWindowFocusAndLayer(const PHLWINDOW& window) {
      if (!window)
          return;
-@@ -1650,6 +1674,42 @@ std::optional<TargetSurface> resolveTargetMainSurface(const std::string& targetR
+@@ -1471,6 +1495,63 @@ void moveRelatedWindowToSessionWorkspace(WorkspaceSession& session, const PHLWIN
+     }
+ }
+ 
++// A window an agent drives in the background must not pull the user to its
++// workspace. Clients ask for activation on their own (Chromium does when a
++// click opens a new tab or a page shows a dialog), and with
++// misc:focus_on_activate that request switches workspaces. Suppress the focus
++// change for the driven window from an action until some time after the last
++// one, then give back only the bits this plugin added, so a window rule's
++// own suppression is kept.
++struct QuietWindow {
++    PHLWINDOWREF    window;
++    uint64_t        added = 0;
++    Time::steady_tp until;
++};
++
++std::vector<QuietWindow> g_quietWindows;
++constexpr auto           QUIET_AFTER_ACTION = std::chrono::seconds(300);
++
++void releaseQuietWindows(bool all = false) {
++    const auto now = Time::steadyNow();
++    std::erase_if(g_quietWindows, [&](const QuietWindow& quiet) {
++        const auto window = quiet.window.lock();
++        if (!window)
++            return true;
++        if (!all && quiet.until > now)
++            return false;
++        window->m_suppressedEvents &= ~quiet.added;
++        return true;
++    });
++}
++
++void quietWindow(const PHLWINDOW& window) {
++    if (!window || !g_pEventLoopManager)
++        return;
++
++    // Focus only: the request still marks the window urgent, so the user can
++    // see that the driven window wants attention without being moved to it.
++    const uint64_t bits = Desktop::View::SUPPRESS_ACTIVATE_FOCUSONLY;
++    const auto     until = Time::steadyNow() + QUIET_AFTER_ACTION;
++    auto           existing = std::ranges::find_if(g_quietWindows, [&window](const QuietWindow& quiet) { return quiet.window.lock() == window; });
++    if (existing == g_quietWindows.end())
++        g_quietWindows.push_back({.window = PHLWINDOWREF{window}, .added = bits & ~window->m_suppressedEvents, .until = until});
++    else
++        existing->until = until;
++    window->m_suppressedEvents |= bits;
++
++    auto timer = makeShared<CEventLoopTimer>(
++        QUIET_AFTER_ACTION + std::chrono::seconds(1),
++        [](SP<CEventLoopTimer> self, void*) {
++            releaseQuietWindows();
++            if (g_pEventLoopManager)
++                g_pEventLoopManager->removeTimer(self);
++            std::erase_if(g_workspaceRestackTimers, [&self](const auto& item) { return item.get() == self.get(); });
++        },
++        nullptr);
++    g_workspaceRestackTimers.push_back(timer);
++    g_pEventLoopManager->addTimer(timer);
++}
++
+ void syncWorkspaceSession(WorkspaceSession& session) {
+     if (!g_pCompositor)
+         return;
+@@ -1650,6 +1731,42 @@ std::optional<TargetSurface> resolveTargetMainSurface(const std::string& targetR
      return TargetSurface{.window = window, .surface = window->wlSurface()->resource(), .local = mainBox.middle()};
  }
  
@@ -1491,7 +1555,7 @@ index 2881342..8db10e5 100644
  struct PointerFocusRestore {
      SP<CWLSurfaceResource> previousSurface;
      Vector2D               previousLocal;
-@@ -2031,6 +2091,7 @@ void cancelWorkspaceSessionTimers() {
+@@ -2031,6 +2148,7 @@ void cancelWorkspaceSessionTimers() {
  
  void cancelAgentActivity(bool cancelSessions) {
      cancelAsyncPointerOperation();
@@ -1499,7 +1563,7 @@ index 2881342..8db10e5 100644
      restoreXWaylandKeyboardFocus();
  
      if (cancelSessions) {
-@@ -2156,6 +2217,16 @@ SDispatchResult dispatchPointerWithMode(const std::string& args, bool windowRela
+@@ -2156,6 +2274,16 @@ SDispatchResult dispatchPointerWithMode(const std::string& args, bool windowRela
      if ((action == "drag" || action == "doubleclick" || action == "double-click") && g_asyncPointerOperation)
          cancelAsyncPointerOperation();
  
@@ -1516,7 +1580,7 @@ index 2881342..8db10e5 100644
      PointerFocusRestore restore;
      activateXWaylandTarget(*target);
      g_pSeatManager->setPointerFocus(target->surface, target->local);
-@@ -2465,7 +2536,81 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+@@ -2465,7 +2593,81 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
          return {.success = false, .error = *error};
  
      const auto action = lower(parts[1]);
@@ -1599,7 +1663,7 @@ index 2881342..8db10e5 100644
      if (!key)
          return {.success = false, .error = "unknown keyboard key"};
  
-@@ -2481,9 +2626,24 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+@@ -2481,9 +2683,24 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
          }
      }
  
@@ -1624,7 +1688,7 @@ index 2881342..8db10e5 100644
      KeyboardResourceTransaction transaction(target->surface);
      if (!transaction.ready()) {
          if (xwaylandLease)
-@@ -2496,17 +2656,17 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
+@@ -2496,17 +2713,17 @@ SDispatchResult dispatchKeyboard(const std::string& args) {
          return {.success = false, .error = "target key is currently held by the physical keyboard"};
      }
  
@@ -1645,7 +1709,7 @@ index 2881342..8db10e5 100644
          for (auto it = modifiers.rbegin(); it != modifiers.rend(); ++it)
              transaction.sendModifierKey(it->key, WL_KEYBOARD_KEY_STATE_RELEASED);
      };
-@@ -2565,6 +2725,9 @@ SDispatchResult dispatchScreenshot(const std::string& args) {
+@@ -2565,6 +2782,9 @@ SDispatchResult dispatchScreenshot(const std::string& args) {
          if (screenshotPrivacyDenied(window))
              return {.success = false, .error = "target window class is excluded by privacy_class_denylist"};
          targetWindow = window;
@@ -1655,7 +1719,7 @@ index 2881342..8db10e5 100644
      } else {
          // Full capture serializes metadata for every mapped window, including
          // hidden windows and windows on inactive workspaces. Apply privacy to
-@@ -2613,6 +2776,7 @@ SDispatchResult dispatchSession(const std::string& args) {
+@@ -2613,10 +2833,12 @@ SDispatchResult dispatchSession(const std::string& args) {
                  .targetWorkspace = root->m_workspace,
              });
              existing = std::prev(g_workspaceSessions.end());
@@ -1663,6 +1727,19 @@ index 2881342..8db10e5 100644
          } else {
              existing->targetWorkspace = root->m_workspace;
          }
+ 
++        quietWindow(root);
+         syncWorkspaceSession(*existing);
+         return {.success = true};
+     }
+@@ -3158,6 +3380,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
+ }
+ 
+ APICALL EXPORT void PLUGIN_EXIT() {
++    releaseQuietWindows(true);
+     g_workspaceSessions.clear();
+     g_windowOpenEarlyListener.reset();
+     g_windowOpenListener.reset();
 diff --git a/src/plugin/screenshot_capture.cpp b/src/plugin/screenshot_capture.cpp
 index 48157d9..37a4328 100644
 --- a/src/plugin/screenshot_capture.cpp
